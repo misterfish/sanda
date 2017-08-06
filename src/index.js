@@ -89,8 +89,8 @@ export const cascade = (val, ...fxs) =>
 
 // ------ bind
 
-export const bind = (o, key) => (...args) => o[key] (...args)
-
+export const bind = curry ((o, key) => (...args) => o[key] (...args)
+)
 // --- hasOwn: R.has
 
 // could also be called pushTo and pushToMut, but pushTo for not mut could be confusing.
@@ -220,8 +220,29 @@ export const defaultTo = curry ((f, x) => ok (x)
 export const given = (xs, f) => f.apply (null, xs)
 export const laat = given
 
-const call = curry ((f, o) => f.apply (o))
-const isFunction = call ({}.toString)
+export const invoke = f => f ()
+export const invoke1 = curry ((val, f) => f (val))
+export const invoke2 = curry ((val1, val2, f) => f (val1, val2))
+export const invoke3 = curry ((val1, val2, val3, f) => f (val1, val2, val3))
+export const invokeN = curry ((vs, f) => f.apply (null, vs))
+
+export const callOn = curry ((o, f) => f.call (o))
+export const callOn1 = curry ((o, val, f) => f.call (o, val))
+export const callOn2 = curry ((o, val1, val2, f) => f.call (o, val1, val2))
+export const callOn3 = curry ((o, val1, val2, val3, f) => f.call (o, val1, val2, val3))
+export const callOnN = curry ((o, vs, f) => f.apply (o, vs))
+
+export const call = callOn
+export const call1 = callOn1
+export const call2 = callOn2
+export const call3 = callOn3
+export const callN = callOnN
+
+export const callUnder = curry ((f, o) => f.call (o))
+export const callUnder1 = curry ((f, val, o) => f.call (o, val))
+export const callUnder2 = curry ((f, val1, val2, o) => f.call (o, val1, val2))
+
+const isFunction = callUnder ({}.toString)
     >> dot2 ('slice') (8, -1)
     >> equals ('Function')
 
@@ -282,8 +303,93 @@ export const tryCatch = (whatToTry, howToCatch = noop) => {
 //
 //
 // factory stuff.
-// call stuff.
 //
-// bitwise or
-// bitwise and
-// 4 * shift
+// unspread?
+// const garble = (...args) => join (',') (args)
+// const garble = applyXXX (join (','))
+
+// --- turn positional args into an array with those values.
+export const array = (...args) => args
+
+const garble1 = (...args) => join (':') (args)
+const garble2 = array >> join (':')
+
+const garble = garble2
+
+// the preposition refers to the identifier following.
+//
+// functions with an On ending are aliased to a version without it:
+// call = callOn
+// bind = bindOn
+//
+// functions with To and From endings have no aliases.
+//
+
+/*
+if (this.startupCallback) {
+    this.startupCallback();
+}
+
+this.startupCallback
+| ifOk (callOn (this))
+
+this.startupCallback
+| ifOk (call (this))
+
+ifOk__ (
+    this.startupCallback,
+    f => f.call (this),
+)
+
+ifOk__ (
+    this.startupCallback,
+    callOn (this),
+)
+
+ifOk__ (
+    this.startupCallback,
+    call (this),
+)
+
+ifOk__ (
+    this.startupCallback,
+    bind (this) >> call,
+)
+
+this.startupCallback
+| ifOk (f => f.call (this))
+
+'startupCallback'
+| ifHasOn (this, call)
+
+'startupCallback'
+| ifBind (this, call)
+
+invokeIfHas (this, 'startupCallback')
+invoke1IfHas (this, 'startupCallback', 10)
+
+ifBind (this, 'startupCallback', call)
+
+*/
+
+// inject?
+// injectok
+// injectwith
+// mergeallin
+// mergeallinwith
+// okorerror
+// existsorerror
+// mapzip
+// eachobjin
+// eachobjindexed
+// defaultto simple, func
+
+export const zipAll = (...xss) => {
+    const ret = []
+    const l = xss[0].length
+    for (let i = 0; i < l; i++) {
+        const zip = xss | map (xs => xs[i])
+        ret.push (zip)
+    }
+    return ret
+}

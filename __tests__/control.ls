@@ -9,7 +9,7 @@
 } = require 'ramda'
 
 {
-    array,
+    array-ls,
     test, xtest,
     expect-to-equal, expect-to-be,
 } = require './common'
@@ -30,7 +30,7 @@ describe 'ifTrue' ->
 
         (expect ret).to-equal expect-ret
 
-    tests = array do
+    tests = array-ls do
         *   desc: 'true'
             input-val: true
             ja-val: 42
@@ -67,7 +67,7 @@ describe 'condTrue' ->
 
         expect-ret |> (expect ret).to-equal
 
-    tests = array do
+    tests = array-ls do
         *   desc: 'true'
             input-val: true
             ja-val: 42
@@ -106,7 +106,7 @@ describe 'ifTrueRF' ->
 
         expect-ret |> (expect ret).to-equal
 
-    tests = array do
+    tests = array-ls do
         *   desc: 'true'
             input-val: true
             do-nee: true

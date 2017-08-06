@@ -1,7 +1,4 @@
 array-ls = -> [.. for &]
-array-js = (...args) -> args
-
-array = array-js
 
 test = (desc, the-test) --> global.it desc, the-test
 xtest = (desc, the-test) --> global.xit desc, the-test
@@ -19,6 +16,6 @@ describe 'dummy' ->
     test 'dummy' ->
 
 export
-    array
+    array-ls,
     test, xtest,
     expect-to-equal, expect-to-be,

@@ -9,7 +9,7 @@
 } = require 'ramda'
 
 {
-    array,
+    array-ls,
     test, xtest,
     expect-to-equal, expect-to-be,
 } = require './common'
@@ -22,17 +22,11 @@ zip-all = (...xss) ->
 {
     ok,
 
-    cascade,
-    bind,
-    flip-c,
+    cascade, bind, flip-c, compact, compact-ok,
+    times, repeat,
+    sprintf1, sprintf-n,
 
     given, laat, given-star, laat-star,
-
-    times, repeat,
-
-    compact, compact-ok,
-
-    sprintf1, sprintf-n,
 
 } = require '../lib/index'
 
@@ -46,15 +40,25 @@ describe 'cascade' ->
         |> expect-to-equal [2 6 10]
 
 describe 'bind' ->
-    test 1 ->
-        obj =
-            name: 'dog'
-            speak: -> 'my name is ' + @name
+    obj =
+        name: 'dog'
+        speak: -> 'my name is ' + @name
+        garble: (...args) -> join '!' args
+    test 'binds' ->
         bad-speak = obj.speak
         (expect bad-speak()).not.to-equal 'my name is dog'
 
         good-speak = bind obj, 'speak'
         (expect good-speak()).to-equal 'my name is dog'
+    test 'passes args' ->
+        garble = bind obj, 'garble'
+        garble 'a' 1 'c'
+        |> expect-to-equal 'a!1!c'
+    test 'curried' ->
+        'speak'
+        |> bind obj
+        |> (x) -> x()
+        |> expect-to-equal 'my name is dog'
 
 describe 'flipC' ->
     fn = flip-c
@@ -201,7 +205,7 @@ describe 'laatStar' ->
                 | m == 1 => 1
                 | otherwise => sum-last-two prev
             refs = times n + 1, -> entry
-            laat-star refs, array
+            laat-star refs, array-ls
 
         (expect fibonacci 0).to-equal [1]
         (expect fibonacci 1).to-equal [1 1]
@@ -279,3 +283,6 @@ describe 'sprintf*' ->
             ['is' 10/3]
             |> sprintf-n 'my name %s %0.2f'
             |> expect-to-equal 'my name is 3.33'
+
+
+# defaultTo
