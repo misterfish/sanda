@@ -1,0 +1,289 @@
+#!/usr/bin/env node
+
+defineBinaryOperator ('|', (a, b) => b (a))
+defineBinaryOperator ('>>', (a, b) => (...args) => b (a (...args)))
+
+import {
+    isEmpty, tap, has, hasIn, flip, fromPairs, toPairs, assoc, assocPath, head,
+    tail, reduceRight, chain, identity, reduce, map, filter, reject, join,
+    split, prop as rProp, path as rPath, defaultTo as rDefaultTo, curry,
+    forEach as each, forEachObjIndexed as eachObj, complement, times as rTimes,
+    range as rRange, isNil, addIndex, take, equals, mapAccum,
+    repeat as rRepeat,
+    concat as rConcat,
+    append as rAppend,
+    merge as rMerge,
+} from 'ramda'
+
+import fishLib, {
+    log, info, warn, error, green, yellow, magenta, brightRed, cyan, brightBlue,
+    sprintf, forceColors,
+} from 'fish-lib'
+
+import {
+    bitwiseAnd, bitwiseOr, bitwiseXor, bitwiseNot,
+    bitwiseLeft, bitwiseRight, bitwiseRightZeroFill,
+} from './operator'
+
+export {
+    bitwiseAnd, bitwiseOr, bitwiseXor, bitwiseNot,
+    bitwiseLeft, bitwiseRight, bitwiseRightZeroFill,
+}
+
+export const ok = x => !isNil (x)
+
+export const dot  = curry ((prop, o) => o[prop] ())
+export const dot1 = curry ((prop, val, o) => o[prop] (val))
+export const dot2 = curry ((prop, val1, val2, o) => o[prop] (val1, val2))
+export const dot3 = curry ((prop, val1, val2, val3, o) => o[prop] (val1, val2, val3))
+export const dotN = curry ((prop, vs, o) => o[prop] (...vs))
+
+export const tapDot  = (prop) => tap (dot (prop))
+export const tapDot1 = curry (
+    (prop, val) => tap (dot1 (prop) (val))
+)
+export const tapDot2 = curry (
+    (prop, val1, val2) => tap (dot2 (prop) (val1) (val2))
+)
+export const tapDot3 = curry (
+    (prop, val1, val2, val3) => tap (dot3 (prop) (val1) (val2) (val3))
+)
+export const tapDotN = curry (
+    (prop, vs) => tap (dotN (prop) (vs))
+)
+
+// --- signal intentions
+export const dotMut = dot
+export const dot1Mut = dot1
+export const dot2Mut = dot2
+export const dot3Mut = dot3
+export const dotNMut = dotN
+
+export const tapMut = tap
+export const tapDotMut = tapDot
+export const tapDot1Mut = tapDot1
+export const tapDot2Mut = tapDot2
+export const tapDot3Mut = tapDot3
+export const tapDotNMut = tapDotN
+
+export const ifOk_ = (x, yes, no) => ifOk (yes, no, x)
+export const ifOk = curry ((x, f) => ok (x) ? f (x) : void 8)
+
+export const ifTrue = curry ((yes, x) => x
+    | condTrue (yes) (() => void 8)
+)
+
+export const condTrue = curry ((yes, no, x) => x === true
+    ? yes (x) : no (x)
+)
+export const ifTrueElse = condTrue
+
+// ------ not data-last.
+// ------ not curried.
+
+export const ifTrueRF = (x, yes, no = () => void 8) => x
+    | condTrue (yes) (no)
+
+export const cascade = (val, ...fxs) =>
+    fxs | reduce ((a, b) => b (a), val)
+
+// ------ bind
+
+export const bind = (o, key) => (...args) => o[key] (...args)
+
+// --- hasOwn: R.has
+
+// could also be called pushTo and pushToMut, but pushTo for not mut could be confusing.
+
+// [1 2 3] -> [4 5 6] -> [1 2 3 [4 5 6]]
+// [] -> a -> []
+// export const appendTo = curry (
+//     (tgt, src) => [...tgt, src]
+// )
+
+// rcvAppend?
+// appendRcv?
+// appendRC?
+// export const appendFrom = rAppend
+
+// ------ append.
+
+export const appendFrom = curry ((elem, ary) =>
+    [...ary, elem]
+)
+export const appendTo = flip (appendFrom)
+
+// [] -> a -> [], mut
+export const appendToMut = curry ((tgt, src) => {
+    tgt.push (src)
+    return tgt
+})
+
+// [] -> a -> [], mut
+export const appendFromMut = flip (appendToMut)
+
+// ------ prepend.
+
+export const prependTo = curry ((ary, elem) =>
+    [elem, ...ary]
+)
+
+export const prependFrom = flip (prependTo)
+
+export const prependFromMut = curry ((src, tgt) => {
+    tgt.unshift (src)
+    return tgt
+})
+
+export const prependToMut = curry ((tgt, src) => {
+    tgt.unshift (src)
+    return tgt
+})
+
+// [1 2 3] -> [4 5 6] -> [1 2 3 4 5 6]
+
+// [] -> [] -> []
+// [] -> a -> [] => error
+// String -> String -> String
+export const concatTo = rConcat
+
+export const concatFrom = flip (rConcat)
+
+// [] -> [] -> [], mut
+export const concatToMut = curry (
+    (tgt, src) => {
+        tgt.push (...src)
+        return tgt
+    }
+)
+
+export const concatFromMut = flip (concatToMut)
+
+export const mergeTo = rMerge
+export const mergeFrom = flip (rMerge)
+
+// --- mut always refers to target.
+
+// --- discards non-own on src.
+// --- does not discard non-own on tgt, b/c mut.
+export const mergeToMut = curry ((tgt, src) => {
+    const ret = tgt
+    for (let i in src)
+        if (has (i, src))
+            ret[i] = src[i]
+    return ret
+})
+
+export const mergeFromMut = flip (mergeToMut)
+
+export const injectToMut = mergeToMut
+export const injectFromMut = mergeFromMut
+
+// --- both will float.
+export const mergeToIn = curry ((tgt, src) => {
+    const ret = {}
+    for (let i in tgt) ret[i] = tgt[i]
+    for (let i in src) ret[i] = src[i]
+    return ret
+})
+
+// --- both will float.
+export const mergeFromIn = flip (mergeToIn)
+
+export const mergeToInMut = curry ((tgt, src) => {
+    const ret = tgt
+    for (let i in src)
+        ret[i] = src[i]
+    return ret
+})
+
+export const mergeFromInMut = flip (mergeToInMut)
+
+// Object.assign and {...} drop proto vals.
+
+// ----- map indexed.
+export const mapIndexed = addIndex (map)
+export const mapAccumIndexed = addIndex (mapAccum)
+
+// --- each obj indexed?
+// --- each obj IN
+
+// --- mapzip.
+
+export const defaultToRF = (x, d) => ok (x)
+    ? x : d ()
+
+export const defaultTo = curry ((f, x) => ok (x)
+    ? x : f ()
+)
+
+export const given = (xs, f) => f.apply (null, xs)
+export const laat = given
+
+const call = curry ((f, o) => f.apply (o))
+const isFunction = call ({}.toString)
+    >> dot2 ('slice') (8, -1)
+    >> equals ('Function')
+
+export const givenStar = (xs, f) => {
+    const xsMapper = (prevVals, v) => isFunction (v)
+        ? v.apply (null, prevVals)
+        : v
+
+    const ys = xs
+        // --- acc contains running output array, up to the previous item.
+        | mapAccum ((acc, v) => xsMapper (acc, v)
+            | (mapped => [[...acc, mapped], mapped])
+        , [])
+        | rProp (1)
+
+    return f.apply (null, ys)
+}
+
+export const laatStar = givenStar
+
+// --- flip first and second args: also works for functions curried with the a => b => ... notation.
+export const flipC = curry ((f) => curry (
+    (a, b, ...rest) => laat (
+        [f (b) (a)],
+        interimResult => rest.length === 0
+            ? interimResult
+            : rest | reduce((a, b) => a (b), interimResult)
+    )
+))
+
+// ------ times, repeat
+
+export const repeat = flip (rRepeat)
+export const times = flip (rTimes)
+
+export const compact = filter (Boolean)
+export const compactOk = reject (isNil)
+
+// ------ sprintf
+
+export const sprintf1 = curry ((str, a) => sprintf (str, a))
+export const sprintfN = curry ((str, xs) => sprintf.apply (null, [str, ...xs]))
+
+export const noop = () => {}
+
+// ------ try catch
+
+export const tryCatch = (whatToTry, howToCatch = noop) => {
+    try {
+        return whatToTry ();
+    } catch (e) {
+        return howToCatch (e);
+    }
+}
+
+// map (+ 2)
+// map (.toUpperCase())
+//
+//
+// factory stuff.
+// call stuff.
+//
+// bitwise or
+// bitwise and
+// 4 * shift
