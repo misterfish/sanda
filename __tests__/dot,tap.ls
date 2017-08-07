@@ -9,17 +9,13 @@
 } = require 'ramda'
 
 {
-    array,
     test, xtest,
     expect-to-equal, expect-to-be,
 } = require './common'
 
-zip-all = (...xss) ->
-    l = xss.0.length
-    for i from 0 to l - 1
-        [xs[i] for xs in xss]
-
 {
+    zip-all,
+
     dot, dot1, dot2, dot3, dot-n,
     dot-mut, dot1-mut, dot2-mut, dot3-mut, dot-n-mut,
     tap-dot, tap-dot1, tap-dot2, tap-dot3, tap-dot-n,

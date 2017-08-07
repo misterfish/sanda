@@ -15,7 +15,7 @@
 } = require './common'
 
 {
-    array, zip-all,
+    zip-all,
 
     invoke, invoke1, invoke2, invoke3, invoke-n,
     call, call1, call2, call3, call-n,
@@ -169,26 +169,3 @@ describe 'call*' ->
             replace-dl 'dog'
             |> expect-to-equal 'log'
 
-# move XXX
-describe 'array' ->
-    test 1 ->
-        array 3 4 5
-        |> expect-to-equal [3 to 5]
-describe 'zip-all' ->
-    test 1 ->
-        zip-all do
-            [1 2 3]
-            <[ un deux trois ]>
-        |> expect-to-equal [
-            [1 'un'] [2 'deux'] [3 'trois']
-        ]
-    test 2 ->
-        zip-all do
-            <[ un deux trois ]>
-            <[ yek do seh ]>
-            <[ egy ketto harom ]>
-        |> expect-to-equal [
-            <[ un yek egy ]>
-            <[ deux do ketto ]>
-            <[ trois seh harom ]>
-        ]

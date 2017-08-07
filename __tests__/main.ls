@@ -14,13 +14,10 @@
     expect-to-equal, expect-to-be,
 } = require './common'
 
-zip-all = (...xss) ->
-    l = xss.0.length
-    for i from 0 to l - 1
-        [xs[i] for xs in xss]
-
 {
     ok,
+
+    array, zip-all,
 
     cascade, bind, flip-c, compact, compact-ok,
     times, repeat,
@@ -284,5 +281,28 @@ describe 'sprintf*' ->
             |> sprintf-n 'my name %s %0.2f'
             |> expect-to-equal 'my name is 3.33'
 
+describe 'array' ->
+    test 1 ->
+        array 3 4 5
+        |> expect-to-equal [3 to 5]
+
+describe 'zip-all' ->
+    test 1 ->
+        zip-all do
+            [1 2 3]
+            <[ un deux trois ]>
+        |> expect-to-equal [
+            [1 'un'] [2 'deux'] [3 'trois']
+        ]
+    test 2 ->
+        zip-all do
+            <[ un deux trois ]>
+            <[ yek do seh ]>
+            <[ egy ketto harom ]>
+        |> expect-to-equal [
+            <[ un yek egy ]>
+            <[ deux do ketto ]>
+            <[ trois seh harom ]>
+        ]
 
 # defaultTo

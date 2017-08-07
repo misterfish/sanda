@@ -67,7 +67,7 @@ export const tapDot3Mut = tapDot3
 export const tapDotNMut = tapDotN
 
 export const ifOk_ = (x, yes, no) => ifOk (yes, no, x)
-export const ifOk = curry ((x, f) => ok (x) ? f (x) : void 8)
+export const ifOk = curry ((yes, x) => ok (x) ? yes (x) : void 8)
 
 export const ifTrue = curry ((yes, x) => x
     | condTrue (yes) (() => void 8)
@@ -393,3 +393,60 @@ export const zipAll = (...xss) => {
     }
     return ret
 }
+
+
+// --- inject src into target, using only own vals.
+const inject = curry ((src, target) => {
+    src | eachObj ((v, k) => target[k] = v)
+    return target
+})
+
+const shallowClone = obj => ({...obj})
+
+// --- like inject, but only if src val is ok.
+const injectOk = curry ((src, target) => {
+    for (let i in src) ifOk (
+        x => target[i] = x,
+        src[i],
+    )
+    return target
+})
+
+// --- like R.merge but also use prototype vals.
+export const mergeAllIn = xs => reduce (
+    (target, mixin) => inject (mixin, target),
+    {},
+    xs,
+)
+
+const ifNot__ = (x, yes) => x ? yes (x) : void 8
+
+export const mergeFish = (mixinsPre, proto, mixinsPost) => {
+    const reduceMixin = reduce ((a, b) => b | mergeTo (a), {})
+    const pre = mixinsPre | reduceMixin
+    const post = mixinsPost | reduceMixin
+    // new merge fun?
+    pre | eachObj ((v, k) => ifNot__ (
+        hasIn (k, proto),
+        () => proto[k] = v,
+    ))
+    post | mergeToMut (proto)
+    return proto
+}
+
+export const factory = (proto, mixinsPre = [], mixinsPost = []) => laat (
+    [
+//         mergeAllIn (
+//             [...mixinsPre, shallowClone (proto), ...mixinsPost]
+//         )
+        mergeFish (mixinsPre, proto, mixinsPost)
+    ],
+
+    (protoExtended) => ({
+        proto: protoExtended,
+        create: instanceExtension => protoExtended
+            | Object.create
+            | injectOk (instanceExtension),
+    })
+)
+

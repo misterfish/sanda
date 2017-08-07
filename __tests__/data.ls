@@ -9,7 +9,6 @@
 } = require 'ramda'
 
 {
-    array,
     test, xtest,
     expect-to-equal, expect-to-be,
 } = require './common'
