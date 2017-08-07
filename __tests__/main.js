@@ -1,7 +1,7 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, ok, array, zipAll, cascade, bind, flipC, compact, compactOk, times, repeat, sprintf1, sprintfN, given, laat, givenStar, laatStar;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, ok, array, zipAll, bind, bindLate, cascade, flipC, compact, compactOk, times, repeat, sprintf1, sprintfN, given, laat, givenStar, laatStar;
 ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
 ref$ = require('./common'), arrayLs = ref$.arrayLs, test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
-ref$ = require('../lib/index'), ok = ref$.ok, array = ref$.array, zipAll = ref$.zipAll, cascade = ref$.cascade, bind = ref$.bind, flipC = ref$.flipC, compact = ref$.compact, compactOk = ref$.compactOk, times = ref$.times, repeat = ref$.repeat, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar;
+ref$ = require('../lib/index'), ok = ref$.ok, array = ref$.array, zipAll = ref$.zipAll, bind = ref$.bind, bindLate = ref$.bindLate, cascade = ref$.cascade, flipC = ref$.flipC, compact = ref$.compact, compactOk = ref$.compactOk, times = ref$.times, repeat = ref$.repeat, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar;
 describe('cascade', function(){
   return test(1, function(){
     var odd, this$ = this;
@@ -14,7 +14,7 @@ describe('cascade', function(){
     }))));
   });
 });
-describe('bind', function(){
+describe('bind*', function(){
   var obj;
   obj = {
     name: 'dog',
@@ -31,27 +31,39 @@ describe('bind', function(){
       return join('!', args);
     }
   };
-  test('binds', function(){
-    var badSpeak, goodSpeak;
-    badSpeak = obj.speak;
-    expect(badSpeak()).not.toEqual('my name is dog');
-    goodSpeak = bind(obj, 'speak');
-    return expect(goodSpeak()).toEqual('my name is dog');
+  each(function(arg$){
+    var bindFunc, bindFuncName;
+    bindFunc = arg$[0], bindFuncName = arg$[1];
+    return describe(bindFuncName, function(){
+      test('binds', function(){
+        var badSpeak, goodSpeak;
+        badSpeak = obj.speak;
+        expect(badSpeak()).not.toEqual('my name is dog');
+        goodSpeak = bindFunc(obj, 'speak');
+        return expect(goodSpeak()).toEqual('my name is dog');
+      });
+      test('passes args', function(){
+        var garble;
+        garble = bindFunc(obj, 'garble');
+        return expectToEqual('a!1!c')(
+        garble('a', 1, 'c'));
+      });
+      return test('curried', function(){
+        return expectToEqual('my name is dog')(
+        function(x){
+          return x();
+        }(
+        bindFunc(obj)(
+        'speak')));
+      });
+    });
+  })(
+  zip([bind, bindLate], ['bind', 'bindLate']));
+  describe('bind hard', function(){
+    xtest('fails on undefined function', function(){});
+    return xtest('fails on undefined function', function(){});
   });
-  test('passes args', function(){
-    var garble;
-    garble = bind(obj, 'garble');
-    return expectToEqual('a!1!c')(
-    garble('a', 1, 'c'));
-  });
-  return test('curried', function(){
-    return expectToEqual('my name is dog')(
-    function(x){
-      return x();
-    }(
-    bind(obj)(
-    'speak')));
-  });
+  return describe('bind late', function(){});
 });
 describe('flipC', function(){
   var fn;

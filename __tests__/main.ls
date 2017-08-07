@@ -19,7 +19,8 @@
 
     array, zip-all,
 
-    cascade, bind, flip-c, compact, compact-ok,
+    bind, bind-late,
+    cascade, flip-c, compact, compact-ok,
     times, repeat,
     sprintf1, sprintf-n,
 
@@ -36,26 +37,33 @@ describe 'cascade' ->
             map (* 2)
         |> expect-to-equal [2 6 10]
 
-describe 'bind' ->
+describe 'bind*' ->
     obj =
         name: 'dog'
         speak: -> 'my name is ' + @name
         garble: (...args) -> join '!' args
-    test 'binds' ->
-        bad-speak = obj.speak
-        (expect bad-speak()).not.to-equal 'my name is dog'
+    zip [bind, bind-late] <[ bind bindLate ]>
+    |> each ([bind-func, bind-func-name]) ->
+        describe bind-func-name, ->
+            test 'binds' ->
+                bad-speak = obj.speak
+                (expect bad-speak()).not.to-equal 'my name is dog'
 
-        good-speak = bind obj, 'speak'
-        (expect good-speak()).to-equal 'my name is dog'
-    test 'passes args' ->
-        garble = bind obj, 'garble'
-        garble 'a' 1 'c'
-        |> expect-to-equal 'a!1!c'
-    test 'curried' ->
-        'speak'
-        |> bind obj
-        |> (x) -> x()
-        |> expect-to-equal 'my name is dog'
+                good-speak = bind-func obj, 'speak'
+                (expect good-speak()).to-equal 'my name is dog'
+            test 'passes args' ->
+                garble = bind-func obj, 'garble'
+                garble 'a' 1 'c'
+                |> expect-to-equal 'a!1!c'
+            test 'curried' ->
+                'speak'
+                |> bind-func obj
+                |> (x) -> x()
+                |> expect-to-equal 'my name is dog'
+    describe 'bind hard' ->
+        xtest 'fails on undefined function' ->
+        xtest 'fails on undefined function' ->
+    describe 'bind late' ->
 
 describe 'flipC' ->
     fn = flip-c

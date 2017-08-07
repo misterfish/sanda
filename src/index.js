@@ -89,8 +89,12 @@ export const cascade = (val, ...fxs) =>
 
 // ------ bind
 
-export const bind = curry ((o, key) => (...args) => o[key] (...args)
-)
+export const bind = curry ((o, prop) => o[prop].bind (o))
+// @dep ifFunction
+// @dep bind
+export const bindTry = curry ((o, prop) => ifFunction (o[prop]) (bind (o, prop)))
+export const bindLate = curry ((o, key) => (...args) => o[key] (...args))
+
 // --- hasOwn: R.has
 
 // could also be called pushTo and pushToMut, but pushTo for not mut could be confusing.
@@ -241,6 +245,9 @@ export const callN = callOnN
 export const callUnder = curry ((f, o) => f.call (o))
 export const callUnder1 = curry ((f, val, o) => f.call (o, val))
 export const callUnder2 = curry ((f, val1, val2, o) => f.call (o, val1, val2))
+
+export const ifFunction__ = (x, yes) => isFunction (x) ? yes (x) : void 8
+export const ifFunction = curry ((yes, x) => ifFunction__ (x, yes))
 
 const isFunction = callUnder ({}.toString)
     >> dot2 ('slice') (8, -1)
@@ -421,6 +428,8 @@ export const mergeAllIn = xs => reduce (
 
 const ifNot__ = (x, yes) => x ? yes (x) : void 8
 
+// list dependencies if a func uses other ones (for unit testing)
+
 export const mergeFish = (mixinsPre, proto, mixinsPost) => {
     const reduceMixin = reduce ((a, b) => b | mergeTo (a), {})
     const pre = mixinsPre | reduceMixin
@@ -449,4 +458,6 @@ export const factory = (proto, mixinsPre = [], mixinsPost = []) => laat (
             | injectOk (instanceExtension),
     })
 )
+
+
 
