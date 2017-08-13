@@ -1,7 +1,7 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, ok, array, zipAll, bind, bindLate, cascade, flipC, compact, compactOk, times, repeat, sprintf1, sprintfN, given, laat, givenStar, laatStar;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, ok, exception, raise, die, decorateException, array, zipAll, bind, bindLate, bindTry, cascade, flipC, compact, compactOk, times, repeat, sprintf1, sprintfN, given, laat, givenStar, laatStar;
 ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
 ref$ = require('./common'), arrayLs = ref$.arrayLs, test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
-ref$ = require('../lib/index'), ok = ref$.ok, array = ref$.array, zipAll = ref$.zipAll, bind = ref$.bind, bindLate = ref$.bindLate, cascade = ref$.cascade, flipC = ref$.flipC, compact = ref$.compact, compactOk = ref$.compactOk, times = ref$.times, repeat = ref$.repeat, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar;
+ref$ = require('../lib/index'), ok = ref$.ok, exception = ref$.exception, raise = ref$.raise, die = ref$.die, decorateException = ref$.decorateException, array = ref$.array, zipAll = ref$.zipAll, bind = ref$.bind, bindLate = ref$.bindLate, bindTry = ref$.bindTry, cascade = ref$.cascade, flipC = ref$.flipC, compact = ref$.compact, compactOk = ref$.compactOk, times = ref$.times, repeat = ref$.repeat, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar;
 describe('cascade', function(){
   return test(1, function(){
     var odd, this$ = this;
@@ -399,6 +399,36 @@ describe('zip-all', function(){
   return test(2, function(){
     return expectToEqual([['un', 'yek', 'egy'], ['deux', 'do', 'ketto'], ['trois', 'seh', 'harom']])(
     zipAll(['un', 'deux', 'trois'], ['yek', 'do', 'seh'], ['egy', 'ketto', 'harom']));
+  });
+});
+describe('exceptions', function(){
+  test('exception', function(){
+    return expectToEqual(new Error('a b c'))(
+    exception('a', 'b', 'c'));
+  });
+  test('raise', function(){
+    return expect(function(){
+      return raise(
+      new Error('bad news'));
+    }).toThrow('bad news');
+  });
+  test('die', function(){
+    return expect(function(){
+      return die('really', 'bad', 'news');
+    }).toThrow('really bad news');
+  });
+  test('decorate exception', function(){
+    return expectToEqual(new Error('bad news: file not found'))(
+    decorateException('bad news:')(
+    new Error('file not found')));
+  });
+  return test('all', function(){
+    return expect(function(){
+      return raise(
+      decorateException('bad news:')(
+      exception(
+      'file not found')));
+    }).toThrow('bad news: file not found');
   });
 });
 function curry$(f, bound){

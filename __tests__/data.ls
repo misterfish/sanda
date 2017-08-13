@@ -14,6 +14,7 @@
 } = require './common'
 
 {
+    assoc-mut,
     append-to, append-to-mut, append-from, append-from-mut,
     prepend-from, prepend-from-mut, prepend-to, prepend-to-mut,
     concat-to, concat-to-mut, concat-from, concat-from-mut,
@@ -34,6 +35,14 @@ describe 'data transforms' ->
         { res, mut, tgt, } = args
         if mut then (expect res).to-be tgt
         else        (expect res).not.to-be tgt
+
+    describe 'assocMut' ->
+        test 1 ->
+            orig = a: 1 b:2
+            nieuw = orig
+                |> assoc-mut 'b' 3
+            (expect nieuw).to-be orig
+            (expect nieuw).to-equal a: 1 b: 3
 
     describe 'appendTo' ->
         fn = append-to

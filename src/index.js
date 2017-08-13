@@ -66,7 +66,7 @@ export const tapDot2Mut = tapDot2
 export const tapDot3Mut = tapDot3
 export const tapDotNMut = tapDotN
 
-export const ifOk_ = (x, yes, no) => ifOk (yes, no, x)
+export const ifOk__ = (x, yes, no) => ifOk (yes, no, x)
 export const ifOk = curry ((yes, x) => ok (x) ? yes (x) : void 8)
 
 export const ifTrue = curry ((yes, x) => x
@@ -90,8 +90,29 @@ export const cascade = (val, ...fxs) =>
 // ------ bind
 
 export const bind = curry ((o, prop) => o[prop].bind (o))
+
 // @dep ifFunction
 // @dep bind
+/*
+ * if (obj.speak) obj.speak()
+ *
+ * ifOk__ (
+ *     bindTry (obj, 'speak'),
+ *     invoke,
+ * )
+ *
+ * ifOk__ (
+ *     bindTry (obj, 'speak'),
+ *     x => x ()
+ * )
+ *
+ * bindTry (obj, 'speak') | ifOk (invoke)
+ *
+ * bindTry (obj, 'speak') | invokeIfOk
+ *
+ * invokeIfCan (obj, 'speak')
+ */
+
 export const bindTry = curry ((o, prop) => ifFunction (o[prop]) (bind (o, prop)))
 export const bindLate = curry ((o, key) => (...args) => o[key] (...args))
 
@@ -109,6 +130,10 @@ export const bindLate = curry ((o, key) => (...args) => o[key] (...args))
 // appendRcv?
 // appendRC?
 // export const appendFrom = rAppend
+
+// ------ assoc.
+
+export const assocMut = curry ((prop, val, o) => (o[prop] = val, o))
 
 // ------ append.
 
@@ -224,11 +249,18 @@ export const defaultTo = curry ((f, x) => ok (x)
 export const given = (xs, f) => f.apply (null, xs)
 export const laat = given
 
+// xxx invoke needs two forms ugh
+
+// log | invokeN ([1, 2, 3])
+// log | invokeUsingN ([1, 2, 3])
+// call them invoke using?
 export const invoke = f => f ()
 export const invoke1 = curry ((val, f) => f (val))
 export const invoke2 = curry ((val1, val2, f) => f (val1, val2))
 export const invoke3 = curry ((val1, val2, val3, f) => f (val1, val2, val3))
 export const invokeN = curry ((vs, f) => f.apply (null, vs))
+
+// ([1, 2, 3]) | invokeOn (log)
 
 export const callOn = curry ((o, f) => f.call (o))
 export const callOn1 = curry ((o, val, f) => f.call (o, val))
@@ -459,5 +491,102 @@ export const factory = (proto, mixinsPre = [], mixinsPost = []) => laat (
     })
 )
 
+export const joinOk = curry ((j, xs) => xs
+    | compactOk
+    | join (j)
+)
+
+export const exception = (...args) => new Error (
+    args | join (' ')
+)
+export const raise = (e) => { throw e }
+export const die = (...args) => exception (...args) | raise
+export const decorateException = curry ((prefix, e) =>
+    e | assocMut ('message', joinOk (' ') ([prefix, e.message]))
+)
+
+/*
+ * invokeIfCanElse
+ * if (canBind
+function getSelection() {
+        let txt = (window.getSelection)
+        ? window.getSelection()
+        : document.selection.createRange().text;
+
+}
+
+function getSelection() {
+    const txt = 'getSelection' | window | ifBind (
+        invoke,
+        () => document.selection.createRange().text,
+    )
+
+    const gebonden = bind (window, 'getSelection')
+    const txt = gebonden | ifOk (
+        invoke,
+        () => document.selection.createRange().text,
+    )
+
+    const txt = gebonden | invokeIfOkElse (
+        () => document.selection.createRange().text,
+    )
+
+*/
+
+/*
+ * const a = [1, 2, 3]
+ * a | applyTo (log) ... ?
+ *
+ */
+
+/*
+ * you could make the flattening proto stuff configurable
+ *
+ * if you want the opposite:
+ *
+ * // on:
+ * o
+ * | discardPrototype
+ * | merge (p)
+ *
+ * // off:
+ * o
+ * | flattenPrototype
+ * | merge (p)
+ *
+ *
+ *
+ *
+const xMatch = curry ((re, target) => re
+    | rProp ('source')
+    | replace (/\s+/g, '')
+    | nieuw1 (RegExp)
+    | dot1 ('exec', target)
+)
+export const nieuw1 = curry ((constructor, val) => new constructor (val))
 
 
+nieuw
+nieuw1
+
+
+    parse: () => new Error (e)
+        | tap (f => { f.msg = msg + ' ' + f.msg })
+        | exception
+snippet nieuw
+const nieuw = x => new x
+endsnippet
+
+snippet nieuw1
+const nieuw1 = curry ((x, val) => new x (val))
+endsnippet
+
+snippet nieuw2
+const nieuw2 = curry ((x, val1, val2) => new x (val1, val2))
+endsnippet
+
+snippet nieuw3
+const nieuw3 = curry ((x, val1, val2, val3) => new x (val1, val2, val3))
+endsnippet
+
+*/
