@@ -69,6 +69,20 @@ export const tapDotNMut = tapDotN
 export const ifOk__ = (x, yes, no) => ifOk (yes, no, x)
 export const ifOk = curry ((yes, x) => ok (x) ? yes (x) : void 8)
 
+export const ifLengthOne = curry ((yes, no, xs) =>
+    xs.length === 1 ? yes (xs) : no (xs)
+)
+
+export const ifEmpty = curry ((yes, no, xs) =>
+    xs.length === 0 ? yes (xs) : no (xs)
+)
+
+export const ifLengthOne__ = (xs, yes, no) =>
+    xs.length === 1 ? yes (xs) : no (xs)
+
+export const ifEmpty__ = (xs, yes, no) =>
+    xs.length === 0 ? yes (xs) : no (xs)
+
 export const ifTrue = curry ((yes, x) => x
     | condTrue (yes) (() => void 8)
 )
@@ -96,21 +110,60 @@ export const bind = curry ((o, prop) => o[prop].bind (o))
 /*
  * if (obj.speak) obj.speak()
  *
- * ifOk__ (
+ * whenOk__ (
  *     bindTry (obj, 'speak'),
  *     invoke,
  * )
  *
- * ifOk__ (
+ * whenOk__ (
  *     bindTry (obj, 'speak'),
  *     x => x ()
  * )
  *
- * bindTry (obj, 'speak') | ifOk (invoke)
+ * bindTry (obj, 'speak') | whenOk (invoke)
+ * whenBind (obj, 'speak') | invoke
+ * invokeWhenBind (obj, 'speak')
+ * whenBindInvoke (obj, 'speak')
+ * invokeIfCan (obj, 'speak')
+ * whenCanInvoke (obj, 'speak') // no
  *
  * bindTry (obj, 'speak') | invokeIfOk
  *
- * invokeIfCan (obj, 'speak')
+ * if (this.parseFormData) formData = this.parseFormData(formData);
+ * first make immutable:
+ *
+ * if (this.parseFormData)
+ *     newFormData = this.parseFormData(formData);
+ *
+ * const newFormData = invokeIfCan (this, 'parseFormData', formData, ... else ??)
+ * const newFormData = bindTry (this, 'parseFormData') | ifOk (
+ *     invoke,
+ *     () => formData,
+ * )
+ *
+ * const newFormData = [this, 'parseFormData'] | whenBind (invoke1 (formData))
+ *
+ * // nooo
+ * const newFormData = bindTry (this, 'parseFormData') | ifOk (
+ *     invoke,
+ *     < formData
+ * )
+ *
+ * const newFormData = bindTry (this, 'parseFormData') | invoke1IfOk (formData)
+ *
+ * if(this.model){
+ *   this.model.set(this.serializeForm());
+ * }
+ *
+ * bindTry (this, 'model') | whenOk (
+ *   it => it.set (this.serializeForm())
+ * )
+ *
+ * bindTry (this, 'model') | whenOk (
+ *   dot1 ('set', (this.serializeForm()))
+ * )
+ *
+ *
  */
 
 export const bindTry = curry ((o, prop) => ifFunction (o[prop]) (bind (o, prop)))
@@ -285,6 +338,9 @@ const isFunction = callUnder ({}.toString)
     >> dot2 ('slice') (8, -1)
     >> equals ('Function')
 
+// an alternative is to skip f and just stick it as the last arg of xs; for now, keep it want
+// symmetry
+
 export const givenStar = (xs, f) => {
     const xsMapper = (prevVals, v) => isFunction (v)
         ? v.apply (null, prevVals)
@@ -303,6 +359,8 @@ export const givenStar = (xs, f) => {
 export const laatStar = givenStar
 
 // --- flip first and second args: also works for functions curried with the a => b => ... notation.
+// outer curry not needed??
+// and how can the inner curry work with rest params?
 export const flipC = curry ((f) => curry (
     (a, b, ...rest) => laat (
         [f (b) (a)],
@@ -557,6 +615,9 @@ function getSelection() {
  *
  *
  *
+ * xReplace should tell how many it replaced.
+ * perhaps when global it should return an object.
+ *
 const xMatch = curry ((re, target) => re
     | rProp ('source')
     | replace (/\s+/g, '')
@@ -589,4 +650,427 @@ snippet nieuw3
 const nieuw3 = curry ((x, val1, val2, val3) => new x (val1, val2, val3))
 endsnippet
 
+
+apply should keep the same meaning as in racket maybe, which it has anyway, so?
+(apply f xs)
+f.apply null xs
+
+
+cond like in cond-> clojure macro.
+
+x | cond ([ ... anaphoric functions ])
+
+
+
+
+
+battery of conds:
+
+const transform = (inFile) => {
+    const c = slurp (inFile)
+    const re1 = /^ \s* (<math (?:.|\s)+ <\/math>) \s+ true \s* $/
+    const re2 = /^ \s* (<math [^>]* \/>) \s* true \s* $/
+    let math
+    const m1 = c | xMatch (re1)
+    if (m1) {
+        math = m1[1]
+    } else {
+        const m2 = c | xMatch (re2)
+        if (m2) math = m2[1]
+    }
+    return math | ifElseOk (
+        math => 'mml=' + math,
+        () => warn ('no match', inFile, c, re1, re2),
+    )
+}
+
+
+xMatch family also needs a from and to version.
+
+
+export const xMatchStr = curry ((str, target) =>
+    target | xMatch (new RegExp (str)))
+
+export const ifElseOk = curry ((good, bad, x) =>
+    ok (x) ? good (x) : bad ())
+
+
+const ifElseTrue = curry ((good, bad, x) => {
+    console.log ('x', x)
+    return x === true ? good (x) : bad (x)
+})
+
+export const ifElseReplaceOk = curry ((good, bad, wat, met, target) => {
+    let success
+    const out = target.replace (wat, () => {
+        success = true
+        return met
+    })
+    return success | ifElseTrue (() => good (out), () => bad (target))
+})
+
+const str = 'ALLENS'
+const re1 = ' x '
+const re2 = ' l '
+
+// --- target should be optional, will need other form.
+// --- last one always? undef if none?
+// tests for truthINEss
+export const cond = curry ((blocks, target) => {
+    let result
+    for (const [test, exec] of blocks) {
+        if (!ok (test)) return exec (target)
+
+        const result = test (target)
+        if (result) return exec (result)
+    }
+})
+
+const out = str | cond ([
+    [
+        xMatchStr (re1),
+        () => 'woot',
+    ],
+    [
+        xMatchStr (re2),
+        () => 'wut',
+    ],
+    [
+        str => str === 'ALLEN',
+        () => 'capital',
+    ],
+    [
+        void 8,
+        target => 'passthrough = ' + target,
+    ],
+])
+
+
+
+
+const transform = (inFile) => {
+    const c = slurp (inFile)
+    const re1 = /^ \s* (<math (?:.|\s)+ <\/math>) \s+ true \s* $/
+    const re2 = /^ \s* (<math [^>]* \/>) \s* true \s* $/
+    let math
+    const m1 = c | xMatch (re1)
+    if (m1) {
+        math = m1[1]
+    } else {
+        const m2 = c | xMatch (re2)
+        if (m2) math = m2[1]
+    }
+    return math | ifElseOk (
+        math => 'mml=' + math,
+        () => warn ('no match', inFile, c, re1, re2),
+    )
+}
+
+
+
+
+in racket, one-armed if is when.
+
+
+
+do ([
+ a <- thing-one
+ b <- thing-two
+ c <- (thing-three b)
+])
+
+
+		isValidPgn:function(pgn) {
+		    var pattern = new RegExp(/^[\d]{8,9}$/g); // 8-9 digits
+
+		    if (!pattern.test(pgn)) {
+				return false;
+			}
+
+			var total = 0;
+			pgn.split('').forEach(function(elem, index, array) {
+		    	if (index === array.length - 1) {
+		    		total += -1 * parseInt(elem);
+		    	} else {
+		    		total += (array.length - index) * parseInt(elem);
+		    	}
+			});
+
+		    return total % 11 === 0; // 'elfproef'
+		},
+		serializeForm:function(){
+			var $disabledFields = $("*[disabled]",this.el);
+			$disabledFields.removeAttr("disabled");
+
+			var formData = $('form',this.$el).serializeObject();
+
+			$disabledFields.attr("disabled","disabled");
+
+			if(this.parseFormData){
+				formData = this.parseFormData(formData);
+			}
+			return formData;
+		},
+
+
 */
+
+
+const Id = (() => {
+    const proto = {
+        val: undefined,
+        map (f) {
+            return id (f (this.val))
+        },
+        // --- dunno how, needs xs
+        apply (f) {
+        },
+        drop () {
+            return this.val
+        },
+        chain (f) {
+            return f (this.val)
+        },
+    }
+
+    return {
+        of (val) {
+            return proto
+            | Object.create
+            | assocMut ('val') (val)
+        },
+    }
+}) ()
+
+const Just = (() => {
+    const proto = {
+        val: undefined,
+        map (f) {
+            return Just.of (f (this.val))
+        },
+        // --- dunno how, needs xs
+        apply (f) {
+        },
+        drop () {
+            return this.val
+        },
+        chain (f) {
+            return f (this.val)
+        },
+    }
+
+    return {
+        of (val) {
+            return proto
+            | Object.create
+            | assocMut ('val') (val)
+        },
+    }
+}) ()
+
+const Nothing = (() => {
+    const proto = {
+        map (f) {
+            return Nothing.of ()
+        },
+        // --- dunno how, needs xs
+        apply (f) {
+        },
+        drop () {
+        },
+        // doesn't call f. ??
+        chain (f) {
+        },
+    }
+
+    return {
+        of (val) {
+            return proto
+            | Object.create
+        },
+    }
+}) ()
+
+const just = (...args) => Just.of (...args)
+const nothing = (...args) => Nothing.of (...args)
+const id = (...args) => Id.of (...args)
+
+const doe = (...mainArgs) => {
+    const fs = mainArgs | ifLengthOne (
+        it => it [0],
+        it => it,
+    )
+
+    const _doe = (fs, argsAcc) => fs.length === 1
+        ? (...args) => {
+            return head (fs).apply (null, [...argsAcc, ...args])
+        }
+        : (...args) => {
+            const chainVal = head (fs).apply (null, [...argsAcc, ...args])
+            const newArgsAcc = [...argsAcc, chainVal.drop ()]
+            return chain (_doe (tail (fs), newArgsAcc) ) (
+                chainVal
+            )
+        }
+
+    const firstReturn = head (fs) ()
+    return chain (_doe (tail (fs), [firstReturn.drop ()]) ) (firstReturn)
+}
+
+        // stretch the function out:
+        //
+        // (y) => id (x + y + 1)
+        //
+        // ->
+        //
+        // (x) => chain (recursive-stuff) (id (x + 1))
+        //
+        // and 'rewire it': before apply, prepend the accumulated vals to the args
+        //
+        // so
+        //
+        // (x, y) => x + y (given by user)
+        //
+        // needs to become
+        //
+        // (y) => x + y (needed by algorithm) (x is lexical)
+        //
+        // DWZ
+        //
+        // const f = head (fs)
+        // (...args) => chain (recursive-stuff) (f.apply (null, [...argsAcc, ...args]))
+        //
+        // seems like the accumulator is left in a strange state after this.
+        // try with 4!
+
+
+
+/*
+(struct id (val)
+    #:transparent
+    #:methods gen:functor
+    [(define (map f x)
+       (id (f (id-val x))))]
+    #:methods gen:applicative
+    [(define (pure _ x)
+       (id x))
+     (define (apply f xs)
+       (base:apply (id-val f) (base:map id-val xs)))]
+    #:methods gen:monad
+    [(define (chain f x)
+       (f (id-val x)))])
+
+; --- (id 3)
+(do
+  [x <- (id 1)]
+  [y <- (id 2)]
+  (pure (+ x y)))
+
+; --- equivalent to:
+
+(chain
+  (λ (x) (chain
+            (λ (y) (pure (+ x y)))
+            (id 2)))
+  (id 1))
+
+*/
+
+// --- 'single' doesn't make that much sense (it will be wrapped).
+
+// const singleMonadExpanded = id (1)
+// const singleMonad = doe ([
+//     () => id (1),
+// ])
+//
+// console.log ('singleMonad')
+// singleMonad | log
+// console.log ('singleMonadExpanded')
+// singleMonadExpanded | log
+
+// remember that functions have a single return in js and always will (no 'array' return for me
+// chump)
+
+const doubleMonadExpanded = chain (
+    (x) => x + 1
+) (id (1)) // --- 2
+
+doubleMonadExpanded | log
+
+const doubleMonad = doe ([
+    () => id (1),
+    (x) => x + 1,
+]) // --- 2.
+
+doubleMonad | log
+
+const tripleMonadExpanded = chain (
+    (x) => chain (
+        (y) => x + y // --- 35.
+    ) (id (x + 25))
+) (id (5))
+
+tripleMonadExpanded | log
+
+const tripleMonad = doe ([
+    () => id (5),
+    (x) => id (x + 25),
+    (x, y) => x + y, // --- 35.
+])
+
+tripleMonad | log
+
+// --- each step always takes one arg.
+
+const quadrupleMonadExpanded = chain (
+    (x) => chain (
+        (y) => chain (
+            (z) => x + y + z, // --- 55.
+        ) (id (x * y)) // --- z = 39.
+    ) (id (x + 10)) // --- y = 13.
+) (id (3)) // --- x = 3.
+
+quadrupleMonadExpanded | log
+
+const quadrupleMonad = doe ([
+    () => id (3),
+    (x) => id (x + 10),
+    (x, y) => id (x * y),
+
+    // --- last one doesn't have to be a monad.
+    // BUT you might want it to be, e.g. safeDivide, and then it's annoying to have to do another
+    // step.
+    // maybe doeStar or something like that?
+    (x, y, z) => x + y + z,
+])
+
+quadrupleMonad | log
+
+// isEmpty OR is nothing?
+const safeFirst = xs => isEmpty (xs)
+    ? nothing ()
+    : just (head (xs))
+
+const safeRest = xs => isEmpty (xs)
+    ? nothing () // or empty list ??
+    : just (tail (xs))
+
+const safeDivide = a => b => b === 0
+    ? nothing ()
+    : just (a / b)
+
+; [] | safeFirst | log
+; [1, 2, 3] | safeFirst | log
+; [1, 2, 3] | safeFirst | rProp ('val') | log
+
+const divideFirstTwoMonadic = xs => doe (
+    () => safeFirst (xs),
+    (a) => safeRest (xs),
+    (a, ys) => safeFirst (ys),
+    (a, ys, b) => safeDivide (a) (b),
+    (a, ys, b, x) => x,
+)
+
+divideFirstTwoMonadic ([1, 2, 3]) | log // --- 1.2
+divideFirstTwoMonadic ([1, 0, 3]) | log // --- nothing
+divideFirstTwoMonadic ([1]) | log // --- undefined (?)

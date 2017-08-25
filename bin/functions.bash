@@ -134,6 +134,18 @@ push() {
     eval "$name=(\"\${$name[@]}\" \"$2\")"
 }
 
+# --- name, joinchar = ' '
+join() {
+    local name="$1"
+    local saveifs="$IFS"
+    local ret
+
+    IFS="${2:- }"
+    eval "ret=\"\${${name}[*]}\""
+    IFS="$saveifs"
+    echo "$ret"
+}
+
 assert_arg() {
     var=$1
     if [ -z "$var" ]; then
