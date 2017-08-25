@@ -43,7 +43,7 @@ describe 'bind*' ->
         name: 'dog'
         speak: -> 'my name is ' + @name
         garble: (...args) -> join '!' args
-    zip [bind, bind-late] <[ bind bindLate ]>
+    zip [bind, bind-late, bind-try] <[ bind bindLate bindTry ]>
     |> each ([bind-func, bind-func-name]) ->
         describe bind-func-name, ->
             test 'binds' ->
@@ -62,9 +62,18 @@ describe 'bind*' ->
                 |> (x) -> x()
                 |> expect-to-equal 'my name is dog'
     describe 'bind hard' ->
-        xtest 'fails on undefined function' ->
-        xtest 'fails on undefined function' ->
+        test 'fails on undefined function' ->
+            (expect -> obj.squeak()).to-throw TypeError
     describe 'bind late' ->
+        test '1' ->
+            obj = {}
+            bound = 'speak' |> bind-late obj
+            (expect -> bound()).to-throw TypeError
+            obj.speak = -> 'spoke'
+            (expect bound()).to-equal 'spoke'
+    describe 'forms' ->
+        xtest '1' ->
+            bindTry(obj, 'speak') |> if-ok
 
 describe 'flipC' ->
     fn = flip-c
@@ -335,5 +344,6 @@ describe 'exceptions' ->
             |> decorate-exception 'bad news:'
             |> raise
         ).to-throw 'bad news: file not found'
+
 
 # defaultTo

@@ -29,9 +29,13 @@ while getopts hw-: arg; do
 done
 shift $((OPTIND-1))
 
+if [ $# -gt 0 ]; then
+    error "$USAGE"
+fi
+
 declare argslist
 if [ "$watch" ]; then push argslist --watch; fi
 
 args=$(join argslist)
 
-cmd "$maindir"/node_modules/.bin/jest $args "$@"
+cmd "$maindir"/node_modules/.bin/jest $args

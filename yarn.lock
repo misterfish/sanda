@@ -1763,6 +1763,14 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
+livescript@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/livescript/-/livescript-1.5.0.tgz#4fe7121c41217e4608e334eb9cbe1762e63e5566"
+  dependencies:
+    optionator "~0.8.1"
+    prelude-ls "~1.1.2"
+    source-map "^0.5.6"
+
 load-json-file@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/load-json-file/-/load-json-file-1.1.0.tgz#956905708d58b4bab4c2261b04f59f31c99374c0"
@@ -1986,7 +1994,7 @@ optimist@^0.6.1:
     minimist "~0.0.1"
     wordwrap "~0.0.2"
 
-optionator@^0.8.1:
+optionator@^0.8.1, optionator@~0.8.1:
   version "0.8.2"
   resolved "https://registry.yarnpkg.com/optionator/-/optionator-0.8.2.tgz#364c5e409d3f4d6301d6c0b4c05bba50180aeb64"
   dependencies:

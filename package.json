@@ -7,6 +7,7 @@
     "fish-lib": "^0.9.10",
     "jasmine-node": "^1.14.5",
     "jest": "^20.0.4",
+    "livescript": "^1.5.0",
     "prelude-ls": "^1.1.2",
     "ramda": "^0.24.1"
   }

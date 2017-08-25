@@ -83,20 +83,19 @@ export const ifLengthOne__ = (xs, yes, no) =>
 export const ifEmpty__ = (xs, yes, no) =>
     xs.length === 0 ? yes (xs) : no (xs)
 
-export const ifTrue = curry ((yes, x) => x
-    | condTrue (yes) (() => void 8)
+export const whenTrue = curry ((yes, x) =>
+    x | ifTrue (yes) (() => void 8)
 )
 
-export const condTrue = curry ((yes, no, x) => x === true
-    ? yes (x) : no (x)
+export const ifTrue = curry ((yes, no, x) =>
+    x === true ? yes (x) : no (x)
 )
-export const ifTrueElse = condTrue
 
 // ------ not data-last.
 // ------ not curried.
 
-export const ifTrueRF = (x, yes, no = () => void 8) => x
-    | condTrue (yes) (no)
+export const ifTrue__ = (x, yes, no = () => void 8) =>
+    x | ifTrue (yes) (no)
 
 export const cascade = (val, ...fxs) =>
     fxs | reduce ((a, b) => b (a), val)
@@ -104,6 +103,10 @@ export const cascade = (val, ...fxs) =>
 // ------ bind
 
 export const bind = curry ((o, prop) => o[prop].bind (o))
+export const bindTry = curry ((o, prop) => bind (o, prop) | ifFunction (identity))
+export const bindLate = curry ((o, key) => (...args) => o[key] (...args))
+
+//export const 
 
 // @dep ifFunction
 // @dep bind
@@ -166,23 +169,10 @@ export const bind = curry ((o, prop) => o[prop].bind (o))
  *
  */
 
-export const bindTry = curry ((o, prop) => ifFunction (o[prop]) (bind (o, prop)))
-export const bindLate = curry ((o, key) => (...args) => o[key] (...args))
-
-// --- hasOwn: R.has
-
-// could also be called pushTo and pushToMut, but pushTo for not mut could be confusing.
+// pushTo for not mut would be a confusing name.
 
 // [1 2 3] -> [4 5 6] -> [1 2 3 [4 5 6]]
 // [] -> a -> []
-// export const appendTo = curry (
-//     (tgt, src) => [...tgt, src]
-// )
-
-// rcvAppend?
-// appendRcv?
-// appendRC?
-// export const appendFrom = rAppend
 
 // ------ assoc.
 
@@ -292,7 +282,7 @@ export const mapAccumIndexed = addIndex (mapAccum)
 
 // --- mapzip.
 
-export const defaultToRF = (x, d) => ok (x)
+export const defaultTo__ = (x, d) => ok (x)
     ? x : d ()
 
 export const defaultTo = curry ((f, x) => ok (x)
@@ -554,6 +544,8 @@ export const joinOk = curry ((j, xs) => xs
     | join (j)
 )
 
+// check latest exception stuff from snippets and from wikiparse
+
 export const exception = (...args) => new Error (
     args | join (' ')
 )
@@ -589,7 +581,42 @@ function getSelection() {
         () => document.selection.createRange().text,
     )
 
+    const txt = [window, 'getSelection'] | ifBind (
+        invoke,
+        () => document.selection.createRange().text,
+    )
+
+    const txt =
+        bind (window, 'getSelection')
+        | ifOk (
+            invoke,
+            () => document.selection.createRange().text,
+        )
+
+// have to decide whether bind fails or returns undefined.
+// probably fails. (see bind hard test)
+//
+// bind needs flip family as well.
+// 'speak' | bind-to obj
+// obj | bind-under 'speak'
+
+    const txt =
+        bind (window, 'getSelection')
+        | ifOk (
+            apply,
+            () => document.selection.createRange().text,
+        )
+
+    
+) ()
 */
+
+/*
+ *
+ *
+ * const y = x | defaultTo (() => 42)
+ *
+ */
 
 /*
  * const a = [1, 2, 3]
@@ -746,8 +773,7 @@ const out = str | cond ([
 ])
 
 
-
-
+(already fixed, see script, also cond implemented)
 const transform = (inFile) => {
     const c = slurp (inFile)
     const re1 = /^ \s* (<math (?:.|\s)+ <\/math>) \s+ true \s* $/
@@ -771,13 +797,6 @@ const transform = (inFile) => {
 
 in racket, one-armed if is when.
 
-
-
-do ([
- a <- thing-one
- b <- thing-two
- c <- (thing-three b)
-])
 
 
 		isValidPgn:function(pgn) {
@@ -816,261 +835,3 @@ do ([
 */
 
 
-const Id = (() => {
-    const proto = {
-        val: undefined,
-        map (f) {
-            return id (f (this.val))
-        },
-        // --- dunno how, needs xs
-        apply (f) {
-        },
-        drop () {
-            return this.val
-        },
-        chain (f) {
-            return f (this.val)
-        },
-    }
-
-    return {
-        of (val) {
-            return proto
-            | Object.create
-            | assocMut ('val') (val)
-        },
-    }
-}) ()
-
-const Just = (() => {
-    const proto = {
-        val: undefined,
-        map (f) {
-            return Just.of (f (this.val))
-        },
-        // --- dunno how, needs xs
-        apply (f) {
-        },
-        drop () {
-            return this.val
-        },
-        chain (f) {
-            return f (this.val)
-        },
-    }
-
-    return {
-        of (val) {
-            return proto
-            | Object.create
-            | assocMut ('val') (val)
-        },
-    }
-}) ()
-
-const Nothing = (() => {
-    const proto = {
-        map (f) {
-            return Nothing.of ()
-        },
-        // --- dunno how, needs xs
-        apply (f) {
-        },
-        drop () {
-        },
-        // doesn't call f. ??
-        chain (f) {
-        },
-    }
-
-    return {
-        of (val) {
-            return proto
-            | Object.create
-        },
-    }
-}) ()
-
-const just = (...args) => Just.of (...args)
-const nothing = (...args) => Nothing.of (...args)
-const id = (...args) => Id.of (...args)
-
-const doe = (...mainArgs) => {
-    const fs = mainArgs | ifLengthOne (
-        it => it [0],
-        it => it,
-    )
-
-    const _doe = (fs, argsAcc) => fs.length === 1
-        ? (...args) => {
-            return head (fs).apply (null, [...argsAcc, ...args])
-        }
-        : (...args) => {
-            const chainVal = head (fs).apply (null, [...argsAcc, ...args])
-            const newArgsAcc = [...argsAcc, chainVal.drop ()]
-            return chain (_doe (tail (fs), newArgsAcc) ) (
-                chainVal
-            )
-        }
-
-    const firstReturn = head (fs) ()
-    return chain (_doe (tail (fs), [firstReturn.drop ()]) ) (firstReturn)
-}
-
-        // stretch the function out:
-        //
-        // (y) => id (x + y + 1)
-        //
-        // ->
-        //
-        // (x) => chain (recursive-stuff) (id (x + 1))
-        //
-        // and 'rewire it': before apply, prepend the accumulated vals to the args
-        //
-        // so
-        //
-        // (x, y) => x + y (given by user)
-        //
-        // needs to become
-        //
-        // (y) => x + y (needed by algorithm) (x is lexical)
-        //
-        // DWZ
-        //
-        // const f = head (fs)
-        // (...args) => chain (recursive-stuff) (f.apply (null, [...argsAcc, ...args]))
-        //
-        // seems like the accumulator is left in a strange state after this.
-        // try with 4!
-
-
-
-/*
-(struct id (val)
-    #:transparent
-    #:methods gen:functor
-    [(define (map f x)
-       (id (f (id-val x))))]
-    #:methods gen:applicative
-    [(define (pure _ x)
-       (id x))
-     (define (apply f xs)
-       (base:apply (id-val f) (base:map id-val xs)))]
-    #:methods gen:monad
-    [(define (chain f x)
-       (f (id-val x)))])
-
-; --- (id 3)
-(do
-  [x <- (id 1)]
-  [y <- (id 2)]
-  (pure (+ x y)))
-
-; --- equivalent to:
-
-(chain
-  (λ (x) (chain
-            (λ (y) (pure (+ x y)))
-            (id 2)))
-  (id 1))
-
-*/
-
-// --- 'single' doesn't make that much sense (it will be wrapped).
-
-// const singleMonadExpanded = id (1)
-// const singleMonad = doe ([
-//     () => id (1),
-// ])
-//
-// console.log ('singleMonad')
-// singleMonad | log
-// console.log ('singleMonadExpanded')
-// singleMonadExpanded | log
-
-// remember that functions have a single return in js and always will (no 'array' return for me
-// chump)
-
-const doubleMonadExpanded = chain (
-    (x) => x + 1
-) (id (1)) // --- 2
-
-doubleMonadExpanded | log
-
-const doubleMonad = doe ([
-    () => id (1),
-    (x) => x + 1,
-]) // --- 2.
-
-doubleMonad | log
-
-const tripleMonadExpanded = chain (
-    (x) => chain (
-        (y) => x + y // --- 35.
-    ) (id (x + 25))
-) (id (5))
-
-tripleMonadExpanded | log
-
-const tripleMonad = doe ([
-    () => id (5),
-    (x) => id (x + 25),
-    (x, y) => x + y, // --- 35.
-])
-
-tripleMonad | log
-
-// --- each step always takes one arg.
-
-const quadrupleMonadExpanded = chain (
-    (x) => chain (
-        (y) => chain (
-            (z) => x + y + z, // --- 55.
-        ) (id (x * y)) // --- z = 39.
-    ) (id (x + 10)) // --- y = 13.
-) (id (3)) // --- x = 3.
-
-quadrupleMonadExpanded | log
-
-const quadrupleMonad = doe ([
-    () => id (3),
-    (x) => id (x + 10),
-    (x, y) => id (x * y),
-
-    // --- last one doesn't have to be a monad.
-    // BUT you might want it to be, e.g. safeDivide, and then it's annoying to have to do another
-    // step.
-    // maybe doeStar or something like that?
-    (x, y, z) => x + y + z,
-])
-
-quadrupleMonad | log
-
-// isEmpty OR is nothing?
-const safeFirst = xs => isEmpty (xs)
-    ? nothing ()
-    : just (head (xs))
-
-const safeRest = xs => isEmpty (xs)
-    ? nothing () // or empty list ??
-    : just (tail (xs))
-
-const safeDivide = a => b => b === 0
-    ? nothing ()
-    : just (a / b)
-
-; [] | safeFirst | log
-; [1, 2, 3] | safeFirst | log
-; [1, 2, 3] | safeFirst | rProp ('val') | log
-
-const divideFirstTwoMonadic = xs => doe (
-    () => safeFirst (xs),
-    (a) => safeRest (xs),
-    (a, ys) => safeFirst (ys),
-    (a, ys, b) => safeDivide (a) (b),
-    (a, ys, b, x) => x,
-)
-
-divideFirstTwoMonadic ([1, 2, 3]) | log // --- 1.2
-divideFirstTwoMonadic ([1, 0, 3]) | log // --- nothing
-divideFirstTwoMonadic ([1]) | log // --- undefined (?)

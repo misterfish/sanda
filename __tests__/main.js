@@ -58,12 +58,35 @@ describe('bind*', function(){
       });
     });
   })(
-  zip([bind, bindLate], ['bind', 'bindLate']));
+  zip([bind, bindLate, bindTry], ['bind', 'bindLate', 'bindTry']));
   describe('bind hard', function(){
-    xtest('fails on undefined function', function(){});
-    return xtest('fails on undefined function', function(){});
+    return test('fails on undefined function', function(){
+      return expect(function(){
+        return obj.squeak();
+      }).toThrow(TypeError);
+    });
   });
-  return describe('bind late', function(){});
+  describe('bind late', function(){
+    return test('1', function(){
+      var obj, bound;
+      obj = {};
+      bound = bindLate(obj)(
+      'speak');
+      expect(function(){
+        return bound();
+      }).toThrow(TypeError);
+      obj.speak = function(){
+        return 'spoke';
+      };
+      return expect(bound()).toEqual('spoke');
+    });
+  });
+  return describe('forms', function(){
+    return xtest('1', function(){
+      return ifOk(
+      bindTry(obj, 'speak'));
+    });
+  });
 });
 describe('flipC', function(){
   var fn;

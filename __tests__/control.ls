@@ -15,130 +15,151 @@
 } = require './common'
 
 {
-    if-true, cond-true,
-    if-true-RF,
+    if-true, when-true,
+    if-true__,
     try-catch,
 } = require '../lib/index'
 
-describe 'ifTrue' ->
-    do-test = (fn, { desc, input-val, ja-val, expect-num-calls, expect-ret, }) --> test desc, ->
-        ja = jest.fn ()
-            ..mock-return-value ja-val
-        ret = input-val |> fn ja
-        expect-num-calls |> (expect ja.mock.calls.length).to-equal
-        expect-ret |> (expect ret).to-equal
+do-test-double-arm = (fn, { curried }, { desc, input-val, expect-num-calls, expect-ret, }) --> test desc, ->
+    [ja-val, nee-val] = [42 43]
 
-        (expect ret).to-equal expect-ret
+    ja = jest.fn ()
+        ..mock-return-value ja-val
+    nee = jest.fn ()
+        ..mock-return-value nee-val
+
+    ret = if curried then input-val |> fn ja, nee
+    else fn ja, nee, input-val
+
+    expect-num-calls.0 |> (expect ja.mock.calls.length).to-equal
+    expect-num-calls.1 |> (expect nee.mock.calls.length).to-equal
+
+    expect-ret |> (expect ret).to-equal
+
+do-test-single-arm = (fn, { curried }, { desc, input-val, expect-num-calls, expect-ret, }) --> test desc, ->
+    ja-val = 42
+    ja = jest.fn ()
+        ..mock-return-value ja-val
+
+    ret = if curried then input-val |> fn ja
+    else fn ja, input-val
+
+    expect-num-calls |> (expect ja.mock.calls.length).to-equal
+    expect-ret |> (expect ret).to-equal
+
+    (expect ret).to-equal expect-ret
+
+describe 'whenTrue' ->
+    do-test = do-test-single-arm
 
     tests = array-ls do
         *   desc: 'true'
             input-val: true
-            ja-val: 42
             expect-num-calls: 1
             expect-ret: 42
         *   desc: 'false'
             input-val: false
-            ja-val: 42
             expect-num-calls: 0
             expect-ret: void
         *   desc: 'empty string'
             input-val: ''
-            ja-val: 42
             expect-num-calls: 0
             expect-ret: void
         *   desc: 'undefined'
             input-val: void
-            ja-val: 42
             expect-num-calls: 0
             expect-ret: void
 
-    tests |> each do-test if-true
+    tests |> each do-test when-true, { +curried }
 
-describe 'condTrue' ->
-    do-test = (fn, { desc, input-val, ja-val, nee-val, expect-num-calls, expect-ret, }) --> test desc, ->
-        ja = jest.fn ()
-            ..mock-return-value ja-val
-        nee = jest.fn ()
-            ..mock-return-value nee-val
-        ret = input-val |> fn ja, nee
-
-        expect-num-calls.0 |> (expect ja.mock.calls.length).to-equal
-        expect-num-calls.1 |> (expect nee.mock.calls.length).to-equal
-
-        expect-ret |> (expect ret).to-equal
+describe 'ifTrue' ->
+    do-test = do-test-double-arm
 
     tests = array-ls do
         *   desc: 'true'
             input-val: true
-            ja-val: 42
-            nee-val: 43
             expect-num-calls: [1 0]
             expect-ret: 42
         *   desc: 'false'
             input-val: false
-            ja-val: 42
-            nee-val: 43
             expect-num-calls: [0 1]
             expect-ret: 43
         *   desc: 'empty string'
             input-val: ''
-            ja-val: 42
-            nee-val: 43
             expect-num-calls: [0 1]
             expect-ret: 43
 
-    tests |> each do-test cond-true
+    tests |> each do-test if-true, { +curried }
 
-describe 'ifTrueRF' ->
-    fn = if-true-RF
-    the-test = (vals) ->
-        { input-val, do-nee, ja-val, nee-val, expect-num-calls, expect-ret, } = vals
-        ja = jest.fn ()
-            ..mock-return-value ja-val
-        nee = jest.fn ()
-            ..mock-return-value nee-val
-        ret = if do-nee then
-            fn input-val, ja, nee
-        else fn input-val, ja
-
-        expect-num-calls.0 |> (expect ja.mock.calls.length).to-equal
-        expect-num-calls.1 |> (expect nee.mock.calls.length).to-equal
-
-        expect-ret |> (expect ret).to-equal
+describe 'ifTrue__' ->
+    fn = if-true__
 
     tests = array-ls do
         *   desc: 'true'
             input-val: true
             do-nee: true
-            ja-val: 42
-            nee-val: 43
+            arms: 2
             expect-num-calls: [1 0]
             expect-ret: 42
         *   desc: 'true, no else'
             input-val: true
-            do-nee: false
-            ja-val: 42
+            arms: 1
             expect-num-calls: [1 0]
             expect-ret: 42
         *   desc: 'false'
             input-val: false
-            do-nee: true
-            ja-val: 42
-            nee-val: 43
+            arms: 2
             expect-num-calls: [0 1]
             expect-ret: 43
         *   desc: 'false, no else'
             input-val: false
-            do-nee: false
-            ja-val: 42
+            arms: 1
             expect-num-calls: [0 0]
             expect-ret: void
 
-    do-test = (vals) -> test do
-        vals.desc
-        -> the-test vals
+    tests |> each (spec) ->
+        arms = delete spec.arms
+        do-test = if arms == 2 then do-test-double-arm else do-test-single-arm
+        (do-test fn { -curried }) spec
 
-    tests |> each do-test
+
+# describe 'ifFunction' ->
+#     do-test = (fn, { desc, input-val, ja-val, nee-val, expect-num-calls, expect-ret, }) --> test desc, ->
+#         ja = jest.fn ()
+#             ..mock-return-value ja-val
+#         nee = jest.fn ()
+#             ..mock-return-value nee-val
+#         ret = input-val |> fn ja, nee
+#
+#         expect-num-calls.0 |> (expect ja.mock.calls.length).to-equal
+#         expect-num-calls.1 |> (expect nee.mock.calls.length).to-equal
+#
+#         expect-ret |> (expect ret).to-equal
+#
+#     # --- abstract away ja-val and nee-val XXX
+#     tests = array-ls do
+#         *   desc: 'function'
+#             input-val: ->
+#             ja-val: 42
+#             nee-val: 43
+#             expect-num-calls: [1 0]
+#             expect-ret: 42
+#         *   desc: 'not function'
+#             input-val: false
+#             ja-val: 42
+#             nee-val: 43
+#             expect-num-calls: [0 1]
+#             expect-ret: 43
+#         *   desc: 'empty string'
+#             input-val: ''
+#             ja-val: 42
+#             nee-val: 43
+#             expect-num-calls: [0 1]
+#             expect-ret: 43
+#
+#     tests |> each do-test if-true
+#
+# describe 'ifFunction__' ->
 
 describe 'try/catch' ->
     danger = -> throw new Error
