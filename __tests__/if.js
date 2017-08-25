@@ -12,11 +12,11 @@ doTests = curry$(function(describeSpec, tests){
   tests);
 });
 doTestDoubleArm = curry$(function(arg$, arg1$){
-  var fn, is__, desc, inputVal, expectNumCalls, expectBranch;
+  var fn, is__, desc, inputVal, expectBranch;
   fn = arg$.fn, is__ = arg$.is__;
-  desc = arg1$.desc, inputVal = arg1$.inputVal, expectNumCalls = arg1$.expectNumCalls, expectBranch = arg1$.expectBranch;
+  desc = arg1$.desc, inputVal = arg1$.inputVal, expectBranch = arg1$.expectBranch;
   return test(desc, function(){
-    var ref$, jaVal, neeVal, x$, ja, y$, nee, ret, expectedRet;
+    var ref$, jaVal, neeVal, x$, ja, y$, nee, ret, expectedRet, expectedCallsJa, expectedCallsNee;
     ref$ = [42, 43], jaVal = ref$[0], neeVal = ref$[1];
     x$ = ja = jest.fn();
     x$.mockReturnValue(jaVal);
@@ -26,21 +26,23 @@ doTestDoubleArm = curry$(function(arg$, arg1$){
       ? fn(ja, nee)(
       inputVal)
       : fn(inputVal, ja, nee);
+    ref$ = expectBranch === 'ja'
+      ? [jaVal, 1, 0]
+      : [neeVal, 0, 1], expectedRet = ref$[0], expectedCallsJa = ref$[1], expectedCallsNee = ref$[2];
     expect(ja.mock.calls.length).toEqual(
-    expectNumCalls[0]);
+    expectedCallsJa);
     expect(nee.mock.calls.length).toEqual(
-    expectNumCalls[1]);
-    expectedRet = expectBranch === 'ja' ? jaVal : neeVal;
+    expectedCallsNee);
     return expectToEqual(expectedRet)(
     ret);
   });
 });
 doTestSingleArm = curry$(function(arg$, arg1$){
-  var fn, is__, desc, inputVal, expectNumCalls, expectBranch;
+  var fn, is__, desc, inputVal, expectBranch;
   fn = arg$.fn, is__ = arg$.is__;
-  desc = arg1$.desc, inputVal = arg1$.inputVal, expectNumCalls = arg1$.expectNumCalls, expectBranch = arg1$.expectBranch;
+  desc = arg1$.desc, inputVal = arg1$.inputVal, expectBranch = arg1$.expectBranch;
   return test(desc, function(){
-    var ref$, jaVal, neeVal, x$, ja, ret, expectedRet;
+    var ref$, jaVal, neeVal, x$, ja, ret, expectedRet, expectedCallsJa;
     ref$ = [42, void 8], jaVal = ref$[0], neeVal = ref$[1];
     x$ = ja = jest.fn();
     x$.mockReturnValue(jaVal);
@@ -48,9 +50,11 @@ doTestSingleArm = curry$(function(arg$, arg1$){
       ? fn(ja)(
       inputVal)
       : fn(inputVal, ja);
+    ref$ = expectBranch === 'ja'
+      ? [jaVal, 1]
+      : [neeVal, 0], expectedRet = ref$[0], expectedCallsJa = ref$[1];
     expect(ja.mock.calls.length).toEqual(
-    expectNumCalls);
-    expectedRet = expectBranch === 'ja' ? jaVal : neeVal;
+    expectedCallsJa);
     return expectToEqual(expectedRet)(
     ret);
   });
@@ -64,25 +68,21 @@ describe('whenTrue', function(){
   tests = arrayLs({
     desc: 'true',
     inputVal: true,
-    expectNumCalls: 1,
     expectBranch: 'ja',
     numArms: 1
   }, {
     desc: 'false',
     inputVal: false,
-    expectNumCalls: 0,
     expectBranch: 'nee',
     numArms: 1
   }, {
     desc: 'empty string',
     inputVal: '',
-    expectNumCalls: 0,
     expectBranch: 'nee',
     numArms: 1
   }, {
     desc: 'undefined',
     inputVal: void 8,
-    expectNumCalls: 0,
     expectBranch: 'nee',
     numArms: 1
   });
@@ -97,19 +97,16 @@ describe('ifTrue', function(){
   tests = arrayLs({
     desc: 'true',
     inputVal: true,
-    expectNumCalls: [1, 0],
     expectBranch: 'ja',
     numArms: 2
   }, {
     desc: 'false',
     inputVal: false,
-    expectNumCalls: [0, 1],
     expectBranch: 'nee',
     numArms: 2
   }, {
     desc: 'empty string',
     inputVal: '',
-    expectNumCalls: [0, 1],
     expectBranch: 'nee',
     numArms: 2
   });
@@ -124,25 +121,123 @@ describe('ifTrue__', function(){
   tests = arrayLs({
     desc: 'true',
     inputVal: true,
-    expectNumCalls: [1, 0],
     expectBranch: 'ja',
     numArms: 2
   }, {
     desc: 'true, no else',
     inputVal: true,
-    expectNumCalls: 1,
     expectBranch: 'ja',
     numArms: 1
   }, {
     desc: 'false',
     inputVal: false,
-    expectNumCalls: [0, 1],
     expectBranch: 'nee',
     numArms: 2
   }, {
     desc: 'false, no else',
     inputVal: false,
-    expectNumCalls: 0,
+    expectBranch: 'nee',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
+});
+describe('whenFunction', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: whenFunction,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'function',
+    inputVal: function(){},
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'empty string',
+    inputVal: '',
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'undefined',
+    inputVal: void 8,
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'array',
+    inputVal: [],
+    expectBranch: 'nee',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifFunction', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifFunction,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'function',
+    inputVal: function(){},
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'empty string',
+    inputVal: '',
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'array',
+    inputVal: [],
+    expectBranch: 'nee',
+    numArms: 2
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifFunction__', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifFunction__,
+    is__: true
+  };
+  tests = arrayLs({
+    desc: 'function',
+    inputVal: function(){},
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'function, no else',
+    inputVal: function(){},
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'false, no else',
+    inputVal: false,
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'array',
+    inputVal: [],
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'array, no else',
+    inputVal: [],
     expectBranch: 'nee',
     numArms: 1
   });

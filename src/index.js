@@ -83,19 +83,18 @@ export const ifLengthOne__ = (xs, yes, no) =>
 export const ifEmpty__ = (xs, yes, no) =>
     xs.length === 0 ? yes (xs) : no (xs)
 
-export const whenTrue = curry ((yes, x) =>
-    x | ifTrue (yes) (() => void 8)
-)
+// --- deps: noop
+export const ifTrue = curry ((yes, no, x) => x === true ? yes (x) : no (x))
+export const whenTrue = curry ((yes, x) => x | ifTrue (yes) (noop))
+export const ifTrue__ = (x, yes, no = noop) => x | ifTrue (yes) (no)
 
-export const ifTrue = curry ((yes, no, x) =>
-    x === true ? yes (x) : no (x)
-)
+export const ifFunction = curry ((yes, no, x) => isFunction (x) ? yes (x) : no (x))
+export const whenFunction = curry ((yes, x) => x | ifFunction (yes) (noop))
+export const ifFunction__ = (x, yes, no = noop) => x | ifFunction (yes) (no)
 
-// ------ not data-last.
-// ------ not curried.
+// -- = not data-last, not curried
 
-export const ifTrue__ = (x, yes, no = () => void 8) =>
-    x | ifTrue (yes) (no)
+
 
 export const cascade = (val, ...fxs) =>
     fxs | reduce ((a, b) => b (a), val)
@@ -103,7 +102,7 @@ export const cascade = (val, ...fxs) =>
 // ------ bind
 
 export const bind = curry ((o, prop) => o[prop].bind (o))
-export const bindTry = curry ((o, prop) => bind (o, prop) | ifFunction (identity))
+export const bindTry = curry ((o, prop) => bind (o, prop) | whenFunction (identity))
 export const bindLate = curry ((o, key) => (...args) => o[key] (...args))
 
 //export const 
@@ -320,13 +319,6 @@ export const callN = callOnN
 export const callUnder = curry ((f, o) => f.call (o))
 export const callUnder1 = curry ((f, val, o) => f.call (o, val))
 export const callUnder2 = curry ((f, val1, val2, o) => f.call (o, val1, val2))
-
-export const ifFunction__ = (x, yes) => isFunction (x) ? yes (x) : void 8
-export const ifFunction = curry ((yes, x) => ifFunction__ (x, yes))
-
-const isFunction = callUnder ({}.toString)
-    >> dot2 ('slice') (8, -1)
-    >> equals ('Function')
 
 // an alternative is to skip f and just stick it as the last arg of xs; for now, keep it want
 // symmetry
@@ -833,5 +825,9 @@ in racket, one-armed if is when.
 
 
 */
+
+const isFunction = callUnder ({}.toString)
+    >> dot2 ('slice') (8, -1)
+    >> equals ('Function')
 
 
