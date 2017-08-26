@@ -41,12 +41,12 @@ do-tests = (describe-spec, tests) -->
         the-test describe-spec, test-spec
 
 do-test-double-arm = ({ fn, is__ }, { desc, input-val, expect-branch, }) --> test desc, ->
-    [ja-val, nee-val] = [42 43]
 
+    # --- mocks return unlikely vals based on input-val
     ja = jest.fn()
-        ..mock-return-value ja-val
+        ..mock-implementation (x) -> [x, x, x]
     nee = jest.fn()
-        ..mock-return-value nee-val
+        ..mock-implementation (x) -> [x, x, x, x]
 
     ret =
         # --- also ensures that currying works.
@@ -54,8 +54,8 @@ do-test-double-arm = ({ fn, is__ }, { desc, input-val, expect-branch, }) --> tes
         else fn input-val, ja, nee
 
     [expected-ret, expected-calls-ja, expected-calls-nee] =
-        if expect-branch == 'ja' then [ja-val, 1, 0]
-        else [nee-val, 0, 1]
+        if expect-branch == 'ja' then [[input-val] * 3, 1, 0]
+        else [[input-val] * 4, 0, 1]
 
     ja.mock.calls.length |> expect-to-equal expected-calls-ja
     nee.mock.calls.length |> expect-to-equal expected-calls-nee
@@ -63,17 +63,17 @@ do-test-double-arm = ({ fn, is__ }, { desc, input-val, expect-branch, }) --> tes
     ret |> expect-to-equal expected-ret
 
 do-test-single-arm = ({ fn, is__ }, { desc, input-val, expect-branch, }) --> test desc, ->
-    [ja-val, nee-val] = [42 void]
+    # --- mocks return unlikely vals based on input-val
     ja = jest.fn()
-        ..mock-return-value ja-val
+        ..mock-implementation (x) -> [x, x, x]
 
     ret =
         if not is__ then input-val |> fn ja
         else fn input-val, ja
 
     [expected-ret, expected-calls-ja] =
-        if expect-branch == 'ja' then [ja-val, 1]
-        else [nee-val, 0]
+        if expect-branch == 'ja' then [[input-val] * 3, 1]
+        else [void 0]
 
     ja.mock.calls.length |> expect-to-equal expected-calls-ja
 

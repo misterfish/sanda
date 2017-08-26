@@ -88,6 +88,8 @@ export const tapDotNMut = tapDotN
 
 // __ = not data-last, not curried
 
+// ------ deps: noop, isFunction, ok
+
 // --- strict evaluation of cond.
 // --- not anaphoric unless param is baked into yes or no.
 // --- doesn't seem useful to pass anything into the yes and no functions.
@@ -95,7 +97,6 @@ export const ifCond = curry ((yes, no, cond) => cond ? yes () : no ())
 export const whenCond = curry ((yes, cond) => cond | ifCond (yes) (noop))
 export const ifCond__ = (cond, yes, no = noop) => cond | ifCond (yes) (no)
 
-// --- deps: noop, isFunction, ok
 export const ifOk = curry ((yes, no, x) => ok (x) ? yes (x) : no (x))
 export const whenOk = curry ((yes, x) => x | ifOk (yes) (noop))
 export const ifOk__ = (x, yes, no = noop) => x | ifOk (yes) (no)

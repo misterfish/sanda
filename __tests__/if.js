@@ -16,19 +16,22 @@ doTestDoubleArm = curry$(function(arg$, arg1$){
   fn = arg$.fn, is__ = arg$.is__;
   desc = arg1$.desc, inputVal = arg1$.inputVal, expectBranch = arg1$.expectBranch;
   return test(desc, function(){
-    var ref$, jaVal, neeVal, x$, ja, y$, nee, ret, expectedRet, expectedCallsJa, expectedCallsNee;
-    ref$ = [42, 43], jaVal = ref$[0], neeVal = ref$[1];
+    var x$, ja, y$, nee, ret, ref$, expectedRet, expectedCallsJa, expectedCallsNee;
     x$ = ja = jest.fn();
-    x$.mockReturnValue(jaVal);
+    x$.mockImplementation(function(x){
+      return [x, x, x];
+    });
     y$ = nee = jest.fn();
-    y$.mockReturnValue(neeVal);
+    y$.mockImplementation(function(x){
+      return [x, x, x, x];
+    });
     ret = !is__
       ? fn(ja, nee)(
       inputVal)
       : fn(inputVal, ja, nee);
     ref$ = expectBranch === 'ja'
-      ? [jaVal, 1, 0]
-      : [neeVal, 0, 1], expectedRet = ref$[0], expectedCallsJa = ref$[1], expectedCallsNee = ref$[2];
+      ? [[inputVal, inputVal, inputVal], 1, 0]
+      : [[inputVal, inputVal, inputVal, inputVal], 0, 1], expectedRet = ref$[0], expectedCallsJa = ref$[1], expectedCallsNee = ref$[2];
     expectToEqual(expectedCallsJa)(
     ja.mock.calls.length);
     expectToEqual(expectedCallsNee)(
@@ -42,17 +45,18 @@ doTestSingleArm = curry$(function(arg$, arg1$){
   fn = arg$.fn, is__ = arg$.is__;
   desc = arg1$.desc, inputVal = arg1$.inputVal, expectBranch = arg1$.expectBranch;
   return test(desc, function(){
-    var ref$, jaVal, neeVal, x$, ja, ret, expectedRet, expectedCallsJa;
-    ref$ = [42, void 8], jaVal = ref$[0], neeVal = ref$[1];
+    var x$, ja, ret, ref$, expectedRet, expectedCallsJa;
     x$ = ja = jest.fn();
-    x$.mockReturnValue(jaVal);
+    x$.mockImplementation(function(x){
+      return [x, x, x];
+    });
     ret = !is__
       ? fn(ja)(
       inputVal)
       : fn(inputVal, ja);
     ref$ = expectBranch === 'ja'
-      ? [jaVal, 1]
-      : [neeVal, 0], expectedRet = ref$[0], expectedCallsJa = ref$[1];
+      ? [[inputVal, inputVal, inputVal], 1]
+      : [void 8, 0], expectedRet = ref$[0], expectedCallsJa = ref$[1];
     expectToEqual(expectedCallsJa)(
     ja.mock.calls.length);
     return expectToEqual(expectedRet)(
