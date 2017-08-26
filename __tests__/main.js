@@ -1,7 +1,7 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, main, ok, exception, raise, die, decorateException, zipAll, bind, bindLate, bindTry, cascade, flipC, sprintf1, sprintfN, given, laat, givenStar, laatStar, nieuw, nieuw1, nieuw2, nieuw3, nieuwN, xRegExp, xMatch, xMatchStr, slice$ = [].slice;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, main, ok, exception, raise, die, decorateException, zipAll, bind, bindLate, bindTry, cascade, flipC, sprintf1, sprintfN, given, laat, givenStar, laatStar, nieuw, nieuw1, nieuw2, nieuw3, nieuwN, xRegExp, xRegExpStr, xRegExpStrFlags, xMatch, xMatchStr, xMatchStrFlags, slice$ = [].slice;
 ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
 ref$ = require('./common'), arrayLs = ref$.arrayLs, test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
-ref$ = main = require('../lib/index'), ok = ref$.ok, exception = ref$.exception, raise = ref$.raise, die = ref$.die, decorateException = ref$.decorateException, zipAll = ref$.zipAll, bind = ref$.bind, bindLate = ref$.bindLate, bindTry = ref$.bindTry, cascade = ref$.cascade, flipC = ref$.flipC, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar, nieuw = ref$.nieuw, nieuw1 = ref$.nieuw1, nieuw2 = ref$.nieuw2, nieuw3 = ref$.nieuw3, nieuwN = ref$.nieuwN, xRegExp = ref$.xRegExp, xMatch = ref$.xMatch, xMatchStr = ref$.xMatchStr;
+ref$ = main = require('../lib/index'), ok = ref$.ok, exception = ref$.exception, raise = ref$.raise, die = ref$.die, decorateException = ref$.decorateException, zipAll = ref$.zipAll, bind = ref$.bind, bindLate = ref$.bindLate, bindTry = ref$.bindTry, cascade = ref$.cascade, flipC = ref$.flipC, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar, nieuw = ref$.nieuw, nieuw1 = ref$.nieuw1, nieuw2 = ref$.nieuw2, nieuw3 = ref$.nieuw3, nieuwN = ref$.nieuwN, xRegExp = ref$.xRegExp, xRegExpStr = ref$.xRegExpStr, xRegExpStrFlags = ref$.xRegExpStrFlags, xMatch = ref$.xMatch, xMatchStr = ref$.xMatchStr, xMatchStrFlags = ref$.xMatchStrFlags;
 describe('cascade', function(){
   return test(1, function(){
     var odd, this$ = this;
@@ -427,21 +427,22 @@ describe('new', function(){
       this.nums = args;
     }
     C.prototype.speak = function(){
-      return join(' ', ['henlo'].concat(slice$.call(this.nums)));
+      return join(' ', ['hulu'].concat(slice$.call(this.nums)));
     };
     return C;
   }());
   test('nieuw', function(){
     var this$ = this;
-    return expectToEqual('henlo')(
+    return expectToEqual('hulu')(
     function(it){
       return it.speak();
     }(
-    nieuw(C)));
+    nieuw(
+    C)));
   });
   test('nieuw1', function(){
     var this$ = this;
-    return expectToEqual('henlo 10')(
+    return expectToEqual('hulu 10')(
     function(it){
       return it.speak();
     }(
@@ -450,7 +451,7 @@ describe('new', function(){
   });
   test('nieuw2', function(){
     var this$ = this;
-    return expectToEqual('henlo 20 30')(
+    return expectToEqual('hulu 20 30')(
     function(it){
       return it.speak();
     }(
@@ -458,7 +459,7 @@ describe('new', function(){
   });
   test('nieuw3', function(){
     var this$ = this;
-    return expectToEqual('henlo 2 4 6')(
+    return expectToEqual('hulu 2 4 6')(
     function(it){
       return it.speak();
     }(
@@ -466,7 +467,7 @@ describe('new', function(){
   });
   return test('nieuwN', function(){
     var this$ = this;
-    return expectToEqual('henlo 4 8 9')(
+    return expectToEqual('hulu 4 8 9')(
     function(it){
       return it.speak();
     }(
@@ -477,7 +478,7 @@ describe('new', function(){
 describe('match/regex', function(){
   test('x-regexp', function(){
     var re, this$ = this;
-    re = xRegExp(' ( o . s ) ');
+    re = xRegExp(new RegExp(' ( o . s ) '));
     return expectToEqual('ors')(
     function(m){
       return m[1];
@@ -487,34 +488,62 @@ describe('match/regex', function(){
     }(
     'horses')));
   });
-  test('match', function(){
-    var re;
-    re = new RegExp('(o.s)');
+  test('x-regexp-str', function(){
+    var re, this$ = this;
+    re = xRegExpStr(' ( o . s ) ');
     return expectToEqual('ors')(
     function(m){
       return m[1];
     }(
-    main.match(re)(
+    function(it){
+      return it.match(re);
+    }(
     'horses')));
+  });
+  test('x-regexp-str-flags', function(){
+    var re, this$ = this;
+    re = xRegExpStrFlags('( ses ) $', 'm');
+    return expectToEqual('ses')(
+    function(m){
+      return m[1];
+    }(
+    function(it){
+      return it.match(re);
+    }(
+    'horses\npigs')));
+  });
+  test('xmatch-str', function(){
+    var this$ = this;
+    return expectToEqual('ors')(
+    function(it){
+      return it[1];
+    }(
+    xMatchStr(' ( o . s ) ')(
+    'horses')));
+  });
+  test('xmatch-str-flags', function(){
+    var this$ = this;
+    return expectToEqual('ses')(
+    function(it){
+      return it[1];
+    }(
+    xMatchStrFlags('( ses ) $', 'm')(
+    'horses\npigs')));
   });
   test('xmatch', function(){
-    var re;
-    re = new RegExp(' ( o . s ) ');
     return expectToEqual('ors')(
     function(m){
       return m[1];
     }(
-    xMatch(re)(
+    xMatch(new RegExp(' ( o . s ) '))(
     'horses')));
   });
-  return test('xmatch-str', function(){
-    var reStr;
-    reStr = ' ( o . s ) ';
+  return test('match', function(){
     return expectToEqual('ors')(
     function(m){
       return m[1];
     }(
-    xMatchStr(reStr)(
+    main.match(new RegExp('(o.s)'))(
     'horses')));
   });
 });

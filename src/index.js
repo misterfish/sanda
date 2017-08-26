@@ -450,6 +450,7 @@ export const joinOk = curry ((j, xs) => xs
 // --------- new.
 
 // @todo: consider flip version, although the name is good how it is.
+// --- fit really well into final part of laat.
 export const nieuw = x => new x
 export const nieuw1 = curry ((x, val) => new x (val))
 export const nieuw2 = curry ((x, val1, val2) => new x (val1, val2))
@@ -457,22 +458,44 @@ export const nieuw3 = curry ((x, val1, val2, val3) => new x (val1, val2, val3))
 export const nieuwN = curry ((x, vs) => new x (...vs))
 
 // --------- regex.
-export const match = curry ((regexp, target) => regexp.exec (target))
+// @deps: dot1
 
-// @deps: dot2
-export const xMatch = curry ((re, target) => re
-    | rProp ('source')
-    | dot2 ('replace') (/\s+/g, '')
-    | nieuw1 (RegExp)
-    | dot1 ('exec', target)
+const removeSpaces = dot2 ('replace') (/\s+/g) ('')
+
+// --- input: regex.
+export const xRegExp = re => new RegExp (
+    re.source | removeSpaces,
+    re.flags,
 )
 
-export const xMatchStr = curry ((str, target) => target
-    | xMatch (new RegExp (str)))
-
-export const xRegExp = (reStr) => reStr
-    | dot2 ('replace') (/\s+/g, '')
+// --- input: string.
+export const xRegExpStr = (reStr) => reStr
+    | removeSpaces
     | nieuw1 (RegExp)
+
+// --- input: string, string.
+export const xRegExpStrFlags = (reStr, flags) => laat (
+    [
+        reStr | removeSpaces,
+        flags,
+    ],
+    nieuw2 (RegExp)
+)
+
+export const match = curry ((re, target) => re.exec (target))
+
+// --- input: regex.
+export const xMatch = curry ((re, target) =>
+    xRegExp (re) | dot1 ('exec', target)
+)
+
+// --- input: string.
+export const xMatchStr = curry ((reStr, target) => target
+    | xMatch (new RegExp (reStr)))
+
+// --- input: string, string.
+export const xMatchStrFlags = curry ((reStr, flags, target) => target
+    | xMatch (new RegExp (reStr, flags)))
 
 export const ifReplace = curry ((good, bad, wat, met, target) => {
     let success
@@ -486,6 +509,8 @@ export const ifReplace = curry ((good, bad, wat, met, target) => {
 
 
 
+
+// update would be good
 
 
 

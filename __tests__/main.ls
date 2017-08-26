@@ -28,8 +28,8 @@
 
     nieuw, nieuw1, nieuw2, nieuw3, nieuw-n,
 
-    x-reg-exp,
-    x-match, x-match-str, #match
+    x-reg-exp, x-reg-exp-str, x-reg-exp-str-flags,
+    x-match, x-match-str, x-match-str-flags, #match
 
 } = main = require '../lib/index'
 
@@ -322,60 +322,75 @@ describe 'new' ->
     class C
         (...args) -> @nums = args
         speak: -> join ' ' [
-            'henlo'
+            'hulu'
             ...@nums
         ]
 
     test 'nieuw' ->
-        nieuw C
+        C
+        |> nieuw
         |> (.speak())
-        |> expect-to-equal 'henlo'
+        |> expect-to-equal 'hulu'
 
     test 'nieuw1' ->
         10
         |> nieuw1 C
         |> (.speak())
-        |> expect-to-equal 'henlo 10'
+        |> expect-to-equal 'hulu 10'
 
     test 'nieuw2' ->
         (nieuw2 C) 20 30
         |> (.speak())
-        |> expect-to-equal 'henlo 20 30'
+        |> expect-to-equal 'hulu 20 30'
 
     test 'nieuw3' ->
         (nieuw3 C) 2 4 6
         |> (.speak())
-        |> expect-to-equal 'henlo 2 4 6'
+        |> expect-to-equal 'hulu 2 4 6'
 
     test 'nieuwN' ->
         [4 8 9]
         |> nieuw-n C
         |> (.speak())
-        |> expect-to-equal 'henlo 4 8 9'
+        |> expect-to-equal 'hulu 4 8 9'
 
 describe 'match/regex' ->
     test 'x-regexp' ->
-        re = x-reg-exp ' ( o . s ) '
+        re = x-reg-exp new RegExp ' ( o . s ) '
         'horses'
         |> (.match re)
         |> (m) -> m.1
         |> expect-to-equal 'ors'
-    test 'match' ->
-        re = new RegExp '(o.s)'
+    test 'x-regexp-str' ->
+        re = x-reg-exp-str ' ( o . s ) '
         'horses'
-        |> main.match re
+        |> (.match re)
         |> (m) -> m.1
         |> expect-to-equal 'ors'
-    test 'xmatch' ->
-        re = new RegExp ' ( o . s ) '
-        'horses'
-        |> x-match re
+    test 'x-regexp-str-flags' ->
+        re = x-reg-exp-str-flags '( ses ) $' 'm'
+        'horses\npigs'
+        |> (.match re)
         |> (m) -> m.1
-        |> expect-to-equal 'ors'
+        |> expect-to-equal 'ses'
     test 'xmatch-str' ->
-        re-str = ' ( o . s ) '
         'horses'
-        |> x-match-str re-str
+        |> x-match-str ' ( o . s ) '
+        |> (.1)
+        |> expect-to-equal 'ors'
+    test 'xmatch-str-flags' ->
+        'horses\npigs'
+        |> x-match-str-flags '( ses ) $' 'm'
+        |> (.1)
+        |> expect-to-equal 'ses'
+    test 'xmatch' ->
+        'horses'
+        |> x-match new RegExp ' ( o . s ) '
+        |> (m) -> m.1
+        |> expect-to-equal 'ors'
+    test 'match' ->
+        'horses'
+        |> main.match new RegExp '(o.s)'
         |> (m) -> m.1
         |> expect-to-equal 'ors'
 
