@@ -265,6 +265,13 @@ export const mergeToInMut = curry ((tgt, src) => {
 
 export const mergeFromInMut = flip (mergeToInMut)
 
+// --- like R.mergeAll but also use prototype vals.
+// --- to and from not applicable, also not curried or meant to be used piped.
+export const mergeAllIn = xs => xs | reduce (
+    (target, source) => source | mergeToInMut (target),
+    {},
+)
+
 // ------ map.
 
 // --- user function f is expected to return pairs: [k, v]
@@ -493,12 +500,12 @@ export const xMatchStrFlags = curry ((reStr, flags, target) => target
     | xMatch (new RegExp (reStr, flags)))
 
 export const ifReplace = curry ((yes, no, re, repl, target) => {
-    let success
+    let success = 0
     const out = target.replace (re, () => {
-        success = true
+        ++success
         return repl
     })
-    return success | ifTrue (() => yes (out), () => no (target))
+    return success | ifYes (() => yes (out, success), () => no (target))
 })
 
 export const ifXReplace = curry ((yes, no, re, repl, target) =>
@@ -511,47 +518,7 @@ export const ifXReplaceStrFlags = curry ((yes, no, reStr, flags, repl, target) =
     ifReplace (yes, no, xRegExpStr (reStr, flags), repl, target))
 
 
-
-
-
-// update would be good
-
-
-
-
-
-
-
-// @todo
-// injectok
-// injectwith
-
-// --- inject src into target, using only own vals.
-const inject = curry ((src, target) => {
-    src | eachObj ((v, k) => target[k] = v)
-    return target
-})
-
 const shallowClone = obj => ({...obj})
-
-// --- like inject, but only if src val is ok.
-const injectOk = curry ((src, target) => {
-    for (let i in src) whenOk (
-        x => target[i] = x,
-        src[i],
-    )
-    return target
-})
-
-// ? mergeAllInWith??
-// --- like mergeAllIn but use f if tgt and src vals both exist.
-
-// --- like R.merge but also use prototype vals.
-export const mergeAllIn = xs => reduce (
-    (target, mixin) => inject (mixin, target),
-    {},
-    xs,
-)
 
 // list dependencies if a func uses other ones (for unit testing)
 
@@ -572,9 +539,6 @@ export const mergeFish = (mixinsPre, proto, mixinsPost) => {
 
 export const factory = (proto, mixinsPre = [], mixinsPost = []) => laat (
     [
-//         mergeAllIn (
-//             [...mixinsPre, shallowClone (proto), ...mixinsPost]
-//         )
         mergeFish (mixinsPre, proto, mixinsPost)
     ],
 
@@ -582,7 +546,7 @@ export const factory = (proto, mixinsPre = [], mixinsPost = []) => laat (
         proto: protoExtended,
         create: instanceExtension => protoExtended
             | Object.create
-            | injectOk (instanceExtension),
+            | mergeToInMut (instanceExtension),
     })
 )
 
@@ -595,10 +559,6 @@ export const die = (...args) => exception (...args) | raise
 export const decorateException = curry ((prefix, e) =>
     e | assocMut ('message', joinOk (' ') ([prefix, e.message]))
 )
-
-// bind needs flip family as well.
-// 'speak' | bind-to obj
-// obj | bind-under 'speak'
 
 /*
  * could make the flattening proto stuff configurable
@@ -632,19 +592,6 @@ export const cond = curry ((blocks, target) => {
     }
 })
 
-nieuw
-nieuw1
-
-
-
-apply should keep the same meaning as in racket maybe, which it has anyway, so?
-(apply f xs)
-f.apply null xs
-
-
-cond like in cond-> clojure macro.
-
-x | cond ([ ... anaphoric functions ])
 
 
 
@@ -732,68 +679,6 @@ const out = str | cond ([
 ])
 
 
-(already fixed, see script, also cond implemented)
-const transform = (inFile) => {
-    const c = slurp (inFile)
-    const re1 = /^ \s* (<math (?:.|\s)+ <\/math>) \s+ true \s* $/
-    const re2 = /^ \s* (<math [^>]* \/>) \s* true \s* $/
-    let math
-    const m1 = c | xMatch (re1)
-    if (m1) {
-        math = m1[1]
-    } else {
-        const m2 = c | xMatch (re2)
-        if (m2) math = m2[1]
-    }
-    return math | ifElseOk (
-        math => 'mml=' + math,
-        () => warn ('no match', inFile, c, re1, re2),
-    )
-}
-
-
-
-
-in racket, one-armed if is when.
-
-
-
-		isValidPgn:function(pgn) {
-		    var pattern = new RegExp(/^[\d]{8,9}$/g); // 8-9 digits
-
-		    if (!pattern.test(pgn)) {
-				return false;
-			}
-
-			var total = 0;
-			pgn.split('').forEach(function(elem, index, array) {
-		    	if (index === array.length - 1) {
-		    		total += -1 * parseInt(elem);
-		    	} else {
-		    		total += (array.length - index) * parseInt(elem);
-		    	}
-			});
-
-		    return total % 11 === 0; // 'elfproef'
-		},
-		serializeForm:function(){
-			var $disabledFields = $("*[disabled]",this.el);
-			$disabledFields.removeAttr("disabled");
-
-			var formData = $('form',this.$el).serializeObject();
-
-			$disabledFields.attr("disabled","disabled");
-
-			if(this.parseFormData){
-				formData = this.parseFormData(formData);
-			}
-			return formData;
-		},
-
-// --- flagsYes ('outSplit', 'sync')
-const flagsYes = (...args) => args
-    | map (x => [x, true])
-    | fromPairs
 
 
 
@@ -812,5 +697,18 @@ const isFunction = isType ('Function')
 const mapIndexed = addIndex (map)
 const mapAccumIndexed = addIndex (mapAccum)
 
+// @todo
 // okorerror
 // existsorerror
+// injectok
+// injectwith
+// update would be good
+
+//cond like in cond-> clojure macro.
+//x | cond ([ ... anaphoric functions ])
+
+
+// bind needs flip family as well.
+// 'speak' | bind-to obj
+// obj | bind-under 'speak'
+

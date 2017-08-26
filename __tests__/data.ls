@@ -9,6 +9,7 @@
 } = require 'ramda'
 
 {
+    array-ls,
     test, xtest,
     expect-to-equal, expect-to-be,
 } = require './common'
@@ -23,6 +24,7 @@
 
     merge-to, merge-from, merge-to-mut, merge-from-mut,
     merge-to-in, merge-from-in, merge-to-in-mut, merge-from-in-mut,
+    merge-all-in,
     inject-to-mut, inject-from-mut,
 
     map-pairs, map-pairs-in, each-obj-in,
@@ -746,6 +748,22 @@ describe 'data transforms' ->
                 { res, mut, tgt, }
 
             (expect res).to-equal a: 1 b: 3 c: 4 hidden: 43
+
+    describe 'mergeAllIn' ->
+        test 'no prototypes' ->
+            merge-all-in array-ls do
+                *   a: 1
+                *   b: 2
+                *   c: 3
+            |> expect-to-equal do
+                a: 1 b: 2 c: 3
+        test 'with prototypes' ->
+            merge-all-in array-ls do
+                { a: 1 } |> Object.create
+                { b: 2 } |> Object.create
+                { c: 3 } |> Object.create
+            |> expect-to-equal do
+                a: 1 b: 2 c: 3
 
 describe 'mapPairs' ->
     test 'obj' ->

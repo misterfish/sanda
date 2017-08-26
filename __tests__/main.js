@@ -549,31 +549,35 @@ describe('match/regex', function(){
 });
 describe('ifReplace*', function(){
   var doTest;
-  doTest = function(result, success, func){
-    var jaRes, neeRes, x$, ja, y$, nee, ref$, jaCalls, neeCalls, expectResult;
+  doTest = function(expectResult, expectReplCount, success, func){
+    var jaRes, neeRes, replCount, x$, ja, y$, nee, ref$, jaCalls, neeCalls, result;
     x$ = ja = jest.fn();
-    x$.mockImplementation(function(x){
-      return jaRes = x;
+    x$.mockImplementation(function(x, cnt){
+      jaRes = x;
+      return replCount = cnt;
     });
     y$ = nee = jest.fn();
     y$.mockImplementation(function(x){
-      return neeRes = x;
+      neeRes = x;
+      return replCount = 0;
     });
     func(ja, nee);
     ref$ = success
       ? [1, 0, jaRes]
-      : [0, 1, neeRes], jaCalls = ref$[0], neeCalls = ref$[1], expectResult = ref$[2];
+      : [0, 1, neeRes], jaCalls = ref$[0], neeCalls = ref$[1], result = ref$[2];
     expectToEqual(jaCalls)(
     ja.mock.calls.length);
     expectToEqual(neeCalls)(
     nee.mock.calls.length);
-    return expectToEqual(result)(
-    expectResult);
+    expectToEqual(expectResult)(
+    result);
+    return expectToEqual(expectReplCount)(
+    replCount);
   };
   test('ifReplace succesful', function(){
     var ref$, re, target, replacement;
     ref$ = [/s/g, 'sandmishes', 't'], re = ref$[0], target = ref$[1], replacement = ref$[2];
-    return doTest('tandmithet', true, function(ja, nee){
+    return doTest('tandmithet', 3, true, function(ja, nee){
       return ifReplace(ja, nee, re, replacement)(
       target);
     });
@@ -581,7 +585,7 @@ describe('ifReplace*', function(){
   test('ifReplace not succesful', function(){
     var ref$, re, target, replacement;
     ref$ = [/xxxx/g, 'sandmishes', 't'], re = ref$[0], target = ref$[1], replacement = ref$[2];
-    return doTest('sandmishes', false, function(ja, nee){
+    return doTest('sandmishes', 0, false, function(ja, nee){
       return ifReplace(ja, nee, re, replacement)(
       target);
     });
@@ -589,7 +593,15 @@ describe('ifReplace*', function(){
   test('ifXReplace succesful', function(){
     var ref$, re, target, replacement;
     ref$ = [new RegExp(' s ', 'g'), 'sandmishes', 't'], re = ref$[0], target = ref$[1], replacement = ref$[2];
-    return doTest('tandmithet', true, function(ja, nee){
+    return doTest('tandmithet', 3, true, function(ja, nee){
+      return ifXReplace(ja, nee, re, replacement)(
+      target);
+    });
+  });
+  test('ifXReplace not succesful', function(){
+    var ref$, re, target, replacement;
+    ref$ = [new RegExp(' xxxx ', 'g'), 'sandmishes', 't'], re = ref$[0], target = ref$[1], replacement = ref$[2];
+    return doTest('sandmishes', 0, false, function(ja, nee){
       return ifXReplace(ja, nee, re, replacement)(
       target);
     });
@@ -597,15 +609,31 @@ describe('ifReplace*', function(){
   test('ifXReplaceStr succesful', function(){
     var ref$, reStr, target, replacement;
     ref$ = [' s ', 'sandmishes', 't'], reStr = ref$[0], target = ref$[1], replacement = ref$[2];
-    return doTest('tandmishes', true, function(ja, nee){
+    return doTest('tandmishes', 1, true, function(ja, nee){
       return ifXReplaceStr(ja, nee, reStr, replacement)(
       target);
     });
   });
-  return test('ifXReplaceStrFlags succesful', function(){
+  test('ifXReplaceStr not succesful', function(){
+    var ref$, reStr, target, replacement;
+    ref$ = [' xxxx ', 'sandmishes', 't'], reStr = ref$[0], target = ref$[1], replacement = ref$[2];
+    return doTest('sandmishes', 0, false, function(ja, nee){
+      return ifXReplaceStr(ja, nee, reStr, replacement)(
+      target);
+    });
+  });
+  test('ifXReplaceStrFlags succesful', function(){
     var ref$, reStr, target, replacement;
     ref$ = [' s ', 'sandmishes', 't'], reStr = ref$[0], target = ref$[1], replacement = ref$[2];
-    return doTest('tandmithet', true, function(ja, nee){
+    return doTest('tandmithet', 3, true, function(ja, nee){
+      return ifXReplaceStrFlags(ja, nee, reStr, 'g', replacement)(
+      target);
+    });
+  });
+  return test('ifXReplaceStrFlags not succesful', function(){
+    var ref$, reStr, target, replacement;
+    ref$ = [' xxxx ', 'sandmishes', 't'], reStr = ref$[0], target = ref$[1], replacement = ref$[2];
+    return doTest('sandmishes', 0, false, function(ja, nee){
       return ifXReplaceStrFlags(ja, nee, reStr, 'g', replacement)(
       target);
     });

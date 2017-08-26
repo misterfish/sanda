@@ -148,5 +148,46 @@ function getSelection() {
 // have to decide whether bind fails or returns undefined.
 // probably fails. (see bind hard test)
 //
-*/
 
+in racket, one-armed if is when.
+
+
+
+		isValidPgn:function(pgn) {
+		    var pattern = new RegExp(/^[\d]{8,9}$/g); // 8-9 digits
+
+		    if (!pattern.test(pgn)) {
+				return false;
+			}
+
+			var total = 0;
+			pgn.split('').forEach(function(elem, index, array) {
+		    	if (index === array.length - 1) {
+		    		total += -1 * parseInt(elem);
+		    	} else {
+		    		total += (array.length - index) * parseInt(elem);
+		    	}
+			});
+
+		    return total % 11 === 0; // 'elfproef'
+		},
+		serializeForm:function(){
+			var $disabledFields = $("*[disabled]",this.el);
+			$disabledFields.removeAttr("disabled");
+
+			var formData = $('form',this.$el).serializeObject();
+
+			$disabledFields.attr("disabled","disabled");
+
+			if(this.parseFormData){
+				formData = this.parseFormData(formData);
+			}
+			return formData;
+		},
+
+// --- flagsYes ('outSplit', 'sync')
+const flagsYes = (...args) => args
+    | map (x => [x, true])
+    | fromPairs
+
+*/

@@ -398,54 +398,73 @@ describe 'match/regex' ->
 
 describe 'ifReplace*' ->
 
-    do-test = (result, success, func) ->
-        var ja-res, nee-res
+    do-test = (expect-result, expect-repl-count, success, func) ->
+        var ja-res, nee-res, repl-count
         ja = jest.fn()
-            ..mock-implementation (x) -> ja-res := x
+            ..mock-implementation (x, cnt) -> ja-res := x; repl-count := cnt
         nee = jest.fn()
-            ..mock-implementation (x) -> nee-res := x
+            ..mock-implementation (x) -> nee-res := x; repl-count := 0
 
         func ja, nee
 
-        [ja-calls, nee-calls, expect-result] =
+        [ja-calls, nee-calls, result] =
             if success then [1 0 ja-res] else [0 1 nee-res]
 
         ja.mock.calls.length |> expect-to-equal ja-calls
         nee.mock.calls.length |> expect-to-equal nee-calls
 
-        expect-result |> expect-to-equal result
+        result |> expect-to-equal expect-result
+        repl-count |> expect-to-equal expect-repl-count
 
     test 'ifReplace succesful' ->
         [re, target, replacement] = [
             /s/g 'sandmishes' 't'
         ]
-        do-test 'tandmithet' true (ja, nee) ->
+        do-test 'tandmithet' 3 true (ja, nee) ->
             target |> (if-replace ja, nee, re, replacement)
     test 'ifReplace not succesful' ->
         [re, target, replacement] = [
             /xxxx/g 'sandmishes' 't'
         ]
-        do-test 'sandmishes' false (ja, nee) ->
+        do-test 'sandmishes' 0 false (ja, nee) ->
             target |> (if-replace ja, nee, re, replacement)
     test 'ifXReplace succesful' ->
         [re, target, replacement] = [
             new RegExp ' s ' 'g'
             'sandmishes' 't'
         ]
-        do-test 'tandmithet' true (ja, nee) ->
+        do-test 'tandmithet' 3 true (ja, nee) ->
             target |> (if-x-replace ja, nee, re, replacement)
-
+    test 'ifXReplace not succesful' ->
+        [re, target, replacement] = [
+            new RegExp ' xxxx ' 'g'
+            'sandmishes' 't'
+        ]
+        do-test 'sandmishes' 0 false (ja, nee) ->
+            target |> (if-x-replace ja, nee, re, replacement)
     test 'ifXReplaceStr succesful' ->
         [re-str, target, replacement] = [
             ' s ' 'sandmishes' 't'
         ]
-        do-test 'tandmishes' true (ja, nee) ->
+        do-test 'tandmishes' 1 true (ja, nee) ->
+            target |> (if-x-replace-str ja, nee, re-str, replacement)
+    test 'ifXReplaceStr not succesful' ->
+        [re-str, target, replacement] = [
+            ' xxxx ' 'sandmishes' 't'
+        ]
+        do-test 'sandmishes' 0 false (ja, nee) ->
             target |> (if-x-replace-str ja, nee, re-str, replacement)
     test 'ifXReplaceStrFlags succesful' ->
         [re-str, target, replacement] = [
             ' s ' 'sandmishes' 't'
         ]
-        do-test 'tandmithet' true (ja, nee) ->
+        do-test 'tandmithet' 3 true (ja, nee) ->
+            target |> (if-x-replace-str-flags ja, nee, re-str, 'g', replacement)
+    test 'ifXReplaceStrFlags not succesful' ->
+        [re-str, target, replacement] = [
+            ' xxxx ' 'sandmishes' 't'
+        ]
+        do-test 'sandmishes' 0 false (ja, nee) ->
             target |> (if-x-replace-str-flags ja, nee, re-str, 'g', replacement)
 
 # defaultTo
