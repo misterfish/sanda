@@ -97,6 +97,8 @@ export const ifCond = curry ((yes, no, cond) => cond ? yes () : no ())
 export const whenCond = curry ((yes, cond) => cond | ifCond (yes) (noop))
 export const ifCond__ = (cond, yes, no = noop) => cond | ifCond (yes) (no)
 
+//@todo export const ifNotOk = curry ((f, x) => ok (x) ? void 8 : f (x))
+
 export const ifOk = curry ((yes, no, x) => ok (x) ? yes (x) : no (x))
 export const whenOk = curry ((yes, x) => x | ifOk (yes) (noop))
 export const ifOk__ = (x, yes, no = noop) => x | ifOk (yes) (no)
@@ -393,14 +395,6 @@ export const flipC = curry ((f) => curry (
     )
 ))
 
-// ------ times, repeat
-
-export const repeat = flip (rRepeat)
-export const times = flip (rTimes)
-
-export const compact = filter (Boolean)
-export const compactOk = reject (isNil)
-
 // ------ sprintf
 
 export const sprintf1 = curry ((str, a) => sprintf (str, a))
@@ -426,11 +420,6 @@ export const tryCatch__ = (whatToTry, howToCatch = noop) => {
     }
 }
 
-// --- turn positional args into an array with those values.
-export const array = (...args) => args
-
-
-
 // --- r's zip only takes two.
 export const zipAll = (...xss) => {
     const ret = []
@@ -441,6 +430,68 @@ export const zipAll = (...xss) => {
     }
     return ret
 }
+
+// --------- list.
+
+export const repeat = flip (rRepeat)
+export const times = flip (rTimes)
+
+export const compact = filter (Boolean)
+export const compactOk = reject (isNil)
+
+// --- turn positional args into an array with those values.
+export const array = (...args) => args
+
+export const joinOk = curry ((j, xs) => xs
+    | compactOk
+    | join (j)
+)
+
+// --------- new.
+
+// @todo: consider flip version, although the name is good how it is.
+export const nieuw = x => new x
+export const nieuw1 = curry ((x, val) => new x (val))
+export const nieuw2 = curry ((x, val1, val2) => new x (val1, val2))
+export const nieuw3 = curry ((x, val1, val2, val3) => new x (val1, val2, val3))
+export const nieuwN = curry ((x, vs) => new x (...vs))
+
+// --------- regex.
+export const match = curry ((regexp, target) => regexp.exec (target))
+
+// @deps: dot2
+export const xMatch = curry ((re, target) => re
+    | rProp ('source')
+    | dot2 ('replace') (/\s+/g, '')
+    | nieuw1 (RegExp)
+    | dot1 ('exec', target)
+)
+
+export const xMatchStr = curry ((str, target) => target
+    | xMatch (new RegExp (str)))
+
+export const xRegExp = (reStr) => reStr
+    | dot2 ('replace') (/\s+/g, '')
+    | nieuw1 (RegExp)
+
+export const ifReplace = curry ((good, bad, wat, met, target) => {
+    let success
+    const out = target.replace (wat, () => {
+        success = true
+        return met
+    })
+    return success | ifElseTrue (() => good (out), () => bad (target))
+})
+
+
+
+
+
+
+
+
+
+
 
 // @todo
 // injectok
@@ -506,12 +557,6 @@ export const factory = (proto, mixinsPre = [], mixinsPost = []) => laat (
     })
 )
 
-export const joinOk = curry ((j, xs) => xs
-    | compactOk
-    | join (j)
-)
-
-// check latest exception stuff from snippets and from wikiparse
 
 export const exception = (...args) => new Error (
     args | join (' ')
@@ -522,77 +567,12 @@ export const decorateException = curry ((prefix, e) =>
     e | assocMut ('message', joinOk (' ') ([prefix, e.message]))
 )
 
-/*
- * invokeIfCanElse
- * if (canBind
-function getSelection() {
-        let txt = (window.getSelection)
-        ? window.getSelection()
-        : document.selection.createRange().text;
-
-}
-
-function getSelection() {
-    const txt = 'getSelection' | window | ifBind (
-        invoke,
-        () => document.selection.createRange().text,
-    )
-
-    const gebonden = bind (window, 'getSelection')
-    const txt = gebonden | ifOk (
-        invoke,
-        () => document.selection.createRange().text,
-    )
-
-    const txt = gebonden | invokeIfOkElse (
-        () => document.selection.createRange().text,
-    )
-
-    const txt = [window, 'getSelection'] | ifBind (
-        invoke,
-        () => document.selection.createRange().text,
-    )
-
-    const txt =
-        bind (window, 'getSelection')
-        | ifOk (
-            invoke,
-            () => document.selection.createRange().text,
-        )
-
-// have to decide whether bind fails or returns undefined.
-// probably fails. (see bind hard test)
-//
 // bind needs flip family as well.
 // 'speak' | bind-to obj
 // obj | bind-under 'speak'
 
-    const txt =
-        bind (window, 'getSelection')
-        | ifOk (
-            apply,
-            () => document.selection.createRange().text,
-        )
-
-    
-) ()
-*/
-
 /*
- *
- *
- * const y = x | defaultTo (() => 42)
- *
- */
-
-/*
- * const a = [1, 2, 3]
- * a | applyTo (log) ... ?
- *
- */
-
-/*
- * you could make the flattening proto stuff configurable
+ * could make the flattening proto stuff configurable
  *
  * if you want the opposite:
  *
@@ -612,37 +592,20 @@ function getSelection() {
  * xReplace should tell how many it replaced.
  * perhaps when global it should return an object.
  *
-const xMatch = curry ((re, target) => re
-    | rProp ('source')
-    | replace (/\s+/g, '')
-    | nieuw1 (RegExp)
-    | dot1 ('exec', target)
-)
-export const nieuw1 = curry ((constructor, val) => new constructor (val))
+// tests for truthINEss
+export const cond = curry ((blocks, target) => {
+    let result
+    for (const [test, exec] of blocks) {
+        if (!ok (test)) return exec (target)
 
+        const result = test (target)
+        if (result) return exec (result)
+    }
+})
 
 nieuw
 nieuw1
 
-
-    parse: () => new Error (e)
-        | tap (f => { f.msg = msg + ' ' + f.msg })
-        | exception
-snippet nieuw
-const nieuw = x => new x
-endsnippet
-
-snippet nieuw1
-const nieuw1 = curry ((x, val) => new x (val))
-endsnippet
-
-snippet nieuw2
-const nieuw2 = curry ((x, val1, val2) => new x (val1, val2))
-endsnippet
-
-snippet nieuw3
-const nieuw3 = curry ((x, val1, val2, val3) => new x (val1, val2, val3))
-endsnippet
 
 
 apply should keep the same meaning as in racket maybe, which it has anyway, so?
@@ -797,6 +760,12 @@ in racket, one-armed if is when.
 			}
 			return formData;
 		},
+
+// --- flagsYes ('outSplit', 'sync')
+const flagsYes = (...args) => args
+    | map (x => [x, true])
+    | fromPairs
+
 
 
 */

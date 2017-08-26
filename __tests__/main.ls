@@ -18,16 +18,20 @@
     ok,
 
     exception, raise, die, decorate-exception,
-    array, zip-all,
+    zip-all,
 
     bind, bind-late, bind-try,
-    cascade, flip-c, compact, compact-ok,
-    times, repeat,
+    cascade, flip-c,
     sprintf1, sprintf-n,
 
     given, laat, given-star, laat-star,
 
-} = require '../lib/index'
+    nieuw, nieuw1, nieuw2, nieuw3, nieuw-n,
+
+    x-reg-exp,
+    x-match, x-match-str, #match
+
+} = main = require '../lib/index'
 
 describe 'cascade' ->
     test 1 ->
@@ -237,7 +241,7 @@ describe 'laatStar' ->
                 | m == 0 => 1
                 | m == 1 => 1
                 | otherwise => sum-last-two prev
-            refs = times n + 1, -> entry
+            refs = r-repeat entry, n + 1
             laat-star refs, array-ls
 
         (expect fibonacci 0).to-equal [1]
@@ -245,57 +249,6 @@ describe 'laatStar' ->
         (expect fibonacci 2).to-equal [1 1 2]
         (expect fibonacci 8).to-equal [1 1 2 3 5 8 13 21 34]
         (expect fibonacci 9).to-equal [1 1 2 3 5 8 13 21 34 55]
-
-describe 'repeat' ->
-    test 1 ->
-        'thing'
-        |> repeat 5
-        |> expect-to-equal ['thing'] * 5
-
-describe 'times' ->
-    thing = (i) -> i
-    test 1 ->
-        thing
-        |> times 5
-        |> expect-to-equal [0 to 4]
-
-describe 'compact*' ->
-    mixed = [1 '' 0 '0' void false true 2]
-    falsey = [false void null '' 0 NaN]
-    truthy = [true '0' [] {} -1 Infinity]
-    describe 'compact' ->
-        test 1 ->
-            mixed
-            |> compact
-            |> expect-to-equal [
-                1 '0' true 2
-            ]
-        test 'all falsey' ->
-            falsey
-            |> compact
-            |> expect-to-equal [
-            ]
-        test 'all truthy' ->
-            truthy
-            |> compact
-            |> expect-to-equal truthy
-    describe 'compactOk' ->
-        test 1 ->
-            mixed
-            |> compact-ok
-            |> expect-to-equal [
-                1 '' 0 '0' false true 2
-            ]
-        test 'all falsey' ->
-            falsey
-            |> compact-ok
-            |> expect-to-equal [
-                false '' 0 NaN
-            ]
-        test 'all truthy' ->
-            truthy
-            |> compact-ok
-            |> expect-to-equal truthy
 
 describe 'sprintf*' ->
     describe 'sprintf1' ->
@@ -316,11 +269,6 @@ describe 'sprintf*' ->
             ['is' 10/3]
             |> sprintf-n 'my name %s %0.2f'
             |> expect-to-equal 'my name is 3.33'
-
-describe 'array' ->
-    test 1 ->
-        array 3 4 5
-        |> expect-to-equal [3 to 5]
 
 describe 'zip-all' ->
     test 1 ->
@@ -370,5 +318,67 @@ describe 'exceptions' ->
             |> raise
         ).to-throw 'bad news: file not found'
 
+describe 'new' ->
+    class C
+        (...args) -> @nums = args
+        speak: -> join ' ' [
+            'henlo'
+            ...@nums
+        ]
+
+    test 'nieuw' ->
+        nieuw C
+        |> (.speak())
+        |> expect-to-equal 'henlo'
+
+    test 'nieuw1' ->
+        10
+        |> nieuw1 C
+        |> (.speak())
+        |> expect-to-equal 'henlo 10'
+
+    test 'nieuw2' ->
+        (nieuw2 C) 20 30
+        |> (.speak())
+        |> expect-to-equal 'henlo 20 30'
+
+    test 'nieuw3' ->
+        (nieuw3 C) 2 4 6
+        |> (.speak())
+        |> expect-to-equal 'henlo 2 4 6'
+
+    test 'nieuwN' ->
+        [4 8 9]
+        |> nieuw-n C
+        |> (.speak())
+        |> expect-to-equal 'henlo 4 8 9'
+
+describe 'match/regex' ->
+    test 'x-regexp' ->
+        re = x-reg-exp ' ( o . s ) '
+        'horses'
+        |> (.match re)
+        |> (m) -> m.1
+        |> expect-to-equal 'ors'
+    test 'match' ->
+        re = new RegExp '(o.s)'
+        'horses'
+        |> main.match re
+        |> (m) -> m.1
+        |> expect-to-equal 'ors'
+    test 'xmatch' ->
+        re = new RegExp ' ( o . s ) '
+        'horses'
+        |> x-match re
+        |> (m) -> m.1
+        |> expect-to-equal 'ors'
+    test 'xmatch-str' ->
+        re-str = ' ( o . s ) '
+        'horses'
+        |> x-match-str re-str
+        |> (m) -> m.1
+        |> expect-to-equal 'ors'
+
+# defaultTo
 
 # defaultTo

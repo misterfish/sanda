@@ -1,7 +1,7 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, ok, exception, raise, die, decorateException, array, zipAll, bind, bindLate, bindTry, cascade, flipC, compact, compactOk, times, repeat, sprintf1, sprintfN, given, laat, givenStar, laatStar;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, main, ok, exception, raise, die, decorateException, zipAll, bind, bindLate, bindTry, cascade, flipC, sprintf1, sprintfN, given, laat, givenStar, laatStar, nieuw, nieuw1, nieuw2, nieuw3, nieuwN, xRegExp, xMatch, xMatchStr, slice$ = [].slice;
 ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
 ref$ = require('./common'), arrayLs = ref$.arrayLs, test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
-ref$ = require('../lib/index'), ok = ref$.ok, exception = ref$.exception, raise = ref$.raise, die = ref$.die, decorateException = ref$.decorateException, array = ref$.array, zipAll = ref$.zipAll, bind = ref$.bind, bindLate = ref$.bindLate, bindTry = ref$.bindTry, cascade = ref$.cascade, flipC = ref$.flipC, compact = ref$.compact, compactOk = ref$.compactOk, times = ref$.times, repeat = ref$.repeat, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar;
+ref$ = main = require('../lib/index'), ok = ref$.ok, exception = ref$.exception, raise = ref$.raise, die = ref$.die, decorateException = ref$.decorateException, zipAll = ref$.zipAll, bind = ref$.bind, bindLate = ref$.bindLate, bindTry = ref$.bindTry, cascade = ref$.cascade, flipC = ref$.flipC, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar, nieuw = ref$.nieuw, nieuw1 = ref$.nieuw1, nieuw2 = ref$.nieuw2, nieuw3 = ref$.nieuw3, nieuwN = ref$.nieuwN, xRegExp = ref$.xRegExp, xMatch = ref$.xMatch, xMatchStr = ref$.xMatchStr;
 describe('cascade', function(){
   return test(1, function(){
     var odd, this$ = this;
@@ -332,9 +332,7 @@ describe('laatStar', function(){
           return sumLastTwo(prev);
         }
       };
-      refs = times(n + 1, function(){
-        return entry;
-      });
+      refs = rRepeat(entry, n + 1);
       return laatStar(refs, arrayLs);
     };
     expect(fibonacci(0)).toEqual([1]);
@@ -342,64 +340,6 @@ describe('laatStar', function(){
     expect(fibonacci(2)).toEqual([1, 1, 2]);
     expect(fibonacci(8)).toEqual([1, 1, 2, 3, 5, 8, 13, 21, 34]);
     return expect(fibonacci(9)).toEqual([1, 1, 2, 3, 5, 8, 13, 21, 34, 55]);
-  });
-});
-describe('repeat', function(){
-  return test(1, function(){
-    return expectToEqual(['thing', 'thing', 'thing', 'thing', 'thing'])(
-    repeat(5)(
-    'thing'));
-  });
-});
-describe('times', function(){
-  var thing;
-  thing = function(i){
-    return i;
-  };
-  return test(1, function(){
-    return expectToEqual([0, 1, 2, 3, 4])(
-    times(5)(
-    thing));
-  });
-});
-describe('compact*', function(){
-  var mixed, falsey, truthy;
-  mixed = [1, '', 0, '0', void 8, false, true, 2];
-  falsey = [false, void 8, null, '', 0, NaN];
-  truthy = [true, '0', [], {}, -1, Infinity];
-  describe('compact', function(){
-    test(1, function(){
-      return expectToEqual([1, '0', true, 2])(
-      compact(
-      mixed));
-    });
-    test('all falsey', function(){
-      return expectToEqual([])(
-      compact(
-      falsey));
-    });
-    return test('all truthy', function(){
-      return expectToEqual(truthy)(
-      compact(
-      truthy));
-    });
-  });
-  return describe('compactOk', function(){
-    test(1, function(){
-      return expectToEqual([1, '', 0, '0', false, true, 2])(
-      compactOk(
-      mixed));
-    });
-    test('all falsey', function(){
-      return expectToEqual([false, '', 0, NaN])(
-      compactOk(
-      falsey));
-    });
-    return test('all truthy', function(){
-      return expectToEqual(truthy)(
-      compactOk(
-      truthy));
-    });
   });
 });
 describe('sprintf*', function(){
@@ -426,12 +366,6 @@ describe('sprintf*', function(){
       sprintfN('my name %s %0.2f')(
       ['is', 10 / 3]));
     });
-  });
-});
-describe('array', function(){
-  return test(1, function(){
-    return expectToEqual([3, 4, 5])(
-    array(3, 4, 5));
   });
 });
 describe('zip-all', function(){
@@ -476,6 +410,112 @@ describe('exceptions', function(){
       exception(
       'file not found')));
     }).toThrow('bad news: file not found');
+  });
+});
+describe('new', function(){
+  var C;
+  C = (function(){
+    C.displayName = 'C';
+    var prototype = C.prototype, constructor = C;
+    function C(){
+      var args, res$, i$, to$;
+      res$ = [];
+      for (i$ = 0, to$ = arguments.length; i$ < to$; ++i$) {
+        res$.push(arguments[i$]);
+      }
+      args = res$;
+      this.nums = args;
+    }
+    C.prototype.speak = function(){
+      return join(' ', ['henlo'].concat(slice$.call(this.nums)));
+    };
+    return C;
+  }());
+  test('nieuw', function(){
+    var this$ = this;
+    return expectToEqual('henlo')(
+    function(it){
+      return it.speak();
+    }(
+    nieuw(C)));
+  });
+  test('nieuw1', function(){
+    var this$ = this;
+    return expectToEqual('henlo 10')(
+    function(it){
+      return it.speak();
+    }(
+    nieuw1(C)(
+    10)));
+  });
+  test('nieuw2', function(){
+    var this$ = this;
+    return expectToEqual('henlo 20 30')(
+    function(it){
+      return it.speak();
+    }(
+    nieuw2(C)(20, 30)));
+  });
+  test('nieuw3', function(){
+    var this$ = this;
+    return expectToEqual('henlo 2 4 6')(
+    function(it){
+      return it.speak();
+    }(
+    nieuw3(C)(2, 4, 6)));
+  });
+  return test('nieuwN', function(){
+    var this$ = this;
+    return expectToEqual('henlo 4 8 9')(
+    function(it){
+      return it.speak();
+    }(
+    nieuwN(C)(
+    [4, 8, 9])));
+  });
+});
+describe('match/regex', function(){
+  test('x-regexp', function(){
+    var re, this$ = this;
+    re = xRegExp(' ( o . s ) ');
+    return expectToEqual('ors')(
+    function(m){
+      return m[1];
+    }(
+    function(it){
+      return it.match(re);
+    }(
+    'horses')));
+  });
+  test('match', function(){
+    var re;
+    re = new RegExp('(o.s)');
+    return expectToEqual('ors')(
+    function(m){
+      return m[1];
+    }(
+    main.match(re)(
+    'horses')));
+  });
+  test('xmatch', function(){
+    var re;
+    re = new RegExp(' ( o . s ) ');
+    return expectToEqual('ors')(
+    function(m){
+      return m[1];
+    }(
+    xMatch(re)(
+    'horses')));
+  });
+  return test('xmatch-str', function(){
+    var reStr;
+    reStr = ' ( o . s ) ';
+    return expectToEqual('ors')(
+    function(m){
+      return m[1];
+    }(
+    xMatchStr(reStr)(
+    'horses')));
   });
 });
 function curry$(f, bound){

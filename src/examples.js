@@ -107,3 +107,46 @@ ifBind (this, 'startupCallback', call)
 */
 
 
+/*
+ * invokeIfCanElse
+ * if (canBind
+function getSelection() {
+        let txt = (window.getSelection)
+        ? window.getSelection()
+        : document.selection.createRange().text;
+
+}
+
+function getSelection() {
+    const txt = 'getSelection' | window | ifBind (
+        invoke,
+        () => document.selection.createRange().text,
+    )
+
+    const gebonden = bind (window, 'getSelection')
+    const txt = gebonden | ifOk (
+        invoke,
+        () => document.selection.createRange().text,
+    )
+
+    const txt = gebonden | invokeIfOkElse (
+        () => document.selection.createRange().text,
+    )
+
+    const txt = [window, 'getSelection'] | ifBind (
+        invoke,
+        () => document.selection.createRange().text,
+    )
+
+    const txt =
+        bind (window, 'getSelection')
+        | ifOk (
+            invoke,
+            () => document.selection.createRange().text,
+        )
+
+// have to decide whether bind fails or returns undefined.
+// probably fails. (see bind hard test)
+//
+*/
+
