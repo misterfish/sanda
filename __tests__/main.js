@@ -275,6 +275,20 @@ describe('laatStar', function(){
       ten + twelve + nineteen + two);
     });
   });
+  test('recursive references, second arg optional', function(){
+    return laatStar([
+      10, function(ten){
+        return ten + 2;
+      }, function(ten, twelve){
+        return twelve + 7;
+      }, function(ten, twelve, nineteen){
+        return 2;
+      }, function(ten, twelve, nineteen, two){
+        return expectToEqual(43)(
+        ten + twelve + nineteen + two);
+      }
+    ]);
+  });
   test('single function', function(){
     return laatStar([function(){
       return 11;
@@ -425,9 +439,13 @@ describe('zip-all', function(){
     return expectToEqual([[1, 'un'], [2, 'deux'], [3, 'trois']])(
     zipAll([1, 2, 3], ['un', 'deux', 'trois']));
   });
-  return test(2, function(){
+  test(2, function(){
     return expectToEqual([['un', 'yek', 'egy'], ['deux', 'do', 'ketto'], ['trois', 'seh', 'harom']])(
     zipAll(['un', 'deux', 'trois'], ['yek', 'do', 'seh'], ['egy', 'ketto', 'harom']));
+  });
+  return test("two args equivalent to ramda's zip", function(){
+    return expectToEqual(zip(['un', 'yek', 'egy'], ['yek', 'do', 'seh']))(
+    zipAll(['un', 'yek', 'egy'], ['yek', 'do', 'seh']));
   });
 });
 describe('exceptions', function(){

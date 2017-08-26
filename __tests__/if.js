@@ -12,8 +12,8 @@ doTests = curry$(function(describeSpec, tests){
   tests);
 });
 doTestDoubleArm = curry$(function(arg$, arg1$){
-  var fn, is__, desc, inputVal, expectBranch;
-  fn = arg$.fn, is__ = arg$.is__;
+  var fn, is__, anaphoric, ref$, desc, inputVal, expectBranch;
+  fn = arg$.fn, is__ = arg$.is__, anaphoric = (ref$ = arg$.anaphoric) != null ? ref$ : true;
   desc = arg1$.desc, inputVal = arg1$.inputVal, expectBranch = arg1$.expectBranch;
   return test(desc, function(){
     var x$, ja, y$, nee, ret, ref$, expectedRet, expectedCallsJa, expectedCallsNee;
@@ -36,13 +36,15 @@ doTestDoubleArm = curry$(function(arg$, arg1$){
     ja.mock.calls.length);
     expectToEqual(expectedCallsNee)(
     nee.mock.calls.length);
-    return expectToEqual(expectedRet)(
-    ret);
+    if (anaphoric) {
+      return expectToEqual(expectedRet)(
+      ret);
+    }
   });
 });
 doTestSingleArm = curry$(function(arg$, arg1$){
-  var fn, is__, desc, inputVal, expectBranch;
-  fn = arg$.fn, is__ = arg$.is__;
+  var fn, is__, anaphoric, ref$, desc, inputVal, expectBranch;
+  fn = arg$.fn, is__ = arg$.is__, anaphoric = (ref$ = arg$.anaphoric) != null ? ref$ : true;
   desc = arg1$.desc, inputVal = arg1$.inputVal, expectBranch = arg1$.expectBranch;
   return test(desc, function(){
     var x$, ja, ret, ref$, expectedRet, expectedCallsJa;
@@ -59,15 +61,18 @@ doTestSingleArm = curry$(function(arg$, arg1$){
       : [void 8, 0], expectedRet = ref$[0], expectedCallsJa = ref$[1];
     expectToEqual(expectedCallsJa)(
     ja.mock.calls.length);
-    return expectToEqual(expectedRet)(
-    ret);
+    if (anaphoric) {
+      return expectToEqual(expectedRet)(
+      ret);
+    }
   });
 });
 describe('whenCond', function(){
   var describeSpec, tests;
   describeSpec = {
     fn: whenCond,
-    is__: false
+    is__: false,
+    anaphoric: false
   };
   tests = arrayLs({
     desc: 'true',
@@ -106,7 +111,8 @@ describe('ifCond', function(){
   var describeSpec, tests;
   describeSpec = {
     fn: ifCond,
-    is__: false
+    is__: false,
+    anaphoric: false
   };
   tests = arrayLs({
     desc: 'true',
@@ -145,7 +151,8 @@ describe('ifCond__', function(){
   var describeSpec, tests;
   describeSpec = {
     fn: ifCond__,
-    is__: true
+    is__: true,
+    anaphoric: false
   };
   tests = arrayLs({
     desc: 'true',

@@ -40,8 +40,7 @@ do-tests = (describe-spec, tests) -->
         the-test = if num-arms == 2 then do-test-double-arm else do-test-single-arm
         the-test describe-spec, test-spec
 
-do-test-double-arm = ({ fn, is__ }, { desc, input-val, expect-branch, }) --> test desc, ->
-
+do-test-double-arm = ({ fn, is__, anaphoric = true }, { desc, input-val, expect-branch, }) --> test desc, ->
     # --- mocks return unlikely vals based on input-val
     ja = jest.fn()
         ..mock-implementation (x) -> [x, x, x]
@@ -60,9 +59,9 @@ do-test-double-arm = ({ fn, is__ }, { desc, input-val, expect-branch, }) --> tes
     ja.mock.calls.length |> expect-to-equal expected-calls-ja
     nee.mock.calls.length |> expect-to-equal expected-calls-nee
 
-    ret |> expect-to-equal expected-ret
+    if anaphoric then ret |> expect-to-equal expected-ret
 
-do-test-single-arm = ({ fn, is__ }, { desc, input-val, expect-branch, }) --> test desc, ->
+do-test-single-arm = ({ fn, is__, anaphoric = true }, { desc, input-val, expect-branch, }) --> test desc, ->
     # --- mocks return unlikely vals based on input-val
     ja = jest.fn()
         ..mock-implementation (x) -> [x, x, x]
@@ -77,12 +76,13 @@ do-test-single-arm = ({ fn, is__ }, { desc, input-val, expect-branch, }) --> tes
 
     ja.mock.calls.length |> expect-to-equal expected-calls-ja
 
-    ret |> expect-to-equal expected-ret
+    if anaphoric then ret |> expect-to-equal expected-ret
 
 describe 'whenCond' ->
     describe-spec =
         fn: when-cond
         is__: false
+        anaphoric: false
 
     tests = array-ls do
         *   desc: 'true'
@@ -116,6 +116,7 @@ describe 'ifCond' ->
     describe-spec =
         fn: if-cond
         is__: false
+        anaphoric: false
 
     tests = array-ls do
         *   desc: 'true'
@@ -149,6 +150,7 @@ describe 'ifCond__' ->
     describe-spec =
         fn: if-cond__
         is__: true
+        anaphoric: false
 
     tests = array-ls do
         *   desc: 'true'

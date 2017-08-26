@@ -23,7 +23,7 @@ defineBinaryOperator ('|', (a, b) => b (a))
 defineBinaryOperator ('>>', (a, b) => (...args) => b (a (...args)))
 
 import {
-    isEmpty, tap, has, hasIn, flip, fromPairs, toPairs, assoc, assocPath, head,
+    isEmpty, tap, has, hasIn, flip, fromPairs, toPairs, toPairsIn, assoc, assocPath, head,
     tail, reduceRight, chain, identity, reduce, map, filter, reject, join,
     split, prop as rProp, path as rPath, defaultTo as rDefaultTo, curry,
     splitEvery,
@@ -33,6 +33,7 @@ import {
     concat as rConcat,
     append as rAppend,
     merge as rMerge,
+    zip,
 } from 'ramda'
 
 import fishLib, {
@@ -156,6 +157,14 @@ export const bindTry = curry ((o, prop) => o[prop]
 // that function is invoked.
 export const bindLate = curry ((o, key) => (...args) => o[key] (...args))
 
+// --------- data.
+
+// ------ defaultTo.
+
+// --- f is a *function*.
+export const defaultTo = curry ((f, x) => ok (x) ? x : f ())
+export const defaultTo__ = (x, f) => x | defaultTo (f)
+
 // ------ assoc.
 
 export const assocMut = curry ((prop, val, o) => (o[prop] = val, o))
@@ -259,6 +268,9 @@ export const mergeFromInMut = flip (mergeToInMut)
 //
 // if target is an obj, it maps on key/value pairs of object.
 // if target is an array [key, value, key, value], it maps on pairs (think %foo= @foo in perl)
+//
+// ordering: k, v.
+// everywhere else: v, k.
 
 export const mapPairs = curry ((f, obj) =>
     obj | ifArray (
@@ -272,37 +284,77 @@ export const mapPairs = curry ((f, obj) =>
     )
 )
 
+// --- doesn't take array, only obj.
+export const mapPairsIn = curry ((f, obj) => obj
+    | toPairsIn
+    | map (([k, v]) => f (k, v))
+    | fromPairs,
+)
+
 // --- map indexed: not sure about exporting these.
 const mapIndexed = addIndex (map)
 const mapAccumIndexed = addIndex (mapAccum)
 
-// --- each obj indexed?
-// --- each obj IN
+// --- ramda already gives us eachObj.
 
-// --- mapzip.
+export const eachObjIn = curry ((f, obj) => {
+    for (const k in obj) f (obj[k], k)
+})
 
-export const defaultTo__ = (x, d) => ok (x)
-    ? x : d ()
-
-export const defaultTo = curry ((f, x) => ok (x)
-    ? x : f ()
+// [a -> b] -> [a] -> [b]
+export const applyScalar = curry ((fs, xs) => xs
+    | zip (fs)
+    | map (([f, x]) => f (x))
 )
+
+export const passScalar = flip (applyScalar)
+
+// --------- given/laat
 
 export const given = (xs, f) => f.apply (null, xs)
 export const laat = given
 
-// xxx invoke needs two forms ugh
+// note that f is optional: the last function in xs serves the same purpose, but it can be used for
+// symmetry with laat.
+
+export const givenStar = (xs, f) => {
+    const xsMapper = prevVals => ifFunction (
+        v => v.apply (null, prevVals),
+        v => v,
+    )
+
+    const ys = xs
+        // --- acc contains running output array, up to the previous item.
+        | mapAccum ((acc, v) => xsMapper (acc) (v)
+            | (mapped => [[...acc, mapped], mapped])
+        , [])
+        | rProp (1)
+
+    return f
+        ? f.apply (null, ys)
+        : last (ys)
+}
+
+export const laatStar = givenStar
+
+// --- 'call' always means pass a context.
+// --- 'apply' always means 'apply this function to some params'
+// --- 'pass' means 'pass these params to a function'
+// --- 'invoke' means just call this function, no context or params.
 
 // log | invokeN ([1, 2, 3])
+// log | passN ([1, 2, 3])
+
 // log | invokeUsingN ([1, 2, 3])
 // call them invoke using?
-export const invoke = f => f ()
-export const invoke1 = curry ((val, f) => f (val))
-export const invoke2 = curry ((val1, val2, f) => f (val1, val2))
-export const invoke3 = curry ((val1, val2, val3, f) => f (val1, val2, val3))
-export const invokeN = curry ((vs, f) => f.apply (null, vs))
 
-// ([1, 2, 3]) | invokeOn (log)
+// [1, 2, 3] | apply (log)
+//
+// point-free of x => x.apply (null, xs)
+// where x is a function,
+// is not called apply.
+// passN (xs)
+// ([1, 2, 3]) | passOn (log)
 
 export const callOn = curry ((o, f) => f.call (o))
 export const callOn1 = curry ((o, val, f) => f.call (o, val))
@@ -320,25 +372,17 @@ export const callUnder = curry ((f, o) => f.call (o))
 export const callUnder1 = curry ((f, val, o) => f.call (o, val))
 export const callUnder2 = curry ((f, val1, val2, o) => f.call (o, val1, val2))
 
-// an alternative is to skip f and just stick it as the last arg of xs; for now, keep it want
-// symmetry
+export const invoke = f => f ()
 
-export const givenStar = (xs, f) => {
-    const xsMapper = (prevVals, v) => isFunction (v)
-        ? v.apply (null, prevVals)
-        : v
+export const pass1 = curry ((val, f) => f (val))
+export const pass2 = curry ((val1, val2, f) => f (val1, val2))
+export const pass3 = curry ((val1, val2, val3, f) => f (val1, val2, val3))
+export const passN = curry ((vs, f) => f.apply (null, vs))
 
-    const ys = xs
-        // --- acc contains running output array, up to the previous item.
-        | mapAccum ((acc, v) => xsMapper (acc, v)
-            | (mapped => [[...acc, mapped], mapped])
-        , [])
-        | rProp (1)
-
-    return f.apply (null, ys)
-}
-
-export const laatStar = givenStar
+export const apply1 = curry ((f, val) => f (val))
+export const apply2 = curry ((f, val1, val2) => f (val1, val2))
+export const apply3 = curry ((f, val1, val2, val3) => f (val1, val2, val3))
+export const applyN = curry ((f, vs) => f.apply (null, vs))
 
 // --- flip first and second args: also works for functions curried with the a => b => ... notation.
 // outer curry not needed??
@@ -455,6 +499,7 @@ ifBind (this, 'startupCallback', call)
 // eachobjindexed
 // defaultto simple, func
 
+// --- r's zip only takes two.
 export const zipAll = (...xss) => {
     const ret = []
     const l = xss[0].length
@@ -464,6 +509,12 @@ export const zipAll = (...xss) => {
     }
     return ret
 }
+
+
+
+
+
+
 
 
 // --- inject src into target, using only own vals.
@@ -828,5 +879,5 @@ const isArray = callUnder ({}.toString)
 
 
 
-
-
+// undef on empty.
+const last = xs => xs [xs.length - 1]

@@ -1,8 +1,8 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, zipAll, invoke, invoke1, invoke2, invoke3, invokeN, call, call1, call2, call3, callN, callOn, callOn1, callOn2, callOn3, callOnN, callUnder, callUnder1, callUnder2;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, zipAll, invoke, pass1, pass2, pass3, passN, apply1, apply2, apply3, applyN, call, call1, call2, call3, callN, callOn, callOn1, callOn2, callOn3, callOnN, callUnder, callUnder1, callUnder2;
 ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
 ref$ = require('./common'), arrayLs = ref$.arrayLs, test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
-ref$ = require('../lib/index'), zipAll = ref$.zipAll, invoke = ref$.invoke, invoke1 = ref$.invoke1, invoke2 = ref$.invoke2, invoke3 = ref$.invoke3, invokeN = ref$.invokeN, call = ref$.call, call1 = ref$.call1, call2 = ref$.call2, call3 = ref$.call3, callN = ref$.callN, callOn = ref$.callOn, callOn1 = ref$.callOn1, callOn2 = ref$.callOn2, callOn3 = ref$.callOn3, callOnN = ref$.callOnN, callUnder = ref$.callUnder, callUnder1 = ref$.callUnder1, callUnder2 = ref$.callUnder2;
-describe('invoke*', function(){
+ref$ = require('../lib/index'), zipAll = ref$.zipAll, invoke = ref$.invoke, pass1 = ref$.pass1, pass2 = ref$.pass2, pass3 = ref$.pass3, passN = ref$.passN, apply1 = ref$.apply1, apply2 = ref$.apply2, apply3 = ref$.apply3, applyN = ref$.applyN, call = ref$.call, call1 = ref$.call1, call2 = ref$.call2, call3 = ref$.call3, callN = ref$.callN, callOn = ref$.callOn, callOn1 = ref$.callOn1, callOn2 = ref$.callOn2, callOn3 = ref$.callOn3, callOnN = ref$.callOnN, callUnder = ref$.callUnder, callUnder1 = ref$.callUnder1, callUnder2 = ref$.callUnder2;
+describe('invoke', function(){
   var func, sumAll;
   func = function(){
     return 'horse';
@@ -19,78 +19,170 @@ describe('invoke*', function(){
     }, 0)(
     args);
   };
-  describe('invoke', function(){
-    test(1, function(){
-      return expectToEqual('horse')(
-      invoke(
-      func));
-    });
-    return test(2, function(){
-      return expectToEqual(0)(
-      invoke(
-      sumAll));
-    });
+  test(1, function(){
+    return expectToEqual('horse')(
+    invoke(
+    func));
   });
-  describe('invoke1', function(){
+  return test(2, function(){
+    return expectToEqual(0)(
+    invoke(
+    sumAll));
+  });
+});
+describe('pass*', function(){
+  var func, sumAll;
+  func = function(){
+    return 'horse';
+  };
+  sumAll = function(){
+    var args, res$, i$, to$;
+    res$ = [];
+    for (i$ = 0, to$ = arguments.length; i$ < to$; ++i$) {
+      res$.push(arguments[i$]);
+    }
+    args = res$;
+    return reduce(function(a, b){
+      return a + b;
+    }, 0)(
+    args);
+  };
+  describe('pass1', function(){
     test(1, function(){
       return expectToEqual(12)(
-      invoke1(12)(
+      pass1(12)(
       sumAll));
     });
     test(2, function(){
       var this$ = this;
       return expectToEqual(16)(
-      invoke1(12)(
+      pass1(12)(
       (function(it){
         return it + 4;
       })));
     });
     return test('discards extra args 1', function(){
       return expectToEqual('horse')(
-      invoke1('abc')(
+      pass1('abc')(
       func));
     });
   });
-  describe('invoke2', function(){
+  describe('pass2', function(){
     test(1, function(){
       return expectToEqual(25)(
-      invoke2(12, 13)(
+      pass2(12, 13)(
       sumAll));
     });
     return test(2, function(){
       return expectToEqual(50)(
-      invoke2(20, 30)(
+      pass2(20, 30)(
       curry$(function(x$, y$){
         return x$ + y$;
       })));
     });
   });
-  describe('invoke3', function(){
+  describe('pass3', function(){
     test(1, function(){
       return expectToEqual(39)(
-      invoke3(12, 13, 14)(
+      pass3(12, 13, 14)(
       sumAll));
     });
     return test('discards', function(){
       return expectToEqual(50)(
-      invoke3(20, 30, 40)(
+      pass3(20, 30, 40)(
       curry$(function(x$, y$){
         return x$ + y$;
       })));
     });
   });
-  return describe('invokeN', function(){
+  return describe('passN', function(){
     test(1, function(){
       return expectToEqual(54)(
-      invokeN([12, 13, 14, 15])(
+      passN([12, 13, 14, 15])(
       sumAll));
     });
     return test(2, function(){
       return expectToEqual(50)(
-      invokeN([20, 30])(
+      passN([20, 30])(
       curry$(function(x$, y$){
         return x$ + y$;
       })));
+    });
+  });
+});
+describe('apply*', function(){
+  var func, sumAll;
+  func = function(){
+    return 'horse';
+  };
+  sumAll = function(){
+    var args, res$, i$, to$;
+    res$ = [];
+    for (i$ = 0, to$ = arguments.length; i$ < to$; ++i$) {
+      res$.push(arguments[i$]);
+    }
+    args = res$;
+    return reduce(function(a, b){
+      return a + b;
+    }, 0)(
+    args);
+  };
+  describe('apply1', function(){
+    test(1, function(){
+      return expectToEqual(12)(
+      apply1(sumAll)(
+      12));
+    });
+    test(2, function(){
+      var this$ = this;
+      return expectToEqual(16)(
+      apply1((function(it){
+        return it + 4;
+      }))(
+      12));
+    });
+    return test('discards extra args 1', function(){
+      return expectToEqual('horse')(
+      apply1(func)(
+      'abc'));
+    });
+  });
+  describe('apply2', function(){
+    test(1, function(){
+      return expectToEqual(25)(
+      apply2(sumAll)(12, 13));
+    });
+    return test(2, function(){
+      return expectToEqual(50)(
+      apply2(curry$(function(x$, y$){
+        return x$ + y$;
+      }))(20, 30));
+    });
+  });
+  describe('apply3', function(){
+    test(1, function(){
+      return expectToEqual(39)(
+      apply3(sumAll)(12, 13, 14));
+    });
+    return test('discards', function(){
+      return expectToEqual(50)(
+      apply3(curry$(function(x$, y$){
+        return x$ + y$;
+      }))(20, 30, 40));
+    });
+  });
+  return describe('applyN', function(){
+    test(1, function(){
+      return expectToEqual(54)(
+      applyN(sumAll)(
+      [12, 13, 14, 15]));
+    });
+    return test(2, function(){
+      return expectToEqual(50)(
+      applyN(curry$(function(x$, y$){
+        return x$ + y$;
+      }))(
+      [20, 30]));
     });
   });
 });

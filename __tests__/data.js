@@ -1,7 +1,56 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, test, xtest, expectToEqual, expectToBe, assocMut, appendTo, appendToMut, appendFrom, appendFromMut, prependFrom, prependFromMut, prependTo, prependToMut, concatTo, concatToMut, concatFrom, concatFromMut, mergeTo, mergeFrom, mergeToMut, mergeFromMut, mergeToIn, mergeFromIn, mergeToInMut, mergeFromInMut, injectToMut, injectFromMut, mapPairs;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, test, xtest, expectToEqual, expectToBe, defaultTo, defaultTo__, assocMut, appendTo, appendToMut, appendFrom, appendFromMut, prependFrom, prependFromMut, prependTo, prependToMut, concatTo, concatToMut, concatFrom, concatFromMut, mergeTo, mergeFrom, mergeToMut, mergeFromMut, mergeToIn, mergeFromIn, mergeToInMut, mergeFromInMut, injectToMut, injectFromMut, mapPairs, mapPairsIn, eachObjIn, applyScalar, passScalar;
 ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
 ref$ = require('./common'), test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
-ref$ = require('../lib/index'), assocMut = ref$.assocMut, appendTo = ref$.appendTo, appendToMut = ref$.appendToMut, appendFrom = ref$.appendFrom, appendFromMut = ref$.appendFromMut, prependFrom = ref$.prependFrom, prependFromMut = ref$.prependFromMut, prependTo = ref$.prependTo, prependToMut = ref$.prependToMut, concatTo = ref$.concatTo, concatToMut = ref$.concatToMut, concatFrom = ref$.concatFrom, concatFromMut = ref$.concatFromMut, mergeTo = ref$.mergeTo, mergeFrom = ref$.mergeFrom, mergeToMut = ref$.mergeToMut, mergeFromMut = ref$.mergeFromMut, mergeToIn = ref$.mergeToIn, mergeFromIn = ref$.mergeFromIn, mergeToInMut = ref$.mergeToInMut, mergeFromInMut = ref$.mergeFromInMut, injectToMut = ref$.injectToMut, injectFromMut = ref$.injectFromMut, mapPairs = ref$.mapPairs;
+ref$ = require('../lib/index'), defaultTo = ref$.defaultTo, defaultTo__ = ref$.defaultTo__, assocMut = ref$.assocMut, appendTo = ref$.appendTo, appendToMut = ref$.appendToMut, appendFrom = ref$.appendFrom, appendFromMut = ref$.appendFromMut, prependFrom = ref$.prependFrom, prependFromMut = ref$.prependFromMut, prependTo = ref$.prependTo, prependToMut = ref$.prependToMut, concatTo = ref$.concatTo, concatToMut = ref$.concatToMut, concatFrom = ref$.concatFrom, concatFromMut = ref$.concatFromMut, mergeTo = ref$.mergeTo, mergeFrom = ref$.mergeFrom, mergeToMut = ref$.mergeToMut, mergeFromMut = ref$.mergeFromMut, mergeToIn = ref$.mergeToIn, mergeFromIn = ref$.mergeFromIn, mergeToInMut = ref$.mergeToInMut, mergeFromInMut = ref$.mergeFromInMut, injectToMut = ref$.injectToMut, injectFromMut = ref$.injectFromMut, mapPairs = ref$.mapPairs, mapPairsIn = ref$.mapPairsIn, eachObjIn = ref$.eachObjIn, applyScalar = ref$.applyScalar, passScalar = ref$.passScalar;
+describe('default to', function(){
+  test(1, function(){
+    return expectToEqual(false)(
+    defaultTo(function(){
+      return 42;
+    })(
+    false));
+  });
+  test(2, function(){
+    return expectToEqual(42)(
+    defaultTo(function(){
+      return 42;
+    })(
+    null));
+  });
+  return test(3, function(){
+    return expectToEqual(42)(
+    defaultTo(function(){
+      return 42;
+    })(
+    void 8));
+  });
+});
+describe('default to __', function(){
+  test(1, function(){
+    return expectToEqual(false)(
+    defaultTo__(false, function(){
+      return 42;
+    }));
+  });
+  test(2, function(){
+    return expectToEqual(42)(
+    defaultTo(function(){
+      return 42;
+    })(
+    defaultTo__(null, function(){
+      return 42;
+    })));
+  });
+  return test(3, function(){
+    return expectToEqual(42)(
+    defaultTo(function(){
+      return 42;
+    })(
+    defaultTo__(void 8, function(){
+      return 42;
+    })));
+  });
+});
 describe('data transforms', function(){
   var run, testMut;
   run = function(args){
@@ -1302,7 +1351,7 @@ describe('data transforms', function(){
       });
     });
   });
-  describe('mergeFromInMut', function(){
+  return describe('mergeFromInMut', function(){
     var fn, dir, mut;
     fn = mergeFromInMut;
     dir = 'from';
@@ -1394,34 +1443,99 @@ describe('data transforms', function(){
       });
     });
   });
-  return describe('mapPairs', function(){
-    test('obj', function(){
-      return expectToEqual({
-        HOW: 'yes, fine',
-        ARE: 'yes, thanks',
-        YOU: 'yes, and you?'
-      })(
-      mapPairs(function(k, v){
-        return [k.toUpperCase(), 'yes, ' + v];
-      })(
-      function(){
-        return {
-          how: 'fine',
-          are: 'thanks',
-          you: 'and you?'
-        };
-      }()));
-    });
-    return test('array', function(){
-      return expectToEqual({
-        HOW: 'yes, fine',
-        ARE: 'yes, thanks',
-        YOU: 'yes, and you?'
-      })(
-      mapPairs(function(k, v){
-        return [k.toUpperCase(), 'yes, ' + v];
-      })(
-      ['how', 'fine', 'are', 'thanks', 'you', 'and you?']));
-    });
+});
+describe('mapPairs', function(){
+  test('obj', function(){
+    var ref$;
+    return expectToEqual({
+      ARE: 'yes, thanks',
+      YOU: 'yes, and you?'
+    })(
+    mapPairs(function(k, v){
+      return [k.toUpperCase(), 'yes, ' + v];
+    })(
+    (ref$ = Object.create(
+    {
+      how: 'fine'
+    }), ref$.are = 'thanks', ref$.you = 'and you?', ref$)));
+  });
+  return test('array', function(){
+    return expectToEqual({
+      HOW: 'yes, fine',
+      ARE: 'yes, thanks',
+      YOU: 'yes, and you?'
+    })(
+    mapPairs(function(k, v){
+      return [k.toUpperCase(), 'yes, ' + v];
+    })(
+    ['how', 'fine', 'are', 'thanks', 'you', 'and you?']));
+  });
+});
+describe('mapPairsIn', function(){
+  return test(1, function(){
+    var ref$;
+    return expectToEqual({
+      HOW: 'yes, fine',
+      ARE: 'yes, thanks',
+      YOU: 'yes, and you?'
+    })(
+    mapPairsIn(function(k, v){
+      return [k.toUpperCase(), 'yes, ' + v];
+    })(
+    (ref$ = Object.create(
+    {
+      how: 'fine'
+    }), ref$.are = 'thanks', ref$.you = 'and you?', ref$)));
+  });
+});
+describe('eachObjIn', function(){
+  return test('also enumerates prototype vals', function(){
+    var ret;
+    ret = [];
+    eachObjIn(function(v, k){
+      ret.push(k);
+      return ret.push(v);
+    })(
+    Object.create(
+    function(){
+      return {
+        how: 'fine',
+        are: 'thanks'
+      };
+    }()));
+    return expectToEqual(['how', 'fine', 'are', 'thanks'])(
+    ret);
+  });
+});
+describe('applyScalar', function(){
+  return test(1, function(){
+    var this$ = this;
+    return expectToEqual([2, 3, 1.5])(
+    applyScalar([
+      (function(it){
+        return it * 2;
+      }), (function(it){
+        return it + 1;
+      }), (function(it){
+        return it / 2;
+      })
+    ])(
+    [1, 2, 3]));
+  });
+});
+describe('passScalar', function(){
+  return test(1, function(){
+    var this$ = this;
+    return expectToEqual([2, 3, 1.5])(
+    passScalar([1, 2, 3])(
+    [
+      (function(it){
+        return it * 2;
+      }), (function(it){
+        return it + 1;
+      }), (function(it){
+        return it / 2;
+      })
+    ]));
   });
 });

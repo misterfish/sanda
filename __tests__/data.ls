@@ -14,6 +14,8 @@
 } = require './common'
 
 {
+    default-to, default-to__,
+
     assoc-mut,
     append-to, append-to-mut, append-from, append-from-mut,
     prepend-from, prepend-from-mut, prepend-to, prepend-to-mut,
@@ -23,9 +25,37 @@
     merge-to-in, merge-from-in, merge-to-in-mut, merge-from-in-mut,
     inject-to-mut, inject-from-mut,
 
-    map-pairs,
+    map-pairs, map-pairs-in, each-obj-in,
+    apply-scalar, pass-scalar,
 
 } = require '../lib/index'
+
+describe 'default to' ->
+    test 1 ->
+        false
+        |> default-to -> 42
+        |> expect-to-equal false
+    test 2 ->
+        null
+        |> default-to -> 42
+        |> expect-to-equal 42
+    test 3 ->
+        void
+        |> default-to -> 42
+        |> expect-to-equal 42
+
+describe 'default to __' ->
+    test 1 ->
+        default-to__ false -> 42
+        |> expect-to-equal false
+    test 2 ->
+        default-to__ null -> 42
+        |> default-to -> 42
+        |> expect-to-equal 42
+    test 3 ->
+        default-to__ void -> 42
+        |> default-to -> 42
+        |> expect-to-equal 42
 
 describe 'data transforms' ->
     # --- vals always get loaded from src into target (direction of pipe is
@@ -717,23 +747,71 @@ describe 'data transforms' ->
 
             (expect res).to-equal a: 1 b: 3 c: 4 hidden: 43
 
-    describe 'mapPairs' ->
-        test 'obj' ->
-            do ->
-                how: 'fine'
-                are: 'thanks'
-                you: 'and you?'
-            |> map-pairs (k, v) ->
-                [k.to-upper-case(), 'yes, ' + v]
-            |> expect-to-equal do
-                HOW: 'yes, fine'
-                ARE: 'yes, thanks'
-                YOU: 'yes, and you?'
-        test 'array' ->
-            ['how' 'fine' 'are' 'thanks' 'you' 'and you?']
-            |> map-pairs (k, v) ->
-                [k.to-upper-case(), 'yes, ' + v]
-            |> expect-to-equal do
-                HOW: 'yes, fine'
-                ARE: 'yes, thanks'
-                YOU: 'yes, and you?'
+describe 'mapPairs' ->
+    test 'obj' ->
+        ({ how: 'fine' }
+        |> Object.create)
+
+        <<<
+            are: 'thanks'
+            you: 'and you?'
+
+        |> map-pairs (k, v) ->
+            [k.to-upper-case(), 'yes, ' + v]
+        |> expect-to-equal do
+            ARE: 'yes, thanks'
+            YOU: 'yes, and you?'
+    test 'array' ->
+        ['how' 'fine' 'are' 'thanks' 'you' 'and you?']
+        |> map-pairs (k, v) ->
+            [k.to-upper-case(), 'yes, ' + v]
+        |> expect-to-equal do
+            HOW: 'yes, fine'
+            ARE: 'yes, thanks'
+            YOU: 'yes, and you?'
+
+describe 'mapPairsIn' ->
+    test 1 ->
+        ({ how: 'fine' }
+        |> Object.create)
+
+        <<<
+            are: 'thanks'
+            you: 'and you?'
+
+        |> map-pairs-in (k, v) ->
+            [k.to-upper-case(), 'yes, ' + v]
+        |> expect-to-equal do
+            HOW: 'yes, fine'
+            ARE: 'yes, thanks'
+            YOU: 'yes, and you?'
+
+describe 'eachObjIn' ->
+    test 'also enumerates prototype vals' ->
+        ret = []
+        do ->
+            how: 'fine'
+            are: 'thanks'
+        |> Object.create
+        |> each-obj-in (v, k) ->
+            ret.push k
+            ret.push v
+
+        ret |> expect-to-equal <[ how fine are thanks ]>
+
+            # --- apply function to arguments has more hits on google.
+            # --- maybe pass -> prams
+            #
+            # --- apply -> func
+
+describe 'applyScalar' ->
+    test 1 ->
+        [1 2 3]
+        |> apply-scalar [(* 2), ( + 1), (/ 2)]
+        |> expect-to-equal [2 3 1.5]
+
+describe 'passScalar' ->
+    test 1 ->
+        [(* 2), ( + 1), (/ 2)]
+        |> pass-scalar [1 2 3]
+        |> expect-to-equal [2 3 1.5]

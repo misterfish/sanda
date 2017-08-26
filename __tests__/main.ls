@@ -198,6 +198,17 @@ describe 'laatStar' ->
             (ten, twelve, nineteen, two) ->
                 ten + twelve + nineteen + two
                 |> expect-to-equal 43
+    test 'recursive references, second arg optional' ->
+        laat-star do
+            [
+                10
+                (ten) -> ten + 2
+                (ten, twelve) -> twelve + 7
+                (ten, twelve, nineteen) -> 2
+                (ten, twelve, nineteen, two) ->
+                    ten + twelve + nineteen + two
+                    |> expect-to-equal 43
+            ]
     test 'single function' ->
         laat-star do
             [
@@ -329,6 +340,13 @@ describe 'zip-all' ->
             <[ deux do ketto ]>
             <[ trois seh harom ]>
         ]
+    test "two args equivalent to ramda's zip" ->
+        zip-all do
+            <[ un yek egy ]>
+            <[ yek do seh ]>
+        |> expect-to-equal zip do
+            <[ un yek egy ]>
+            <[ yek do seh ]>
 
 # --- move XXX
 
