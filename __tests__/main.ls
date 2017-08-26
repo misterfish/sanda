@@ -28,8 +28,10 @@
 
     nieuw, nieuw1, nieuw2, nieuw3, nieuw-n,
 
-    x-reg-exp, x-reg-exp-str, x-reg-exp-str-flags,
+    x-reg-exp, x-reg-exp-str,
     x-match, x-match-str, x-match-str-flags, #match
+
+    if-replace, if-x-replace, if-x-replace-str, if-x-replace-str-flags,
 
 } = main = require '../lib/index'
 
@@ -356,19 +358,19 @@ describe 'new' ->
 
 describe 'match/regex' ->
     test 'x-regexp' ->
-        re = x-reg-exp new RegExp ' ( o . s ) '
-        'horses'
+        re = x-reg-exp new RegExp ' (ses) $' 'm'
+        'horses\npigs'
         |> (.match re)
         |> (m) -> m.1
-        |> expect-to-equal 'ors'
-    test 'x-regexp-str' ->
-        re = x-reg-exp-str ' ( o . s ) '
-        'horses'
+        |> expect-to-equal 'ses'
+    test 'x-regexp-str, no flags' ->
+        re = x-reg-exp-str ' (igs) $'
+        'horses\npigs'
         |> (.match re)
         |> (m) -> m.1
-        |> expect-to-equal 'ors'
-    test 'x-regexp-str-flags' ->
-        re = x-reg-exp-str-flags '( ses ) $' 'm'
+        |> expect-to-equal 'igs'
+    test 'x-regexp-str, flags' ->
+        re = x-reg-exp-str ' (ses) $' 'm'
         'horses\npigs'
         |> (.match re)
         |> (m) -> m.1
@@ -380,7 +382,7 @@ describe 'match/regex' ->
         |> expect-to-equal 'ors'
     test 'xmatch-str-flags' ->
         'horses\npigs'
-        |> x-match-str-flags '( ses ) $' 'm'
+        |> x-match-str-flags ' (ses) $' 'm'
         |> (.1)
         |> expect-to-equal 'ses'
     test 'xmatch' ->
@@ -393,6 +395,58 @@ describe 'match/regex' ->
         |> main.match new RegExp '(o.s)'
         |> (m) -> m.1
         |> expect-to-equal 'ors'
+
+describe 'ifReplace*' ->
+
+    do-test = (result, success, func) ->
+        var ja-res, nee-res
+        ja = jest.fn()
+            ..mock-implementation (x) -> ja-res := x
+        nee = jest.fn()
+            ..mock-implementation (x) -> nee-res := x
+
+        func ja, nee
+
+        [ja-calls, nee-calls, expect-result] =
+            if success then [1 0 ja-res] else [0 1 nee-res]
+
+        ja.mock.calls.length |> expect-to-equal ja-calls
+        nee.mock.calls.length |> expect-to-equal nee-calls
+
+        expect-result |> expect-to-equal result
+
+    test 'ifReplace succesful' ->
+        [re, target, replacement] = [
+            /s/g 'sandmishes' 't'
+        ]
+        do-test 'tandmithet' true (ja, nee) ->
+            target |> (if-replace ja, nee, re, replacement)
+    test 'ifReplace not succesful' ->
+        [re, target, replacement] = [
+            /xxxx/g 'sandmishes' 't'
+        ]
+        do-test 'sandmishes' false (ja, nee) ->
+            target |> (if-replace ja, nee, re, replacement)
+    test 'ifXReplace succesful' ->
+        [re, target, replacement] = [
+            new RegExp ' s ' 'g'
+            'sandmishes' 't'
+        ]
+        do-test 'tandmithet' true (ja, nee) ->
+            target |> (if-x-replace ja, nee, re, replacement)
+
+    test 'ifXReplaceStr succesful' ->
+        [re-str, target, replacement] = [
+            ' s ' 'sandmishes' 't'
+        ]
+        do-test 'tandmishes' true (ja, nee) ->
+            target |> (if-x-replace-str ja, nee, re-str, replacement)
+    test 'ifXReplaceStrFlags succesful' ->
+        [re-str, target, replacement] = [
+            ' s ' 'sandmishes' 't'
+        ]
+        do-test 'tandmithet' true (ja, nee) ->
+            target |> (if-x-replace-str-flags ja, nee, re-str, 'g', replacement)
 
 # defaultTo
 

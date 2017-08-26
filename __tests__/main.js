@@ -1,7 +1,7 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, main, ok, exception, raise, die, decorateException, zipAll, bind, bindLate, bindTry, cascade, flipC, sprintf1, sprintfN, given, laat, givenStar, laatStar, nieuw, nieuw1, nieuw2, nieuw3, nieuwN, xRegExp, xRegExpStr, xRegExpStrFlags, xMatch, xMatchStr, xMatchStrFlags, slice$ = [].slice;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, main, ok, exception, raise, die, decorateException, zipAll, bind, bindLate, bindTry, cascade, flipC, sprintf1, sprintfN, given, laat, givenStar, laatStar, nieuw, nieuw1, nieuw2, nieuw3, nieuwN, xRegExp, xRegExpStr, xMatch, xMatchStr, xMatchStrFlags, ifReplace, ifXReplace, ifXReplaceStr, ifXReplaceStrFlags, slice$ = [].slice;
 ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
 ref$ = require('./common'), arrayLs = ref$.arrayLs, test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
-ref$ = main = require('../lib/index'), ok = ref$.ok, exception = ref$.exception, raise = ref$.raise, die = ref$.die, decorateException = ref$.decorateException, zipAll = ref$.zipAll, bind = ref$.bind, bindLate = ref$.bindLate, bindTry = ref$.bindTry, cascade = ref$.cascade, flipC = ref$.flipC, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar, nieuw = ref$.nieuw, nieuw1 = ref$.nieuw1, nieuw2 = ref$.nieuw2, nieuw3 = ref$.nieuw3, nieuwN = ref$.nieuwN, xRegExp = ref$.xRegExp, xRegExpStr = ref$.xRegExpStr, xRegExpStrFlags = ref$.xRegExpStrFlags, xMatch = ref$.xMatch, xMatchStr = ref$.xMatchStr, xMatchStrFlags = ref$.xMatchStrFlags;
+ref$ = main = require('../lib/index'), ok = ref$.ok, exception = ref$.exception, raise = ref$.raise, die = ref$.die, decorateException = ref$.decorateException, zipAll = ref$.zipAll, bind = ref$.bind, bindLate = ref$.bindLate, bindTry = ref$.bindTry, cascade = ref$.cascade, flipC = ref$.flipC, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar, nieuw = ref$.nieuw, nieuw1 = ref$.nieuw1, nieuw2 = ref$.nieuw2, nieuw3 = ref$.nieuw3, nieuwN = ref$.nieuwN, xRegExp = ref$.xRegExp, xRegExpStr = ref$.xRegExpStr, xMatch = ref$.xMatch, xMatchStr = ref$.xMatchStr, xMatchStrFlags = ref$.xMatchStrFlags, ifReplace = ref$.ifReplace, ifXReplace = ref$.ifXReplace, ifXReplaceStr = ref$.ifXReplaceStr, ifXReplaceStrFlags = ref$.ifXReplaceStrFlags;
 describe('cascade', function(){
   return test(1, function(){
     var odd, this$ = this;
@@ -478,31 +478,31 @@ describe('new', function(){
 describe('match/regex', function(){
   test('x-regexp', function(){
     var re, this$ = this;
-    re = xRegExp(new RegExp(' ( o . s ) '));
-    return expectToEqual('ors')(
+    re = xRegExp(new RegExp(' (ses) $', 'm'));
+    return expectToEqual('ses')(
     function(m){
       return m[1];
     }(
     function(it){
       return it.match(re);
     }(
-    'horses')));
+    'horses\npigs')));
   });
-  test('x-regexp-str', function(){
+  test('x-regexp-str, no flags', function(){
     var re, this$ = this;
-    re = xRegExpStr(' ( o . s ) ');
-    return expectToEqual('ors')(
+    re = xRegExpStr(' (igs) $');
+    return expectToEqual('igs')(
     function(m){
       return m[1];
     }(
     function(it){
       return it.match(re);
     }(
-    'horses')));
+    'horses\npigs')));
   });
-  test('x-regexp-str-flags', function(){
+  test('x-regexp-str, flags', function(){
     var re, this$ = this;
-    re = xRegExpStrFlags('( ses ) $', 'm');
+    re = xRegExpStr(' (ses) $', 'm');
     return expectToEqual('ses')(
     function(m){
       return m[1];
@@ -527,7 +527,7 @@ describe('match/regex', function(){
     function(it){
       return it[1];
     }(
-    xMatchStrFlags('( ses ) $', 'm')(
+    xMatchStrFlags(' (ses) $', 'm')(
     'horses\npigs')));
   });
   test('xmatch', function(){
@@ -545,6 +545,70 @@ describe('match/regex', function(){
     }(
     main.match(new RegExp('(o.s)'))(
     'horses')));
+  });
+});
+describe('ifReplace*', function(){
+  var doTest;
+  doTest = function(result, success, func){
+    var jaRes, neeRes, x$, ja, y$, nee, ref$, jaCalls, neeCalls, expectResult;
+    x$ = ja = jest.fn();
+    x$.mockImplementation(function(x){
+      return jaRes = x;
+    });
+    y$ = nee = jest.fn();
+    y$.mockImplementation(function(x){
+      return neeRes = x;
+    });
+    func(ja, nee);
+    ref$ = success
+      ? [1, 0, jaRes]
+      : [0, 1, neeRes], jaCalls = ref$[0], neeCalls = ref$[1], expectResult = ref$[2];
+    expectToEqual(jaCalls)(
+    ja.mock.calls.length);
+    expectToEqual(neeCalls)(
+    nee.mock.calls.length);
+    return expectToEqual(result)(
+    expectResult);
+  };
+  test('ifReplace succesful', function(){
+    var ref$, re, target, replacement;
+    ref$ = [/s/g, 'sandmishes', 't'], re = ref$[0], target = ref$[1], replacement = ref$[2];
+    return doTest('tandmithet', true, function(ja, nee){
+      return ifReplace(ja, nee, re, replacement)(
+      target);
+    });
+  });
+  test('ifReplace not succesful', function(){
+    var ref$, re, target, replacement;
+    ref$ = [/xxxx/g, 'sandmishes', 't'], re = ref$[0], target = ref$[1], replacement = ref$[2];
+    return doTest('sandmishes', false, function(ja, nee){
+      return ifReplace(ja, nee, re, replacement)(
+      target);
+    });
+  });
+  test('ifXReplace succesful', function(){
+    var ref$, re, target, replacement;
+    ref$ = [new RegExp(' s ', 'g'), 'sandmishes', 't'], re = ref$[0], target = ref$[1], replacement = ref$[2];
+    return doTest('tandmithet', true, function(ja, nee){
+      return ifXReplace(ja, nee, re, replacement)(
+      target);
+    });
+  });
+  test('ifXReplaceStr succesful', function(){
+    var ref$, reStr, target, replacement;
+    ref$ = [' s ', 'sandmishes', 't'], reStr = ref$[0], target = ref$[1], replacement = ref$[2];
+    return doTest('tandmishes', true, function(ja, nee){
+      return ifXReplaceStr(ja, nee, reStr, replacement)(
+      target);
+    });
+  });
+  return test('ifXReplaceStrFlags succesful', function(){
+    var ref$, reStr, target, replacement;
+    ref$ = [' s ', 'sandmishes', 't'], reStr = ref$[0], target = ref$[1], replacement = ref$[2];
+    return doTest('tandmithet', true, function(ja, nee){
+      return ifXReplaceStrFlags(ja, nee, reStr, 'g', replacement)(
+      target);
+    });
   });
 });
 function curry$(f, bound){

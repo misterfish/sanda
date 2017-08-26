@@ -468,13 +468,8 @@ export const xRegExp = re => new RegExp (
     re.flags,
 )
 
-// --- input: string.
-export const xRegExpStr = (reStr) => reStr
-    | removeSpaces
-    | nieuw1 (RegExp)
-
-// --- input: string, string.
-export const xRegExpStrFlags = (reStr, flags) => laat (
+// --- input: string, [string].
+export const xRegExpStr = (reStr, flags = '') => laat (
     [
         reStr | removeSpaces,
         flags,
@@ -497,14 +492,23 @@ export const xMatchStr = curry ((reStr, target) => target
 export const xMatchStrFlags = curry ((reStr, flags, target) => target
     | xMatch (new RegExp (reStr, flags)))
 
-export const ifReplace = curry ((good, bad, wat, met, target) => {
+export const ifReplace = curry ((yes, no, re, repl, target) => {
     let success
-    const out = target.replace (wat, () => {
+    const out = target.replace (re, () => {
         success = true
-        return met
+        return repl
     })
-    return success | ifElseTrue (() => good (out), () => bad (target))
+    return success | ifTrue (() => yes (out), () => no (target))
 })
+
+export const ifXReplace = curry ((yes, no, re, repl, target) =>
+    ifReplace (yes, no, re | xRegExp, repl, target))
+
+export const ifXReplaceStr = curry ((yes, no, reStr, repl, target) =>
+    ifReplace (yes, no, xRegExpStr (reStr), repl, target))
+
+export const ifXReplaceStrFlags = curry ((yes, no, reStr, flags, repl, target) =>
+    ifReplace (yes, no, xRegExpStr (reStr, flags), repl, target))
 
 
 
