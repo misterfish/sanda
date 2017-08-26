@@ -68,17 +68,23 @@ describe('bind*', function(){
   });
   describe('bind late', function(){
     return test('1', function(){
-      var obj, bound;
-      obj = {};
-      bound = bindLate(obj)(
+      var obj2, bound;
+      obj2 = {};
+      bound = bindLate(obj2)(
       'speak');
       expect(function(){
         return bound();
       }).toThrow(TypeError);
-      obj.speak = function(){
+      obj2.speak = function(){
         return 'spoke';
       };
       return expect(bound()).toEqual('spoke');
+    });
+  });
+  describe('bind try', function(){
+    return test('returns undefined on bad bind', function(){
+      return expectToEqual(void 8)(
+      bindTry(obj, 'squeqk'));
     });
   });
   return describe('forms', function(){

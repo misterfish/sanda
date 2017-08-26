@@ -15,8 +15,9 @@
 } = require './common'
 
 {
-    if-ok, when-ok, if-ok__,
+    if-cond, when-cond, if-cond__,
 
+    if-ok, when-ok, if-ok__,
     if-true, when-true, if-true__,
     if-false, when-false, if-false__,
     if-yes, when-yes, if-yes__,
@@ -27,6 +28,8 @@
     if-empty, when-empty, if-empty__,
 
 } = require '../lib/index'
+
+# --- @todo test anaphoric
 
 # --- note that num-arms is part of the test spec, not describe spec
 # (because of the __ variants).
@@ -75,6 +78,122 @@ do-test-single-arm = ({ fn, is__ }, { desc, input-val, expect-branch, }) --> tes
     ja.mock.calls.length |> expect-to-equal expected-calls-ja
 
     ret |> expect-to-equal expected-ret
+
+describe 'whenCond' ->
+    describe-spec =
+        fn: when-cond
+        is__: false
+
+    tests = array-ls do
+        *   desc: 'true'
+            input-val: true
+            expect-branch: 'ja'
+            num-arms: 1
+        *   desc: '3'
+            input-val: 3
+            expect-branch: 'ja'
+            num-arms: 1
+        *   desc: 'false'
+            input-val: false
+            expect-branch: 'nee'
+            num-arms: 1
+        *   desc: 'empty string'
+            input-val: ''
+            expect-branch: 'nee'
+            num-arms: 1
+        *   desc: 'undefined'
+            input-val: void
+            expect-branch: 'nee'
+            num-arms: 1
+        *   desc: 'null'
+            input-val: null
+            expect-branch: 'nee'
+            num-arms: 1
+
+    do-tests describe-spec, tests
+
+describe 'ifCond' ->
+    describe-spec =
+        fn: if-cond
+        is__: false
+
+    tests = array-ls do
+        *   desc: 'true'
+            input-val: true
+            expect-branch: 'ja'
+            num-arms: 2
+        *   desc: '3'
+            input-val: 3
+            expect-branch: 'ja'
+            num-arms: 2
+        *   desc: 'false'
+            input-val: false
+            expect-branch: 'nee'
+            num-arms: 2
+        *   desc: 'empty string'
+            input-val: ''
+            expect-branch: 'nee'
+            num-arms: 2
+        *   desc: 'undefined'
+            input-val: void
+            expect-branch: 'nee'
+            num-arms: 2
+        *   desc: 'null'
+            input-val: null
+            expect-branch: 'nee'
+            num-arms: 2
+
+    do-tests describe-spec, tests
+
+describe 'ifCond__' ->
+    describe-spec =
+        fn: if-cond__
+        is__: true
+
+    tests = array-ls do
+        *   desc: 'true'
+            input-val: true
+            expect-branch: 'ja'
+            num-arms: 2
+        *   desc: 'true, no else'
+            input-val: true
+            expect-branch: 'ja'
+            num-arms: 1
+        *   desc: '3'
+            input-val: 3
+            expect-branch: 'ja'
+            num-arms: 2
+        *   desc: '3, no else'
+            input-val: 3
+            expect-branch: 'ja'
+            num-arms: 1
+        *   desc: 'false'
+            input-val: false
+            expect-branch: 'nee'
+            num-arms: 2
+        *   desc: 'false, no else'
+            input-val: false
+            expect-branch: 'nee'
+            num-arms: 1
+        *   desc: 'undefined'
+            input-val: void
+            expect-branch: 'nee'
+            num-arms: 2
+        *   desc: 'undefined, no else'
+            input-val: void
+            expect-branch: 'nee'
+            num-arms: 1
+        *   desc: 'null'
+            input-val: null
+            expect-branch: 'nee'
+            num-arms: 2
+        *   desc: 'null, no else'
+            input-val: null
+            expect-branch: 'nee'
+            num-arms: 1
+
+    do-tests describe-spec, tests
+
 
 describe 'whenOk' ->
     describe-spec =

@@ -1,5 +1,24 @@
 #!/usr/bin/env node
 
+// ramda map works on objs: keys same, values altered.
+// could make an object mapper which lets you return pairs.
+//
+// Object.assign and {...} drop proto vals.
+
+// pushTo for not mut would be a confusing name.
+
+// [1 2 3] -> [4 5 6] -> [1 2 3 [4 5 6]]
+// [] -> a -> []
+
+// the preposition refers to the identifier following.
+//
+// functions with an On ending are aliased to a version without it:
+// call = callOn
+// bind = bindOn
+//
+// functions with To and From endings have no aliases.
+
+
 defineBinaryOperator ('|', (a, b) => b (a))
 defineBinaryOperator ('>>', (a, b) => (...args) => b (a (...args)))
 
@@ -7,6 +26,7 @@ import {
     isEmpty, tap, has, hasIn, flip, fromPairs, toPairs, assoc, assocPath, head,
     tail, reduceRight, chain, identity, reduce, map, filter, reject, join,
     split, prop as rProp, path as rPath, defaultTo as rDefaultTo, curry,
+    splitEvery,
     forEach as each, forEachObjIndexed as eachObj, complement, times as rTimes,
     range as rRange, isNil, addIndex, take, equals, mapAccum,
     repeat as rRepeat,
@@ -68,6 +88,13 @@ export const tapDotNMut = tapDotN
 
 // __ = not data-last, not curried
 
+// --- strict evaluation of cond.
+// --- not anaphoric unless param is baked into yes or no.
+// --- doesn't seem useful to pass anything into the yes and no functions.
+export const ifCond = curry ((yes, no, cond) => cond ? yes () : no ())
+export const whenCond = curry ((yes, cond) => cond | ifCond (yes) (noop))
+export const ifCond__ = (cond, yes, no = noop) => cond | ifCond (yes) (no)
+
 // --- deps: noop, isFunction, ok
 export const ifOk = curry ((yes, no, x) => ok (x) ? yes (x) : no (x))
 export const whenOk = curry ((yes, x) => x | ifOk (yes) (noop))
@@ -97,90 +124,36 @@ export const ifLengthOne = curry ((yes, no, xs) => xs.length === 1 ? yes (xs) : 
 export const whenLengthOne = curry ((yes, xs) => xs | ifLengthOne (yes) (noop))
 export const ifLengthOne__ = (xs, yes, no = noop) => xs | ifLengthOne (yes) (no)
 
+// @todo
+const ifArray = curry ((yes, no, x) => isArray (x) ? yes (x) : no (x))
+const ifZero = curry ((yes, no, x) => x === 0 ? yes (x) : no (x))
+const whenZero = curry ((yes, x) => x | ifZero (yes) (noop))
+const ifZero__ = (x, yes, no = noop) => x | ifZero (yes) (no)
+const ifOne = curry ((yes, no, x) => x === 1 ? yes (x) : no (x))
+const whenOne = curry ((yes, x) => x | ifOne (yes) (noop))
+const ifOne__ = (x, yes, no = noop) => x | ifOne (yes) (no)
+
 export const ifEmpty = curry ((yes, no, xs) => xs.length === 0 ? yes (xs) : no (xs))
 export const whenEmpty = curry ((yes, xs) => xs | ifEmpty (yes) (noop))
 export const ifEmpty__ = (xs, yes, no = noop) => xs | ifEmpty (yes) (no)
 
-const ifNot__ = (x, yes) => x ? yes (x) : void 8
-
-
+// ------ cascade
 
 export const cascade = (val, ...fxs) =>
     fxs | reduce ((a, b) => b (a), val)
 
 // ------ bind
 
+// --- dies if o[prop] is not a function.
 export const bind = curry ((o, prop) => o[prop].bind (o))
-export const bindTry = curry ((o, prop) => bind (o, prop) | whenFunction (identity))
+
+// --- returns undefined if o[prop] is not a function.
+export const bindTry = curry ((o, prop) => o[prop]
+    | whenFunction (() => bind (o, prop)))
+
+// --- returns a function representing the 'result' of the bind: doesn't actually try to bind until
+// that function is invoked.
 export const bindLate = curry ((o, key) => (...args) => o[key] (...args))
-
-//export const 
-
-// @dep ifFunction
-// @dep bind
-/*
- * if (obj.speak) obj.speak()
- *
- * whenOk__ (
- *     bindTry (obj, 'speak'),
- *     invoke,
- * )
- *
- * whenOk__ (
- *     bindTry (obj, 'speak'),
- *     x => x ()
- * )
- *
- * bindTry (obj, 'speak') | whenOk (invoke)
- * whenBind (obj, 'speak') | invoke
- * invokeWhenBind (obj, 'speak')
- * whenBindInvoke (obj, 'speak')
- * invokeIfCan (obj, 'speak')
- * whenCanInvoke (obj, 'speak') // no
- *
- * bindTry (obj, 'speak') | invokeIfOk
- *
- * if (this.parseFormData) formData = this.parseFormData(formData);
- * first make immutable:
- *
- * if (this.parseFormData)
- *     newFormData = this.parseFormData(formData);
- *
- * const newFormData = invokeIfCan (this, 'parseFormData', formData, ... else ??)
- * const newFormData = bindTry (this, 'parseFormData') | ifOk (
- *     invoke,
- *     () => formData,
- * )
- *
- * const newFormData = [this, 'parseFormData'] | whenBind (invoke1 (formData))
- *
- * // nooo
- * const newFormData = bindTry (this, 'parseFormData') | ifOk (
- *     invoke,
- *     < formData
- * )
- *
- * const newFormData = bindTry (this, 'parseFormData') | invoke1IfOk (formData)
- *
- * if(this.model){
- *   this.model.set(this.serializeForm());
- * }
- *
- * bindTry (this, 'model') | whenOk (
- *   it => it.set (this.serializeForm())
- * )
- *
- * bindTry (this, 'model') | whenOk (
- *   dot1 ('set', (this.serializeForm()))
- * )
- *
- *
- */
-
-// pushTo for not mut would be a confusing name.
-
-// [1 2 3] -> [4 5 6] -> [1 2 3 [4 5 6]]
-// [] -> a -> []
 
 // ------ assoc.
 
@@ -279,11 +252,28 @@ export const mergeToInMut = curry ((tgt, src) => {
 
 export const mergeFromInMut = flip (mergeToInMut)
 
-// Object.assign and {...} drop proto vals.
+// ------ map.
 
-// ----- map indexed.
-export const mapIndexed = addIndex (map)
-export const mapAccumIndexed = addIndex (mapAccum)
+// --- user function f is expected to return pairs: [k, v]
+//
+// if target is an obj, it maps on key/value pairs of object.
+// if target is an array [key, value, key, value], it maps on pairs (think %foo= @foo in perl)
+
+export const mapPairs = curry ((f, obj) =>
+    obj | ifArray (
+        splitEvery (2)
+        >> map (([k, v]) => f (k, v))
+        >> fromPairs,
+
+        toPairs
+        >> map (([k, v]) => f (k, v))
+        >> fromPairs,
+    )
+)
+
+// --- map indexed: not sure about exporting these.
+const mapIndexed = addIndex (map)
+const mapAccumIndexed = addIndex (mapAccum)
 
 // --- each obj indexed?
 // --- each obj IN
@@ -404,14 +394,6 @@ const garble2 = array >> join (':')
 
 const garble = garble2
 
-// the preposition refers to the identifier following.
-//
-// functions with an On ending are aliased to a version without it:
-// call = callOn
-// bind = bindOn
-//
-// functions with To and From endings have no aliases.
-//
 
 /*
 if (this.startupCallback) {
@@ -513,11 +495,13 @@ export const mergeFish = (mixinsPre, proto, mixinsPost) => {
     const reduceMixin = reduce ((a, b) => b | mergeTo (a), {})
     const pre = mixinsPre | reduceMixin
     const post = mixinsPost | reduceMixin
+
     // new merge fun?
-    pre | eachObj ((v, k) => ifNot__ (
-        hasIn (k, proto),
-        () => proto[k] = v,
-    ))
+//     pre | eachObj ((v, k) => ifNot__ (
+//         hasIn (k, proto),
+//         () => proto[k] = v,
+//     ))
+
     post | mergeToMut (proto)
     return proto
 }
@@ -836,6 +820,12 @@ in racket, one-armed if is when.
 const isFunction = callUnder ({}.toString)
     >> dot2 ('slice') (8, -1)
     >> equals ('Function')
+
+const isArray = callUnder ({}.toString)
+    >> dot2 ('slice') (8, -1)
+    >> equals ('Array')
+
+
 
 
 

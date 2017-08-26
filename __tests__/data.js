@@ -1,7 +1,7 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, test, xtest, expectToEqual, expectToBe, assocMut, appendTo, appendToMut, appendFrom, appendFromMut, prependFrom, prependFromMut, prependTo, prependToMut, concatTo, concatToMut, concatFrom, concatFromMut, mergeTo, mergeFrom, mergeToMut, mergeFromMut, mergeToIn, mergeFromIn, mergeToInMut, mergeFromInMut;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, test, xtest, expectToEqual, expectToBe, assocMut, appendTo, appendToMut, appendFrom, appendFromMut, prependFrom, prependFromMut, prependTo, prependToMut, concatTo, concatToMut, concatFrom, concatFromMut, mergeTo, mergeFrom, mergeToMut, mergeFromMut, mergeToIn, mergeFromIn, mergeToInMut, mergeFromInMut, injectToMut, injectFromMut, mapPairs;
 ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
 ref$ = require('./common'), test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
-ref$ = require('../lib/index'), assocMut = ref$.assocMut, appendTo = ref$.appendTo, appendToMut = ref$.appendToMut, appendFrom = ref$.appendFrom, appendFromMut = ref$.appendFromMut, prependFrom = ref$.prependFrom, prependFromMut = ref$.prependFromMut, prependTo = ref$.prependTo, prependToMut = ref$.prependToMut, concatTo = ref$.concatTo, concatToMut = ref$.concatToMut, concatFrom = ref$.concatFrom, concatFromMut = ref$.concatFromMut, mergeTo = ref$.mergeTo, mergeFrom = ref$.mergeFrom, mergeToMut = ref$.mergeToMut, mergeFromMut = ref$.mergeFromMut, mergeToIn = ref$.mergeToIn, mergeFromIn = ref$.mergeFromIn, mergeToInMut = ref$.mergeToInMut, mergeFromInMut = ref$.mergeFromInMut;
+ref$ = require('../lib/index'), assocMut = ref$.assocMut, appendTo = ref$.appendTo, appendToMut = ref$.appendToMut, appendFrom = ref$.appendFrom, appendFromMut = ref$.appendFromMut, prependFrom = ref$.prependFrom, prependFromMut = ref$.prependFromMut, prependTo = ref$.prependTo, prependToMut = ref$.prependToMut, concatTo = ref$.concatTo, concatToMut = ref$.concatToMut, concatFrom = ref$.concatFrom, concatFromMut = ref$.concatFromMut, mergeTo = ref$.mergeTo, mergeFrom = ref$.mergeFrom, mergeToMut = ref$.mergeToMut, mergeFromMut = ref$.mergeFromMut, mergeToIn = ref$.mergeToIn, mergeFromIn = ref$.mergeFromIn, mergeToInMut = ref$.mergeToInMut, mergeFromInMut = ref$.mergeFromInMut, injectToMut = ref$.injectToMut, injectFromMut = ref$.injectFromMut, mapPairs = ref$.mapPairs;
 describe('data transforms', function(){
   var run, testMut;
   run = function(args){
@@ -870,7 +870,7 @@ describe('data transforms', function(){
       });
       return expect(res.hidden).toEqual(42);
     });
-    return test('discards non-own vals 3', function(){
+    test('discards non-own vals 3', function(){
       var x$, tgt, y$, src, res;
       x$ = tgt = Object.create({
         hidden: 42
@@ -898,6 +898,10 @@ describe('data transforms', function(){
         b: 3,
         c: 4
       });
+    });
+    return test('alias inject-to-mut', function(){
+      return expectToEqual(mergeToMut)(
+      injectToMut);
     });
   });
   describe('mergeFromMut', function(){
@@ -988,7 +992,7 @@ describe('data transforms', function(){
       });
       return expect(res.hidden).toEqual(42);
     });
-    return test('discards non-own vals 3', function(){
+    test('discards non-own vals 3', function(){
       var x$, tgt, y$, src, res;
       x$ = tgt = Object.create({
         hidden: 42
@@ -1016,6 +1020,10 @@ describe('data transforms', function(){
         b: 3,
         c: 4
       });
+    });
+    return test('alias inject-from-mut', function(){
+      return expectToEqual(mergeFromMut)(
+      injectFromMut);
     });
   });
   describe('mergeToIn', function(){
@@ -1294,7 +1302,7 @@ describe('data transforms', function(){
       });
     });
   });
-  return describe('mergeFromInMut', function(){
+  describe('mergeFromInMut', function(){
     var fn, dir, mut;
     fn = mergeFromInMut;
     dir = 'from';
@@ -1384,6 +1392,36 @@ describe('data transforms', function(){
         c: 4,
         hidden: 43
       });
+    });
+  });
+  return describe('mapPairs', function(){
+    test('obj', function(){
+      return expectToEqual({
+        HOW: 'yes, fine',
+        ARE: 'yes, thanks',
+        YOU: 'yes, and you?'
+      })(
+      mapPairs(function(k, v){
+        return [k.toUpperCase(), 'yes, ' + v];
+      })(
+      function(){
+        return {
+          how: 'fine',
+          are: 'thanks',
+          you: 'and you?'
+        };
+      }()));
+    });
+    return test('array', function(){
+      return expectToEqual({
+        HOW: 'yes, fine',
+        ARE: 'yes, thanks',
+        YOU: 'yes, and you?'
+      })(
+      mapPairs(function(k, v){
+        return [k.toUpperCase(), 'yes, ' + v];
+      })(
+      ['how', 'fine', 'are', 'thanks', 'you', 'and you?']));
     });
   });
 });

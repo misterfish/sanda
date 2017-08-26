@@ -43,6 +43,8 @@ describe 'bind*' ->
         name: 'dog'
         speak: -> 'my name is ' + @name
         garble: (...args) -> join '!' args
+
+    # --- common to all.
     zip [bind, bind-late, bind-try] <[ bind bindLate bindTry ]>
     |> each ([bind-func, bind-func-name]) ->
         describe bind-func-name, ->
@@ -61,16 +63,21 @@ describe 'bind*' ->
                 |> bind-func obj
                 |> (x) -> x()
                 |> expect-to-equal 'my name is dog'
+
     describe 'bind hard' ->
         test 'fails on undefined function' ->
             (expect -> obj.squeak()).to-throw TypeError
     describe 'bind late' ->
         test '1' ->
-            obj = {}
-            bound = 'speak' |> bind-late obj
+            obj2 = {}
+            bound = 'speak' |> bind-late obj2
             (expect -> bound()).to-throw TypeError
-            obj.speak = -> 'spoke'
+            obj2.speak = -> 'spoke'
             (expect bound()).to-equal 'spoke'
+    describe 'bind try' ->
+        test 'returns undefined on bad bind' ->
+            bind-try obj, 'squeqk'
+            |> expect-to-equal void
     describe 'forms' ->
         xtest '1' ->
             bindTry(obj, 'speak') |> if-ok

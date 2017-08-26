@@ -18,8 +18,13 @@
     append-to, append-to-mut, append-from, append-from-mut,
     prepend-from, prepend-from-mut, prepend-to, prepend-to-mut,
     concat-to, concat-to-mut, concat-from, concat-from-mut,
+
     merge-to, merge-from, merge-to-mut, merge-from-mut,
     merge-to-in, merge-from-in, merge-to-in-mut, merge-from-in-mut,
+    inject-to-mut, inject-from-mut,
+
+    map-pairs,
+
 } = require '../lib/index'
 
 describe 'data transforms' ->
@@ -476,6 +481,9 @@ describe 'data transforms' ->
             test-mut do
                 { res, mut, tgt, }
             (expect res).to-equal a: 1 b: 3 c: 4
+        test 'alias inject-to-mut' ->
+            inject-to-mut
+            |> expect-to-equal merge-to-mut
 
     describe 'mergeFromMut' ->
         fn = merge-from-mut
@@ -527,6 +535,9 @@ describe 'data transforms' ->
             test-mut do
                 { res, mut, tgt, }
             (expect res).to-equal a: 1 b: 3 c: 4
+        test 'alias inject-from-mut' ->
+            inject-from-mut
+            |> expect-to-equal merge-from-mut
 
     describe 'mergeToIn' ->
         fn = merge-to-in
@@ -706,3 +717,23 @@ describe 'data transforms' ->
 
             (expect res).to-equal a: 1 b: 3 c: 4 hidden: 43
 
+    describe 'mapPairs' ->
+        test 'obj' ->
+            do ->
+                how: 'fine'
+                are: 'thanks'
+                you: 'and you?'
+            |> map-pairs (k, v) ->
+                [k.to-upper-case(), 'yes, ' + v]
+            |> expect-to-equal do
+                HOW: 'yes, fine'
+                ARE: 'yes, thanks'
+                YOU: 'yes, and you?'
+        test 'array' ->
+            ['how' 'fine' 'are' 'thanks' 'you' 'and you?']
+            |> map-pairs (k, v) ->
+                [k.to-upper-case(), 'yes, ' + v]
+            |> expect-to-equal do
+                HOW: 'yes, fine'
+                ARE: 'yes, thanks'
+                YOU: 'yes, and you?'
