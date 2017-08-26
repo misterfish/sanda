@@ -58,3 +58,52 @@ bindTry (this, 'model') | whenOk (
 bindTry (this, 'model') | whenOk (
   dot1 ('set', (this.serializeForm()))
 )
+
+/*
+if (this.startupCallback) {
+    this.startupCallback();
+}
+
+this.startupCallback
+| ifOk (callOn (this))
+
+this.startupCallback
+| ifOk (call (this))
+
+ifOk__ (
+    this.startupCallback,
+    f => f.call (this),
+)
+
+ifOk__ (
+    this.startupCallback,
+    callOn (this),
+)
+
+ifOk__ (
+    this.startupCallback,
+    call (this),
+)
+
+ifOk__ (
+    this.startupCallback,
+    bind (this) >> call,
+)
+
+this.startupCallback
+| ifOk (f => f.call (this))
+
+'startupCallback'
+| ifHasOn (this, call)
+
+'startupCallback'
+| ifBind (this, call)
+
+invokeIfHas (this, 'startupCallback')
+invoke1IfHas (this, 'startupCallback', 10)
+
+ifBind (this, 'startupCallback', call)
+
+*/
+
+

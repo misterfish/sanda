@@ -18,13 +18,12 @@
 //
 // functions with To and From endings have no aliases.
 
-
 defineBinaryOperator ('|', (a, b) => b (a))
 defineBinaryOperator ('>>', (a, b) => (...args) => b (a (...args)))
 
 import {
     isEmpty, tap, has, hasIn, flip, fromPairs, toPairs, toPairsIn, assoc, assocPath, head,
-    tail, reduceRight, chain, identity, reduce, map, filter, reject, join,
+    last, tail, reduceRight, chain, identity, reduce, map, filter, reject, join,
     split, prop as rProp, path as rPath, defaultTo as rDefaultTo, curry,
     splitEvery,
     forEach as each, forEachObjIndexed as eachObj, complement, times as rTimes,
@@ -138,6 +137,8 @@ const ifOne__ = (x, yes, no = noop) => x | ifOne (yes) (no)
 export const ifEmpty = curry ((yes, no, xs) => xs.length === 0 ? yes (xs) : no (xs))
 export const whenEmpty = curry ((yes, xs) => xs | ifEmpty (yes) (noop))
 export const ifEmpty__ = (xs, yes, no = noop) => xs | ifEmpty (yes) (no)
+
+// --@todo: cond battery from wiris script.
 
 // ------ cascade
 
@@ -291,10 +292,6 @@ export const mapPairsIn = curry ((f, obj) => obj
     | fromPairs,
 )
 
-// --- map indexed: not sure about exporting these.
-const mapIndexed = addIndex (map)
-const mapAccumIndexed = addIndex (mapAccum)
-
 // --- ramda already gives us eachObj.
 
 export const eachObjIn = curry ((f, obj) => {
@@ -413,7 +410,15 @@ export const noop = () => {}
 
 // ------ try catch
 
-export const tryCatch = (whatToTry, howToCatch = noop) => {
+export const tryCatch = curry ((good, bad, f) => {
+    try {
+        return good (f ())
+    } catch (e) {
+        return bad (e)
+    }
+})
+
+export const tryCatch__ = (whatToTry, howToCatch = noop) => {
     try {
         return whatToTry ();
     } catch (e) {
@@ -421,83 +426,10 @@ export const tryCatch = (whatToTry, howToCatch = noop) => {
     }
 }
 
-// map (+ 2)
-// map (.toUpperCase())
-//
-//
-// factory stuff.
-//
-// unspread?
-// const garble = (...args) => join (',') (args)
-// const garble = applyXXX (join (','))
-
 // --- turn positional args into an array with those values.
 export const array = (...args) => args
 
-const garble1 = (...args) => join (':') (args)
-const garble2 = array >> join (':')
 
-const garble = garble2
-
-
-/*
-if (this.startupCallback) {
-    this.startupCallback();
-}
-
-this.startupCallback
-| ifOk (callOn (this))
-
-this.startupCallback
-| ifOk (call (this))
-
-ifOk__ (
-    this.startupCallback,
-    f => f.call (this),
-)
-
-ifOk__ (
-    this.startupCallback,
-    callOn (this),
-)
-
-ifOk__ (
-    this.startupCallback,
-    call (this),
-)
-
-ifOk__ (
-    this.startupCallback,
-    bind (this) >> call,
-)
-
-this.startupCallback
-| ifOk (f => f.call (this))
-
-'startupCallback'
-| ifHasOn (this, call)
-
-'startupCallback'
-| ifBind (this, call)
-
-invokeIfHas (this, 'startupCallback')
-invoke1IfHas (this, 'startupCallback', 10)
-
-ifBind (this, 'startupCallback', call)
-
-*/
-
-// inject?
-// injectok
-// injectwith
-// mergeallin
-// mergeallinwith
-// okorerror
-// existsorerror
-// mapzip
-// eachobjin
-// eachobjindexed
-// defaultto simple, func
 
 // --- r's zip only takes two.
 export const zipAll = (...xss) => {
@@ -510,12 +442,9 @@ export const zipAll = (...xss) => {
     return ret
 }
 
-
-
-
-
-
-
+// @todo
+// injectok
+// injectwith
 
 // --- inject src into target, using only own vals.
 const inject = curry ((src, target) => {
@@ -533,6 +462,9 @@ const injectOk = curry ((src, target) => {
     )
     return target
 })
+
+// ? mergeAllInWith??
+// --- like mergeAllIn but use f if tgt and src vals both exist.
 
 // --- like R.merge but also use prototype vals.
 export const mergeAllIn = xs => reduce (
@@ -869,15 +801,18 @@ in racket, one-armed if is when.
 
 */
 
-const isFunction = callUnder ({}.toString)
-    >> dot2 ('slice') (8, -1)
-    >> equals ('Function')
+// --- wants upper case, e.g. output of toString.
+const isType = curry ((t, x) => x
+    | callUnder ({}.toString)
+    | dot2 ('slice') (8, -1)
+    | equals (t)
+)
+const isArray = isType ('Array')
+const isFunction = isType ('Function')
 
-const isArray = callUnder ({}.toString)
-    >> dot2 ('slice') (8, -1)
-    >> equals ('Array')
+// --- map indexed: not sure about exporting these.
+const mapIndexed = addIndex (map)
+const mapAccumIndexed = addIndex (mapAccum)
 
-
-
-// undef on empty.
-const last = xs => xs [xs.length - 1]
+// okorerror
+// existsorerror

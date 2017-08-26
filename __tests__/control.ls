@@ -15,20 +15,38 @@
 } = require './common'
 
 {
-    try-catch,
+    try-catch, try-catch__,
 } = require '../lib/index'
 
-describe 'try/catch' ->
-    danger = -> throw new Error
-    safe = -> 99
+describe 'try/catch__' ->
+    fails = -> throw new Error
+    passes = -> 99
+
+    how-to-fail = jest.fn()
+        ..mock-return-value 'failed'
+
     test 'should fail' ->
-        catcher = jest.fn()
-            ..mock-return-value 10
-        try-catch danger, catcher
-        |> expect-to-equal 10
+        try-catch__ fails, how-to-fail
+        |> expect-to-equal 'failed'
     test 'should succeed' ->
-        catcher = jest.fn()
-            ..mock-return-value 10
-        try-catch safe, catcher
+        try-catch__ passes, how-to-fail
         |> expect-to-equal 99
+
+describe 'try/catch' ->
+    fails = -> throw new Error
+    passes = -> 99
+
+    how-to-pass = jest.fn()
+        ..mock-implementation (x) -> [x, x, x]
+    how-to-fail = jest.fn()
+        ..mock-return-value 'failed'
+
+    test 'should fail' ->
+        fails
+        |> try-catch how-to-pass, how-to-fail
+        |> expect-to-equal 'failed'
+    test 'should succeed, and pass params' ->
+        passes
+        |> try-catch how-to-pass, how-to-fail
+        |> expect-to-equal [99 99 99]
 
