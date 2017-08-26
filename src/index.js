@@ -66,33 +66,42 @@ export const tapDot2Mut = tapDot2
 export const tapDot3Mut = tapDot3
 export const tapDotNMut = tapDotN
 
-export const ifOk__ = (x, yes, no) => ifOk (yes, no, x)
-export const ifOk = curry ((yes, x) => ok (x) ? yes (x) : void 8)
+// __ = not data-last, not curried
 
-export const ifLengthOne = curry ((yes, no, xs) =>
-    xs.length === 1 ? yes (xs) : no (xs)
-)
+// --- deps: noop, isFunction, ok
+export const ifOk = curry ((yes, no, x) => ok (x) ? yes (x) : no (x))
+export const whenOk = curry ((yes, x) => x | ifOk (yes) (noop))
+export const ifOk__ = (x, yes, no = noop) => x | ifOk (yes) (no)
 
-export const ifEmpty = curry ((yes, no, xs) =>
-    xs.length === 0 ? yes (xs) : no (xs)
-)
-
-export const ifLengthOne__ = (xs, yes, no) =>
-    xs.length === 1 ? yes (xs) : no (xs)
-
-export const ifEmpty__ = (xs, yes, no) =>
-    xs.length === 0 ? yes (xs) : no (xs)
-
-// --- deps: noop
 export const ifTrue = curry ((yes, no, x) => x === true ? yes (x) : no (x))
 export const whenTrue = curry ((yes, x) => x | ifTrue (yes) (noop))
 export const ifTrue__ = (x, yes, no = noop) => x | ifTrue (yes) (no)
+
+export const ifFalse = curry ((yes, no, x) => x === false ? yes (x) : no (x))
+export const whenFalse = curry ((yes, x) => x | ifFalse (yes) (noop))
+export const ifFalse__ = (x, yes, no = noop) => x | ifFalse (yes) (no)
+
+export const ifYes = curry ((yes, no, x) => x ? yes (x) : no (x))
+export const whenYes = curry ((yes, x) => x | ifYes (yes) (noop))
+export const ifYes__ = (x, yes, no = noop) => x | ifYes (yes) (no)
+
+export const ifNo = curry ((yes, no, x) => (! x) ? yes (x) : no (x))
+export const whenNo = curry ((yes, x) => x | ifNo (yes) (noop))
+export const ifNo__ = (x, yes, no = noop) => x | ifNo (yes) (no)
 
 export const ifFunction = curry ((yes, no, x) => isFunction (x) ? yes (x) : no (x))
 export const whenFunction = curry ((yes, x) => x | ifFunction (yes) (noop))
 export const ifFunction__ = (x, yes, no = noop) => x | ifFunction (yes) (no)
 
-// -- = not data-last, not curried
+export const ifLengthOne = curry ((yes, no, xs) => xs.length === 1 ? yes (xs) : no (xs))
+export const whenLengthOne = curry ((yes, xs) => xs | ifLengthOne (yes) (noop))
+export const ifLengthOne__ = (xs, yes, no = noop) => xs | ifLengthOne (yes) (no)
+
+export const ifEmpty = curry ((yes, no, xs) => xs.length === 0 ? yes (xs) : no (xs))
+export const whenEmpty = curry ((yes, xs) => xs | ifEmpty (yes) (noop))
+export const ifEmpty__ = (xs, yes, no = noop) => xs | ifEmpty (yes) (no)
+
+const ifNot__ = (x, yes) => x ? yes (x) : void 8
 
 
 
@@ -484,7 +493,7 @@ const shallowClone = obj => ({...obj})
 
 // --- like inject, but only if src val is ok.
 const injectOk = curry ((src, target) => {
-    for (let i in src) ifOk (
+    for (let i in src) whenOk (
         x => target[i] = x,
         src[i],
     )
@@ -497,8 +506,6 @@ export const mergeAllIn = xs => reduce (
     {},
     xs,
 )
-
-const ifNot__ = (x, yes) => x ? yes (x) : void 8
 
 // list dependencies if a func uses other ones (for unit testing)
 
@@ -829,5 +836,6 @@ in racket, one-armed if is when.
 const isFunction = callUnder ({}.toString)
     >> dot2 ('slice') (8, -1)
     >> equals ('Function')
+
 
 

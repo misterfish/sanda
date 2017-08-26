@@ -1,7 +1,7 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, whenTrue, ifTrue, ifTrue__, whenFunction, ifFunction, ifFunction__, doTests, doTestDoubleArm, doTestSingleArm;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, ifOk, whenOk, ifOk__, ifTrue, whenTrue, ifTrue__, ifFalse, whenFalse, ifFalse__, ifYes, whenYes, ifYes__, ifNo, whenNo, ifNo__, ifFunction, whenFunction, ifFunction__, ifLengthOne, whenLengthOne, ifLengthOne__, ifEmpty, whenEmpty, ifEmpty__, doTests, doTestDoubleArm, doTestSingleArm;
 ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
 ref$ = require('./common'), arrayLs = ref$.arrayLs, test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
-ref$ = require('../lib/index'), whenTrue = ref$.whenTrue, ifTrue = ref$.ifTrue, ifTrue__ = ref$.ifTrue__, whenFunction = ref$.whenFunction, ifFunction = ref$.ifFunction, ifFunction__ = ref$.ifFunction__;
+ref$ = require('../lib/index'), ifOk = ref$.ifOk, whenOk = ref$.whenOk, ifOk__ = ref$.ifOk__, ifTrue = ref$.ifTrue, whenTrue = ref$.whenTrue, ifTrue__ = ref$.ifTrue__, ifFalse = ref$.ifFalse, whenFalse = ref$.whenFalse, ifFalse__ = ref$.ifFalse__, ifYes = ref$.ifYes, whenYes = ref$.whenYes, ifYes__ = ref$.ifYes__, ifNo = ref$.ifNo, whenNo = ref$.whenNo, ifNo__ = ref$.ifNo__, ifFunction = ref$.ifFunction, whenFunction = ref$.whenFunction, ifFunction__ = ref$.ifFunction__, ifLengthOne = ref$.ifLengthOne, whenLengthOne = ref$.whenLengthOne, ifLengthOne__ = ref$.ifLengthOne__, ifEmpty = ref$.ifEmpty, whenEmpty = ref$.whenEmpty, ifEmpty__ = ref$.ifEmpty__;
 doTests = curry$(function(describeSpec, tests){
   return each(function(testSpec){
     var numArms, ref$, ref1$, theTest;
@@ -29,10 +29,10 @@ doTestDoubleArm = curry$(function(arg$, arg1$){
     ref$ = expectBranch === 'ja'
       ? [jaVal, 1, 0]
       : [neeVal, 0, 1], expectedRet = ref$[0], expectedCallsJa = ref$[1], expectedCallsNee = ref$[2];
-    expect(ja.mock.calls.length).toEqual(
-    expectedCallsJa);
-    expect(nee.mock.calls.length).toEqual(
-    expectedCallsNee);
+    expectToEqual(expectedCallsJa)(
+    ja.mock.calls.length);
+    expectToEqual(expectedCallsNee)(
+    nee.mock.calls.length);
     return expectToEqual(expectedRet)(
     ret);
   });
@@ -53,11 +53,128 @@ doTestSingleArm = curry$(function(arg$, arg1$){
     ref$ = expectBranch === 'ja'
       ? [jaVal, 1]
       : [neeVal, 0], expectedRet = ref$[0], expectedCallsJa = ref$[1];
-    expect(ja.mock.calls.length).toEqual(
-    expectedCallsJa);
+    expectToEqual(expectedCallsJa)(
+    ja.mock.calls.length);
     return expectToEqual(expectedRet)(
     ret);
   });
+});
+describe('whenOk', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: whenOk,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'true',
+    inputVal: true,
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'empty string',
+    inputVal: '',
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'undefined',
+    inputVal: void 8,
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'null',
+    inputVal: null,
+    expectBranch: 'nee',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifOk', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifOk,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'true',
+    inputVal: true,
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'empty string',
+    inputVal: '',
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'undefined',
+    inputVal: void 8,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'null',
+    inputVal: null,
+    expectBranch: 'nee',
+    numArms: 2
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifOk__', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifOk__,
+    is__: true
+  };
+  tests = arrayLs({
+    desc: 'true',
+    inputVal: true,
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'true, no else',
+    inputVal: true,
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'false, no else',
+    inputVal: false,
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'undefined',
+    inputVal: void 8,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'undefined, no else',
+    inputVal: void 8,
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'null',
+    inputVal: null,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'null, no else',
+    inputVal: null,
+    expectBranch: 'nee',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
 });
 describe('whenTrue', function(){
   var describeSpec, tests;
@@ -69,6 +186,11 @@ describe('whenTrue', function(){
     desc: 'true',
     inputVal: true,
     expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: '3',
+    inputVal: 3,
+    expectBranch: 'nee',
     numArms: 1
   }, {
     desc: 'false',
@@ -100,6 +222,11 @@ describe('ifTrue', function(){
     expectBranch: 'ja',
     numArms: 2
   }, {
+    desc: '3',
+    inputVal: 3,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
     desc: 'false',
     inputVal: false,
     expectBranch: 'nee',
@@ -129,6 +256,16 @@ describe('ifTrue__', function(){
     expectBranch: 'ja',
     numArms: 1
   }, {
+    desc: '3',
+    inputVal: 3,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: '3, no else',
+    inputVal: 3,
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
     desc: 'false',
     inputVal: false,
     expectBranch: 'nee',
@@ -137,6 +274,302 @@ describe('ifTrue__', function(){
     desc: 'false, no else',
     inputVal: false,
     expectBranch: 'nee',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
+});
+describe('whenFalse', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: whenFalse,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'true',
+    inputVal: true,
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'empty string',
+    inputVal: '',
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'undefined',
+    inputVal: void 8,
+    expectBranch: 'nee',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifFalse', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifFalse,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'true',
+    inputVal: true,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'empty string',
+    inputVal: '',
+    expectBranch: 'nee',
+    numArms: 2
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifFalse__', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifFalse__,
+    is__: true
+  };
+  tests = arrayLs({
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'false, no else',
+    inputVal: false,
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'true',
+    inputVal: true,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'true, no else',
+    inputVal: true,
+    expectBranch: 'nee',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
+});
+describe('whenYes', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: whenYes,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'true',
+    inputVal: true,
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: '3',
+    inputVal: 3,
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'empty string',
+    inputVal: '',
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'undefined',
+    inputVal: void 8,
+    expectBranch: 'nee',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifYes', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifYes,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'true',
+    inputVal: true,
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: '3',
+    inputVal: 3,
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'empty string',
+    inputVal: '',
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'undefined',
+    inputVal: void 8,
+    expectBranch: 'nee',
+    numArms: 2
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifYes__', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifYes__,
+    is__: true
+  };
+  tests = arrayLs({
+    desc: 'true',
+    inputVal: true,
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'true, no else',
+    inputVal: true,
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: '3',
+    inputVal: 3,
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: '3, no else',
+    inputVal: 3,
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'false, no else',
+    inputVal: false,
+    expectBranch: 'nee',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
+});
+describe('whenNo', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: whenNo,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'true',
+    inputVal: true,
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: '3',
+    inputVal: 3,
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'empty string',
+    inputVal: '',
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'undefined',
+    inputVal: void 8,
+    expectBranch: 'ja',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifNo', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifNo,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'true',
+    inputVal: true,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'empty string',
+    inputVal: '',
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: '3',
+    inputVal: 3,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'undefined',
+    inputVal: void 8,
+    expectBranch: 'ja',
+    numArms: 2
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifNo__', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifNo__,
+    is__: true
+  };
+  tests = arrayLs({
+    desc: 'true',
+    inputVal: true,
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'true, no else',
+    inputVal: true,
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'false',
+    inputVal: false,
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'false, no else',
+    inputVal: false,
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'empty string',
+    inputVal: '',
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'empty string, no else',
+    inputVal: '',
+    expectBranch: 'ja',
     numArms: 1
   });
   return doTests(describeSpec, tests);
@@ -239,6 +672,140 @@ describe('ifFunction__', function(){
     desc: 'array, no else',
     inputVal: [],
     expectBranch: 'nee',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
+});
+describe('whenLengthOne', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: whenLengthOne,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'array n = 1',
+    inputVal: [9],
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'array n = 0',
+    inputVal: [],
+    expectBranch: 'nee',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifLengthOne', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifLengthOne,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'array n = 1',
+    inputVal: [9],
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'array n = 0',
+    inputVal: [],
+    expectBranch: 'nee',
+    numArms: 2
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifLengthOne__', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifLengthOne__,
+    is__: true
+  };
+  tests = arrayLs({
+    desc: 'array n = 1',
+    inputVal: [9],
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'array n = 1, no else',
+    inputVal: [9],
+    expectBranch: 'ja',
+    numArms: 1
+  }, {
+    desc: 'array n = 0',
+    inputVal: [],
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'array n = 0, no else',
+    inputVal: [],
+    expectBranch: 'nee',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
+});
+describe('whenEmpty', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: whenEmpty,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'array n = 1',
+    inputVal: [9],
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'array n = 0',
+    inputVal: [],
+    expectBranch: 'ja',
+    numArms: 1
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifEmpty', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifEmpty,
+    is__: false
+  };
+  tests = arrayLs({
+    desc: 'array n = 1',
+    inputVal: [9],
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'array n = 0',
+    inputVal: [],
+    expectBranch: 'ja',
+    numArms: 2
+  });
+  return doTests(describeSpec, tests);
+});
+describe('ifEmpty__', function(){
+  var describeSpec, tests;
+  describeSpec = {
+    fn: ifEmpty__,
+    is__: true
+  };
+  tests = arrayLs({
+    desc: 'array n = 1',
+    inputVal: [9],
+    expectBranch: 'nee',
+    numArms: 2
+  }, {
+    desc: 'array n = 1, no else',
+    inputVal: [9],
+    expectBranch: 'nee',
+    numArms: 1
+  }, {
+    desc: 'array n = 0',
+    inputVal: [],
+    expectBranch: 'ja',
+    numArms: 2
+  }, {
+    desc: 'array n = 0, no else',
+    inputVal: [],
+    expectBranch: 'ja',
     numArms: 1
   });
   return doTests(describeSpec, tests);
