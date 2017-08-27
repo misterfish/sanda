@@ -137,12 +137,12 @@ const ifHasIn = curry ((yes, no, [o, k]) => o | hasIn (k) ? yes (o, k, o[k]) : n
 const whenHasIn = curry ((yes, spec) => spec | ifHasIn (yes) (noop))
 const ifHasIn__ = (spec, yes, no = noop) => spec | ifHasIn (yes) (no)
 
-export const ifBind = curry ((yes, no, [o, k]) => laat (
+const ifBind = curry ((yes, no, [o, k]) => laat (
     [k | bindTry (o)],
     ifOk (yes, no),
 ))
-export const whenBind = curry ((yes, spec) => spec | ifBind (yes) (noop))
-export const ifBind__ = (spec, yes, no = noop) => spec | ifBind (yes) (no)
+const whenBind = curry ((yes, spec) => spec | ifBind (yes) (noop))
+const ifBind__ = (spec, yes, no = noop) => spec | ifBind (yes) (no)
 
 // --- last one always? undef if none?
 // tests for truthINEss, so it acts like if().
@@ -617,6 +617,13 @@ const mergeMixins = (mixinsPre, proto, mixinsPost) => {
 
     return proto
 }
+
+// --- providing mixins will *alter* proto -- this is to avoid doing a clone or flattening the
+// prototype chain.
+// --- you can avoid this by passing Object.create (proto) instead of proto.
+// --- probably if you are working with mixins you don't mind if the proto is altered, just saying.
+
+// --- allow array for instanceExtension, for last-minute mixins. XXX
 
 export const factory = (proto, mixinsPre = [], mixinsPost = []) => laat (
     [

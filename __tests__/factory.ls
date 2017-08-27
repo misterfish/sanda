@@ -19,16 +19,34 @@
     factory,
 } = require '../lib/index'
 
-describe 'factory ' ->
-    prehistoric-proto =
-        ooze: -> 'ooze'
+num-keys = keys >> (.length)
 
-    animal-proto = (Object.create prehistoric-proto) <<<
-        walk: -> 'walk'
-        confess: -> 'I am ' + @color
+describe 'factory ' ->
+    var animal-proto
+
+    init = ->
+        prehistoric-proto =
+            ooze: -> 'ooze'
+
+        animal-proto := (Object.create prehistoric-proto) <<<
+            walk: -> 'walk'
+            confess: -> 'I am ' + @color
+
+    test-proto-unaltered = ->
+        animal-proto.walk() |> expect-to-equal 'walk'
+        (typeof! animal-proto.confess) |> expect-to-equal 'Function'
+        animal-proto.ooze() |> expect-to-equal 'ooze'
+        animal-proto |> num-keys |> expect-to-equal 2
 
     describe 1 ->
-        { proto, create, } = factory animal-proto
+        var proto, create
+        before-each ->
+            init()
+            fact = factory animal-proto
+            proto := fact.proto
+            create := fact.create
+
+        after-each -> test-proto-unaltered()
 
         test 'main' ->
             red-animal = create color: 'red'
@@ -58,6 +76,14 @@ describe 'factory ' ->
             |> expect-to-equal 'ooze'
 
     describe 'mixins pre' ->
+        var proto, create, red-animal
+        before-each ->
+            init()
+            fact = factory animal-proto, [hopper, topper, walker]
+            proto := fact.proto
+            create := fact.create
+            red-animal := create color: 'red'
+        after-each -> test-proto-unaltered()
         hopper =
             hop: -> 'hopper hop'
         topper =
@@ -67,9 +93,6 @@ describe 'factory ' ->
             pop: -> 'walker pop'
             # --- shouldn't make it to the object.
             walk: -> 'walker walk'
-
-        { proto, create, } = factory animal-proto, [hopper, topper, walker]
-        red-animal = create color: 'red'
 
         test 'mixins pre, right order' ->
             red-animal.confess()
@@ -81,11 +104,22 @@ describe 'factory ' ->
             red-animal.pop()
             |> expect-to-equal 'walker pop'
         test "mixins pre doesn't clobber" ->
+            console.log 'HERE'
             red-animal.walk()
             |> expect-to-equal 'walk'
 
-    describe 'mixins pre' ->
-        num-keys = keys >> (.length)
+    describe 'mixins post' ->
+        return
+        var proto, create, red-animal
+        before-each ->
+            init()
+            fact = factory animal-proto, [], [hopper, topper, walker]
+            proto := fact.proto
+            create := fact.create
+            red-animal := create color: 'red'
+        after-each -> test-proto-unaltered()
+
+        console.log 'THERE'
 
         hopper =
             hop: -> 'hopper hop'
@@ -97,10 +131,7 @@ describe 'factory ' ->
             # --- shouldn't make it to the object.
             walk: -> 'walker walk'
 
-        { proto, create, } = factory animal-proto, [hopper, topper, walker]
-        red-animal = create color: 'red'
-
-        test 'mixins pre, right order' ->
+        test 'mixins post, right order' ->
             red-animal.confess()
             |> expect-to-equal 'I am red'
             red-animal.hop()
@@ -109,9 +140,9 @@ describe 'factory ' ->
             |> expect-to-equal 'topper top'
             red-animal.pop()
             |> expect-to-equal 'walker pop'
-        test "mixins pre doesn't clobber" ->
+        test "mixins post does clobber" ->
             red-animal.walk()
-            |> expect-to-equal 'walk'
+            |> expect-to-equal 'walker walk'
         test 'mixins not altered' ->
             (num-keys hopper) |> expect-to-equal 1
             (num-keys topper) |> expect-to-equal 2
