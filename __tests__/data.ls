@@ -28,6 +28,8 @@
     merge-all-in,
     inject-to-mut, inject-from-mut,
 
+    discard-prototype, flatten-prototype,
+
     map-pairs, map-pairs-in, each-obj-in,
     apply-scalar, pass-scalar,
 
@@ -899,6 +901,24 @@ describe 'data transforms' ->
                 { c: 3 } |> Object.create
             |> expect-to-equal do
                 a: 1 b: 2 c: 3
+
+describe 'discardPrototype' ->
+    proto1 = Object.create blah: 10
+    proto2 = Object.create proto1
+    obj = Object.create proto2
+    obj.blah |> expect-to-equal 10
+    (obj |> discard-prototype).blah |> expect-to-equal void
+
+describe 'flattenPrototype' ->
+    proto1 = Object.create blah: 10
+        ..feets = 'sometimes'
+    proto2 = Object.create proto1
+        ..hands = 'mostways'
+    obj = Object.create proto2
+        ..legs = 'noo'
+    obj.blah |> expect-to-equal 10
+    (obj |> flatten-prototype) |> expect-to-equal do
+        blah: 10 feets: 'sometimes' hands: 'mostways' legs: 'noo'
 
 describe 'mapPairs' ->
     test 'obj' ->

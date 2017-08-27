@@ -1,7 +1,7 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, defaultTo, defaultTo__, assocMut, appendTo, appendToMut, appendFrom, appendFromMut, prependFrom, prependFromMut, prependTo, prependToMut, concatTo, concatToMut, concatFrom, concatFromMut, mergeTo, mergeFrom, mergeToMut, mergeFromMut, mergeToWithMut, mergeFromWithMut, mergeToIn, mergeFromIn, mergeToInMut, mergeFromInMut, mergeAllIn, injectToMut, injectFromMut, mapPairs, mapPairsIn, eachObjIn, applyScalar, passScalar;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, defaultTo, defaultTo__, assocMut, appendTo, appendToMut, appendFrom, appendFromMut, prependFrom, prependFromMut, prependTo, prependToMut, concatTo, concatToMut, concatFrom, concatFromMut, mergeTo, mergeFrom, mergeToMut, mergeFromMut, mergeToWithMut, mergeFromWithMut, mergeToIn, mergeFromIn, mergeToInMut, mergeFromInMut, mergeAllIn, injectToMut, injectFromMut, discardPrototype, flattenPrototype, mapPairs, mapPairsIn, eachObjIn, applyScalar, passScalar;
 ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
 ref$ = require('./common'), arrayLs = ref$.arrayLs, test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
-ref$ = require('../lib/index'), defaultTo = ref$.defaultTo, defaultTo__ = ref$.defaultTo__, assocMut = ref$.assocMut, appendTo = ref$.appendTo, appendToMut = ref$.appendToMut, appendFrom = ref$.appendFrom, appendFromMut = ref$.appendFromMut, prependFrom = ref$.prependFrom, prependFromMut = ref$.prependFromMut, prependTo = ref$.prependTo, prependToMut = ref$.prependToMut, concatTo = ref$.concatTo, concatToMut = ref$.concatToMut, concatFrom = ref$.concatFrom, concatFromMut = ref$.concatFromMut, mergeTo = ref$.mergeTo, mergeFrom = ref$.mergeFrom, mergeToMut = ref$.mergeToMut, mergeFromMut = ref$.mergeFromMut, mergeToWithMut = ref$.mergeToWithMut, mergeFromWithMut = ref$.mergeFromWithMut, mergeToIn = ref$.mergeToIn, mergeFromIn = ref$.mergeFromIn, mergeToInMut = ref$.mergeToInMut, mergeFromInMut = ref$.mergeFromInMut, mergeAllIn = ref$.mergeAllIn, injectToMut = ref$.injectToMut, injectFromMut = ref$.injectFromMut, mapPairs = ref$.mapPairs, mapPairsIn = ref$.mapPairsIn, eachObjIn = ref$.eachObjIn, applyScalar = ref$.applyScalar, passScalar = ref$.passScalar;
+ref$ = require('../lib/index'), defaultTo = ref$.defaultTo, defaultTo__ = ref$.defaultTo__, assocMut = ref$.assocMut, appendTo = ref$.appendTo, appendToMut = ref$.appendToMut, appendFrom = ref$.appendFrom, appendFromMut = ref$.appendFromMut, prependFrom = ref$.prependFrom, prependFromMut = ref$.prependFromMut, prependTo = ref$.prependTo, prependToMut = ref$.prependToMut, concatTo = ref$.concatTo, concatToMut = ref$.concatToMut, concatFrom = ref$.concatFrom, concatFromMut = ref$.concatFromMut, mergeTo = ref$.mergeTo, mergeFrom = ref$.mergeFrom, mergeToMut = ref$.mergeToMut, mergeFromMut = ref$.mergeFromMut, mergeToWithMut = ref$.mergeToWithMut, mergeFromWithMut = ref$.mergeFromWithMut, mergeToIn = ref$.mergeToIn, mergeFromIn = ref$.mergeFromIn, mergeToInMut = ref$.mergeToInMut, mergeFromInMut = ref$.mergeFromInMut, mergeAllIn = ref$.mergeAllIn, injectToMut = ref$.injectToMut, injectFromMut = ref$.injectFromMut, discardPrototype = ref$.discardPrototype, flattenPrototype = ref$.flattenPrototype, mapPairs = ref$.mapPairs, mapPairsIn = ref$.mapPairsIn, eachObjIn = ref$.eachObjIn, applyScalar = ref$.applyScalar, passScalar = ref$.passScalar;
 describe('default to', function(){
   test(1, function(){
     return expectToEqual(false)(
@@ -1682,6 +1682,40 @@ describe('data transforms', function(){
       }))));
     });
   });
+});
+describe('discardPrototype', function(){
+  var proto1, proto2, obj;
+  proto1 = Object.create({
+    blah: 10
+  });
+  proto2 = Object.create(proto1);
+  obj = Object.create(proto2);
+  expectToEqual(10)(
+  obj.blah);
+  return expectToEqual(void 8)(
+  discardPrototype(
+  obj).blah);
+});
+describe('flattenPrototype', function(){
+  var x$, proto1, y$, proto2, z$, obj;
+  x$ = proto1 = Object.create({
+    blah: 10
+  });
+  x$.feets = 'sometimes';
+  y$ = proto2 = Object.create(proto1);
+  y$.hands = 'mostways';
+  z$ = obj = Object.create(proto2);
+  z$.legs = 'noo';
+  expectToEqual(10)(
+  obj.blah);
+  return expectToEqual({
+    blah: 10,
+    feets: 'sometimes',
+    hands: 'mostways',
+    legs: 'noo'
+  })(
+  flattenPrototype(
+  obj));
 });
 describe('mapPairs', function(){
   test('obj', function(){

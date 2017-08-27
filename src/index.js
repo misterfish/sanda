@@ -574,9 +574,15 @@ export const ifXReplaceStr = curry ((yes, no, reStr, repl, target) =>
 export const ifXReplaceStrFlags = curry ((yes, no, reStr, flags, repl, target) =>
     ifReplace (yes, no, xRegExpStr (reStr, flags), repl, target))
 
+// --- returns a copy with prototype vals discarded.
+export const discardPrototype = (o) => ({ ...o })
 
-
-
+// --- returns a copy with prototype vals floated.
+export const flattenPrototype = (o) => {
+    const ret = {}
+    for (const i in o) ret[i] = o[i]
+    return ret
+}
 
 const arg0 = (...args) => args [0]
 const arg1 = (...args) => args [1]
