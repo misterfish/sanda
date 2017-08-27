@@ -29,6 +29,7 @@
 
     x-reg-exp, x-reg-exp-str,
     x-match, x-match-str, x-match-str-flags, #match
+    x-replace, x-replace-str, x-replace-str-flags,
 
     if-replace, if-x-replace, if-x-replace-str, if-x-replace-str-flags,
 
@@ -384,6 +385,26 @@ describe 'match/regex' ->
         |> main.match new RegExp '(o.s)'
         |> (m) -> m.1
         |> expect-to-equal 'ors'
+    test 'x-replace' ->
+        'lots of pigs'
+        |> x-replace (new RegExp '(o .)'), 'po'
+        |> expect-to-equal 'lpos of pigs'
+    test 'x-replace global' ->
+        'lots of pigs'
+        |> x-replace (new RegExp '(o .)' 'g'), 'po'
+        |> expect-to-equal 'lpos po pigs'
+    test 'x-replace-str' ->
+        'lots of pigs'
+        |> x-replace-str ' (o .. p) ' 'stick'
+        |> expect-to-equal 'lots stickigs'
+    test 'x-replace-str-flags' ->
+        'lots of pigs'
+        |> x-replace-str-flags ' (o .) ' '' 'po'
+        |> expect-to-equal 'lpos of pigs'
+    test 'x-replace-str-flags global' ->
+        'lots of pigs'
+        |> x-replace-str-flags ' (o .) ' 'g' 'po'
+        |> expect-to-equal 'lpos po pigs'
 
 describe 'ifReplace*' ->
 

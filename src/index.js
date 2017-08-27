@@ -407,8 +407,8 @@ export const laat = given
 
 export const givenStar = (xs, f) => {
     const xsMapper = prevVals => ifFunction (
-        v => v.apply (null, prevVals),
-        v => v,
+        passN (prevVals),
+        identity,
     )
 
     const ys = xs
@@ -430,20 +430,6 @@ export const laatStar = givenStar
 // --- 'apply' always means 'apply this function to some params'
 // --- 'pass' means 'pass these params to a function'
 // --- 'invoke' means just call this function, no context or params.
-
-// log | invokeN ([1, 2, 3])
-// log | passN ([1, 2, 3])
-
-// log | invokeUsingN ([1, 2, 3])
-// call them invoke using?
-
-// [1, 2, 3] | apply (log)
-//
-// point-free of x => x.apply (null, xs)
-// where x is a function,
-// is not called apply.
-// passN (xs)
-// ([1, 2, 3]) | passOn (log)
 
 export const callOn = curry ((o, f) => f.call (o))
 export const callOn1 = curry ((o, val, f) => f.call (o, val))
@@ -568,9 +554,22 @@ export const xMatchStr = curry ((reStr, target) => target
 export const xMatchStrFlags = curry ((reStr, flags, target) => target
     | xMatch (new RegExp (reStr, flags)))
 
+export const xReplace = curry ((re, repl, target) =>
+    target.replace (xRegExp (re), repl)
+)
+
+export const xReplaceStr = curry ((reStr, repl, target) =>
+    target.replace (xRegExpStr (reStr), repl)
+)
+
+export const xReplaceStrFlags = curry ((reStr, flags, repl, target) =>
+    target.replace (xRegExpStr (reStr, flags), repl)
+)
+
 // --- @todo
-// xReplace
-// xReplace should tell how many it replaced.
+//
+// xReplace should tell how many it replaced? but ifReplace gets ths count, good enough?
+//
 // perhaps when global it should return an object.
 // xReplaceStr
 // xReplaceStrFlags
@@ -653,13 +652,3 @@ const isFunction = isType ('Function')
 // --- map indexed: not sure about exporting these.
 const mapIndexed = addIndex (map)
 const mapAccumIndexed = addIndex (mapAccum)
-
-// @todo
-// okorerror
-// existsorerror
-// injectok
-// injectwith
-// update would be good
-
-// cond like in cond-> clojure macro.
-// x | cond ([ ... anaphoric functions ])

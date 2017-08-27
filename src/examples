@@ -196,3 +196,43 @@ const flagsYes = (...args) => args
 
 */
 
+// update would be good
+// cond like in cond-> clojure macro.
+
+const my = {
+    parseFormData: formData => 'parsed ' + formData,
+}
+
+// if (my.parseFormData) {
+//     formData = my.parseFormData(formData);
+// }
+
+; [my, 'parseFormData']
+| ifBind (
+    pass1 (formData),
+    () => formData,
+)
+| log
+
+; [my, 'parseFormData']
+| whenBind (
+    pass1 (formData),
+)
+| log
+
+; [my, 'arseFormData']
+| whenBind (
+    pass1 (formData),
+)
+| log
+
+ifBind__ (
+    [my, 'parseFomData'],
+    pass1 (formData),
+    () => 'allen',
+)
+| log
+
+// point-free of x => x.apply (null, xs)
+// is not called apply, but passX.
+

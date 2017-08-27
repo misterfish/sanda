@@ -1,7 +1,7 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, main, ok, zipAll, bind, bindLate, bindTry, cascade, flipC, sprintf1, sprintfN, given, laat, givenStar, laatStar, nieuw, nieuw1, nieuw2, nieuw3, nieuwN, xRegExp, xRegExpStr, xMatch, xMatchStr, xMatchStrFlags, ifReplace, ifXReplace, ifXReplaceStr, ifXReplaceStrFlags, slice$ = [].slice;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, main, ok, zipAll, bind, bindLate, bindTry, cascade, flipC, sprintf1, sprintfN, given, laat, givenStar, laatStar, nieuw, nieuw1, nieuw2, nieuw3, nieuwN, xRegExp, xRegExpStr, xMatch, xMatchStr, xMatchStrFlags, xReplace, xReplaceStr, xReplaceStrFlags, ifReplace, ifXReplace, ifXReplaceStr, ifXReplaceStrFlags, slice$ = [].slice;
 ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
 ref$ = require('./common'), arrayLs = ref$.arrayLs, test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
-ref$ = main = require('../lib/index'), ok = ref$.ok, zipAll = ref$.zipAll, bind = ref$.bind, bindLate = ref$.bindLate, bindTry = ref$.bindTry, cascade = ref$.cascade, flipC = ref$.flipC, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar, nieuw = ref$.nieuw, nieuw1 = ref$.nieuw1, nieuw2 = ref$.nieuw2, nieuw3 = ref$.nieuw3, nieuwN = ref$.nieuwN, xRegExp = ref$.xRegExp, xRegExpStr = ref$.xRegExpStr, xMatch = ref$.xMatch, xMatchStr = ref$.xMatchStr, xMatchStrFlags = ref$.xMatchStrFlags, ifReplace = ref$.ifReplace, ifXReplace = ref$.ifXReplace, ifXReplaceStr = ref$.ifXReplaceStr, ifXReplaceStrFlags = ref$.ifXReplaceStrFlags;
+ref$ = main = require('../lib/index'), ok = ref$.ok, zipAll = ref$.zipAll, bind = ref$.bind, bindLate = ref$.bindLate, bindTry = ref$.bindTry, cascade = ref$.cascade, flipC = ref$.flipC, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar, nieuw = ref$.nieuw, nieuw1 = ref$.nieuw1, nieuw2 = ref$.nieuw2, nieuw3 = ref$.nieuw3, nieuwN = ref$.nieuwN, xRegExp = ref$.xRegExp, xRegExpStr = ref$.xRegExpStr, xMatch = ref$.xMatch, xMatchStr = ref$.xMatchStr, xMatchStrFlags = ref$.xMatchStrFlags, xReplace = ref$.xReplace, xReplaceStr = ref$.xReplaceStr, xReplaceStrFlags = ref$.xReplaceStrFlags, ifReplace = ref$.ifReplace, ifXReplace = ref$.ifXReplace, ifXReplaceStr = ref$.ifXReplaceStr, ifXReplaceStrFlags = ref$.ifXReplaceStrFlags;
 describe('cascade', function(){
   return test(1, function(){
     var odd, this$ = this;
@@ -526,13 +526,38 @@ describe('match/regex', function(){
     xMatch(new RegExp(' ( o . s ) '))(
     'horses')));
   });
-  return test('match', function(){
+  test('match', function(){
     return expectToEqual('ors')(
     function(m){
       return m[1];
     }(
     main.match(new RegExp('(o.s)'))(
     'horses')));
+  });
+  test('x-replace', function(){
+    return expectToEqual('lpos of pigs')(
+    xReplace(new RegExp('(o .)'), 'po')(
+    'lots of pigs'));
+  });
+  test('x-replace global', function(){
+    return expectToEqual('lpos po pigs')(
+    xReplace(new RegExp('(o .)', 'g'), 'po')(
+    'lots of pigs'));
+  });
+  test('x-replace-str', function(){
+    return expectToEqual('lots stickigs')(
+    xReplaceStr(' (o .. p) ', 'stick')(
+    'lots of pigs'));
+  });
+  test('x-replace-str-flags', function(){
+    return expectToEqual('lpos of pigs')(
+    xReplaceStrFlags(' (o .) ', '', 'po')(
+    'lots of pigs'));
+  });
+  return test('x-replace-str-flags global', function(){
+    return expectToEqual('lpos po pigs')(
+    xReplaceStrFlags(' (o .) ', 'g', 'po')(
+    'lots of pigs'));
   });
 });
 describe('ifReplace*', function(){

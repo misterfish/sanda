@@ -21,40 +21,28 @@ import fishLib, {
     sprintf, forceColors,
 } from 'fish-lib'
 
-import { pass1, whenBind, ifBind__, ifBind, } from './index'
+import { xReplace, xReplaceStr, xReplaceStrFlags, pass1, whenBind, ifBind__, ifBind, } from './index'
 
-let formData = 'old'
+'lots of pigs'
+| xReplace (/ (o .. p) /) ('stick')
+| log // 'lots stickigs'
 
-const my = {
-    parseFormData: formData => 'parsed ' + formData,
-}
+'lots of pigs'
+| xReplace (/ (o .) /) ('po')
+| log // 'lpos of pigs'
 
-// if (my.parseFormData) {
-//     formData = my.parseFormData(formData);
-// }
+'lots of pigs'
+| xReplace (/ (o .) /g) ('po')
+| log // 'lpos po pigs'
 
-; [my, 'parseFormData']
-| ifBind (
-    pass1 (formData),
-    () => formData,
-)
-| log
+'lots of pigs'
+| xReplaceStr (' (o .. p) ') ('stick')
+| log // 'lots stickigs'
 
-; [my, 'parseFormData']
-| whenBind (
-    pass1 (formData),
-)
-| log
+'lots of pigs'
+| xReplaceStrFlags (' (o .) ') ('') ('po')
+| log // 'lpos of pigs'
 
-; [my, 'arseFormData']
-| whenBind (
-    pass1 (formData),
-)
-| log
-
-ifBind__ (
-    [my, 'parseFomData'],
-    pass1 (formData),
-    () => 'allen',
-)
-| log
+'lots of pigs'
+| xReplaceStrFlags (' (o .) ') ('g') ('po')
+| log // 'lpos po pigs'
