@@ -5,8 +5,6 @@
 //
 // Object.assign and {...} drop proto vals.
 
-// pushTo for not mut would be a confusing name.
-
 // [1 2 3] -> [4 5 6] -> [1 2 3 [4 5 6]]
 // [] -> a -> []
 
@@ -139,6 +137,13 @@ const ifHasIn = curry ((yes, no, [o, k]) => o | hasIn (k) ? yes (o, k, o[k]) : n
 const whenHasIn = curry ((yes, spec) => spec | ifHasIn (yes) (noop))
 const ifHasIn__ = (spec, yes, no = noop) => spec | ifHasIn (yes) (no)
 
+export const ifBind = curry ((yes, no, [o, k]) => laat (
+    [k | bindTry (o)],
+    ifOk (yes, no),
+))
+export const whenBind = curry ((yes, spec) => spec | ifBind (yes) (noop))
+export const ifBind__ = (spec, yes, no = noop) => spec | ifBind (yes) (no)
+
 // --- last one always? undef if none?
 // tests for truthINEss, so it acts like if().
 export const cond = curry ((blocks, target) => {
@@ -237,6 +242,8 @@ export const appendToMut = curry ((tgt, src) => {
     tgt.push (src)
     return tgt
 })
+
+const pushTo = appendToMut
 
 // [] -> a -> [], mut
 export const appendFromMut = flip (appendToMut)
@@ -470,8 +477,7 @@ export const applyN = curry ((f, vs) => f.apply (null, vs))
 // --- also works for functions curried with the a => b => ... notation (unlike R.flip).
 // --- does not work with non-curried functions.
 
-export const flipC = f => curryN (
-    2,
+export const flipC = f => curryN (2) (
     (a, b, ...rest) => laat (
         // --- if f had arity 2, f (b) (a) is the answer; otherwise it's a curried interim result,
         // since f itself was curried.
@@ -491,13 +497,12 @@ export const sprintfN = curry ((str, xs) => sprintf.apply (null, [str, ...xs]))
 export const noop = () => {}
 
 // --- r's zip only takes two.
+// @dep appendToMut
 export const zipAll = (...xss) => {
     const ret = []
     const l = xss[0].length
-    for (let i = 0; i < l; i++) {
-        const zip = xss | map (xs => xs[i])
-        ret.push (zip)
-    }
+    for (let i = 0; i < l; i++)
+        xss | map (xs => xs [i]) | pushTo (ret)
     return ret
 }
 
@@ -627,45 +632,6 @@ export const factory = (proto, mixinsPre = [], mixinsPost = []) => laat (
 )
 
 
-/*
- * could make the flattening proto stuff configurable
- *
- * if you want the opposite:
- *
- * // on:
- * o
- * | discardPrototype
- * | merge (p)
- *
- * // off:
- * o
- * | flattenPrototype
- * | merge (p)
- *
- *
- *
- *
- *
-// tests for truthINEss
-export const cond = curry ((blocks, target) => {
-    let result
-    for (const [test, exec] of blocks) {
-        if (!ok (test)) return exec (target)
-
-        const result = test (target)
-        if (result) return exec (result)
-    }
-})
-
-
-
-
-
-
-
-
-
-*/
 
 // --- wants upper case, e.g. output of toString.
 const isType = curry ((t, x) => x
@@ -687,11 +653,5 @@ const mapAccumIndexed = addIndex (mapAccum)
 // injectwith
 // update would be good
 
-//cond like in cond-> clojure macro.
-//x | cond ([ ... anaphoric functions ])
-
-
-// bind needs flip family as well.
-// 'speak' | bind-to obj
-// obj | bind-under 'speak'
-
+// cond like in cond-> clojure macro.
+// x | cond ([ ... anaphoric functions ])

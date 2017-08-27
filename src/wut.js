@@ -21,11 +21,40 @@ import fishLib, {
     sprintf, forceColors,
 } from 'fish-lib'
 
-import { flipC, } from './index'
+import { pass1, whenBind, ifBind__, ifBind, } from './index'
 
-const add = a => b => a / b
-const padd = (a, b) => a / b
+let formData = 'old'
 
+const my = {
+    parseFormData: formData => 'parsed ' + formData,
+}
 
-; (add | flip ) (5,10) | log
+// if (my.parseFormData) {
+//     formData = my.parseFormData(formData);
+// }
 
+; [my, 'parseFormData']
+| ifBind (
+    pass1 (formData),
+    () => formData,
+)
+| log
+
+; [my, 'parseFormData']
+| whenBind (
+    pass1 (formData),
+)
+| log
+
+; [my, 'arseFormData']
+| whenBind (
+    pass1 (formData),
+)
+| log
+
+ifBind__ (
+    [my, 'parseFomData'],
+    pass1 (formData),
+    () => 'allen',
+)
+| log
