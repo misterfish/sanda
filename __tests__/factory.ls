@@ -5,6 +5,7 @@
     reverse,
     tap,
     flip,
+    keys,
     zip,
 } = require 'ramda'
 
@@ -70,7 +71,7 @@ describe 'factory ' ->
         { proto, create, } = factory animal-proto, [hopper, topper, walker]
         red-animal = create color: 'red'
 
-        test 'mixins pre' ->
+        test 'mixins pre, right order' ->
             red-animal.confess()
             |> expect-to-equal 'I am red'
             red-animal.hop()
@@ -83,5 +84,37 @@ describe 'factory ' ->
             red-animal.walk()
             |> expect-to-equal 'walk'
 
+    describe 'mixins pre' ->
+        num-keys = keys >> (.length)
+
+        hopper =
+            hop: -> 'hopper hop'
+        topper =
+            hop: -> 'topper hop'
+            top: -> 'topper top'
+        walker =
+            pop: -> 'walker pop'
+            # --- shouldn't make it to the object.
+            walk: -> 'walker walk'
+
+        { proto, create, } = factory animal-proto, [hopper, topper, walker]
+        red-animal = create color: 'red'
+
+        test 'mixins pre, right order' ->
+            red-animal.confess()
+            |> expect-to-equal 'I am red'
+            red-animal.hop()
+            |> expect-to-equal 'topper hop'
+            red-animal.top()
+            |> expect-to-equal 'topper top'
+            red-animal.pop()
+            |> expect-to-equal 'walker pop'
+        test "mixins pre doesn't clobber" ->
+            red-animal.walk()
+            |> expect-to-equal 'walk'
+        test 'mixins not altered' ->
+            (num-keys hopper) |> expect-to-equal 1
+            (num-keys topper) |> expect-to-equal 2
+            (num-keys walker) |> expect-to-equal 2
 
     # shouldn't alter mixins

@@ -1719,7 +1719,7 @@ describe('flattenPrototype', function(){
 });
 describe('mapPairs', function(){
   test('obj', function(){
-    var ref$;
+    var x$;
     return expectToEqual({
       ARE: 'yes, thanks',
       YOU: 'yes, and you?'
@@ -1727,10 +1727,9 @@ describe('mapPairs', function(){
     mapPairs(function(k, v){
       return [k.toUpperCase(), 'yes, ' + v];
     })(
-    (ref$ = Object.create(
-    {
+    (x$ = Object.create({
       how: 'fine'
-    }), ref$.are = 'thanks', ref$.you = 'and you?', ref$)));
+    }), x$.are = 'thanks', x$.you = 'and you?', x$)));
   });
   return test('array', function(){
     return expectToEqual({

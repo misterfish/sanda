@@ -1,5 +1,5 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, factory, toString$ = {}.toString;
-ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, keys, zip, arrayLs, test, xtest, expectToEqual, expectToBe, factory, toString$ = {}.toString;
+ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, keys = ref$.keys, zip = ref$.zip;
 ref$ = require('./common'), arrayLs = ref$.arrayLs, test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
 factory = require('../lib/index').factory;
 describe('factory ', function(){
@@ -58,7 +58,7 @@ describe('factory ', function(){
       redAnimal.ooze());
     });
   });
-  return describe('mixins pre', function(){
+  describe('mixins pre', function(){
     var hopper, topper, walker, ref$, proto, create, redAnimal;
     hopper = {
       hop: function(){
@@ -85,7 +85,7 @@ describe('factory ', function(){
     redAnimal = create({
       color: 'red'
     });
-    test('mixins pre', function(){
+    test('mixins pre, right order', function(){
       expectToEqual('I am red')(
       redAnimal.confess());
       expectToEqual('topper hop')(
@@ -100,4 +100,68 @@ describe('factory ', function(){
       redAnimal.walk());
     });
   });
+  return describe('mixins pre', function(){
+    var numKeys, hopper, topper, walker, ref$, proto, create, redAnimal, this$ = this;
+    numKeys = compose$(keys, function(it){
+      return it.length;
+    });
+    hopper = {
+      hop: function(){
+        return 'hopper hop';
+      }
+    };
+    topper = {
+      hop: function(){
+        return 'topper hop';
+      },
+      top: function(){
+        return 'topper top';
+      }
+    };
+    walker = {
+      pop: function(){
+        return 'walker pop';
+      },
+      walk: function(){
+        return 'walker walk';
+      }
+    };
+    ref$ = factory(animalProto, [hopper, topper, walker]), proto = ref$.proto, create = ref$.create;
+    redAnimal = create({
+      color: 'red'
+    });
+    test('mixins pre, right order', function(){
+      expectToEqual('I am red')(
+      redAnimal.confess());
+      expectToEqual('topper hop')(
+      redAnimal.hop());
+      expectToEqual('topper top')(
+      redAnimal.top());
+      return expectToEqual('walker pop')(
+      redAnimal.pop());
+    });
+    test("mixins pre doesn't clobber", function(){
+      return expectToEqual('walk')(
+      redAnimal.walk());
+    });
+    return test('mixins not altered', function(){
+      expectToEqual(1)(
+      numKeys(hopper));
+      expectToEqual(2)(
+      numKeys(topper));
+      return expectToEqual(2)(
+      numKeys(walker));
+    });
+  });
 });
+function compose$() {
+  var functions = arguments;
+  return function() {
+    var i, result;
+    result = functions[0].apply(this, arguments);
+    for (i = 1; i < functions.length; ++i) {
+      result = functions[i](result);
+    }
+    return result;
+  };
+}

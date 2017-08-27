@@ -922,13 +922,9 @@ describe 'flattenPrototype' ->
 
 describe 'mapPairs' ->
     test 'obj' ->
-        ({ how: 'fine' }
-        |> Object.create)
-
-        <<<
-            are: 'thanks'
-            you: 'and you?'
-
+        (Object.create how: 'fine'
+            ..are = 'thanks'
+            ..you = 'and you?')
         |> map-pairs (k, v) ->
             [k.to-upper-case(), 'yes, ' + v]
         |> expect-to-equal do

@@ -103,6 +103,10 @@ export const ifOk = curry ((yes, no, x) => ok (x) ? yes (x) : no (x))
 export const whenOk = curry ((yes, x) => x | ifOk (yes) (noop))
 export const ifOk__ = (x, yes, no = noop) => x | ifOk (yes) (no)
 
+const ifNotOk = curry ((yes, no, x) => isNil (x) ? yes (x) : no (x))
+const whenNotOk = curry ((yes, x) => x | ifNotOk (yes) (noop))
+const ifNotOk__ = (x, yes, no = noop) => x | ifNotOk (yes) (no)
+
 export const ifTrue = curry ((yes, no, x) => x === true ? yes (x) : no (x))
 export const whenTrue = curry ((yes, x) => x | ifTrue (yes) (noop))
 export const ifTrue__ = (x, yes, no = noop) => x | ifTrue (yes) (no)
@@ -127,6 +131,13 @@ export const ifLengthOne = curry ((yes, no, xs) => xs.length === 1 ? yes (xs) : 
 export const whenLengthOne = curry ((yes, xs) => xs | ifLengthOne (yes) (noop))
 export const ifLengthOne__ = (xs, yes, no = noop) => xs | ifLengthOne (yes) (no)
 
+const ifHas = curry ((yes, no, [o, k]) => o | has (k) ? yes (o, k, o[k]) : no (o, k))
+const whenHas = curry ((yes, spec) => spec | ifHas (yes) (noop))
+const ifHas__ = (spec, yes, no = noop) => spec | ifHas (yes) (no)
+
+const ifHasIn = curry ((yes, no, [o, k]) => o | hasIn (k) ? yes (o, k, o[k]) : no (o, k))
+const whenHasIn = curry ((yes, spec) => spec | ifHasIn (yes) (noop))
+const ifHasIn__ = (spec, yes, no = noop) => spec | ifHasIn (yes) (no)
 
 // --- last one always? undef if none?
 // tests for truthINEss, so it acts like if().
@@ -139,9 +150,6 @@ export const cond = curry ((blocks, target) => {
         if (result) return exec (result)
     }
 })
-
-
-
 
 // ------ exceptions.
 
@@ -279,9 +287,7 @@ export const mergeFrom = flip (rMerge)
 // --- does not discard non-own on tgt, b/c mut.
 export const mergeToMut = curry ((tgt, src) => {
     const ret = tgt
-    for (let i in src)
-        if (has (i, src))
-            ret[i] = src[i]
+    for (let i in src) [src, i] | whenHas ((o, k, v) => ret[k] = v)
     return ret
 })
 
@@ -298,10 +304,12 @@ export const mergeFromMut = flip (mergeToMut)
 export const mergeToWithMut = curry ((collision, tgt, src) => {
     const ret = tgt
     for (let i in src)
-        if (has (i, src)) {
-            if (hasIn (i, ret)) ret[i] = collision (tgt[i], src[i])
-            else ret[i] = src[i]
-        }
+        [src, i] | whenHas ((o, k, v) => {
+            [ret, i] | ifHasIn (
+                (o, k, v) => ret[i] = collision (ret[i], src[i]),
+                (o, k) => ret[i] = src[i],
+            )
+        })
     return ret
 })
 
@@ -400,12 +408,13 @@ export const givenStar = (xs, f) => {
         // --- acc contains running output array, up to the previous item.
         | mapAccum ((acc, v) => xsMapper (acc) (v)
             | (mapped => [[...acc, mapped], mapped])
-        , [])
+        ) ([])
         | rProp (1)
 
-    return f
-        ? f.apply (null, ys)
-        : last (ys)
+    return f | ifYes (
+        passN (ys),
+        () => last (ys),
+    )
 }
 
 export const laatStar = givenStar
