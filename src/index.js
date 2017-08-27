@@ -127,6 +127,51 @@ export const ifLengthOne = curry ((yes, no, xs) => xs.length === 1 ? yes (xs) : 
 export const whenLengthOne = curry ((yes, xs) => xs | ifLengthOne (yes) (noop))
 export const ifLengthOne__ = (xs, yes, no = noop) => xs | ifLengthOne (yes) (no)
 
+
+// --- last one always? undef if none?
+// tests for truthINEss, so it acts like if().
+export const cond = curry ((blocks, target) => {
+    let result
+    for (const [test, exec] of blocks) {
+        if (!ok (test)) return exec (target)
+
+        const result = test (target)
+        if (result) return exec (result)
+    }
+})
+
+
+
+
+// ------ exceptions.
+
+export const tryCatch = curry ((good, bad, f) => {
+    try {
+        return good (f ())
+    } catch (e) {
+        return bad (e)
+    }
+})
+
+export const tryCatch__ = (whatToTry, howToCatch = noop) => {
+    try {
+        return whatToTry ();
+    } catch (e) {
+        return howToCatch (e);
+    }
+}
+
+export const exception = (...args) => new Error (
+    args | join (' ')
+)
+export const raise = (e) => { throw e }
+export const die = (...args) => exception (...args) | raise
+export const decorateException = curry ((prefix, e) =>
+    e | assocMut ('message', joinOk (' ') ([prefix, e.message]))
+)
+
+
+
 // @todo
 const ifArray = curry ((yes, no, x) => isArray (x) ? yes (x) : no (x))
 const ifZero = curry ((yes, no, x) => x === 0 ? yes (x) : no (x))
@@ -241,6 +286,30 @@ export const mergeToMut = curry ((tgt, src) => {
 })
 
 export const mergeFromMut = flip (mergeToMut)
+
+// @todo test
+// not intended to be piped, thus no To or From necessary.
+// --- discards non-own on src.
+// --- does not discard non-own on tgt, b/c mut.
+// --- uses collision function if key exists in the target, anywhere in target's prototype chain.
+// --- 'with' refers to collision
+// --- 'to' refers to tgt
+// --- if a collision occurs in the target's prototype chain, the value will surface, regardless of
+// whether src or tgt version is chosen.
+
+export const mergeToWithMut = curry ((collision, tgt, src) => {
+    const ret = tgt
+    for (let i in src)
+        if (has (i, src)) {
+            if (hasIn (i, ret)) ret[i] = collision (tgt[i], src[i])
+            else ret[i] = src[i]
+        }
+    return ret
+})
+
+export const mergeFromWithMut = curry ((collision, src, tgt) =>
+    mergeToWithMut (collision, tgt, src)
+)
 
 export const injectToMut = mergeToMut
 export const injectFromMut = mergeFromMut
@@ -409,24 +478,6 @@ export const sprintfN = curry ((str, xs) => sprintf.apply (null, [str, ...xs]))
 
 export const noop = () => {}
 
-// ------ try catch
-
-export const tryCatch = curry ((good, bad, f) => {
-    try {
-        return good (f ())
-    } catch (e) {
-        return bad (e)
-    }
-})
-
-export const tryCatch__ = (whatToTry, howToCatch = noop) => {
-    try {
-        return whatToTry ();
-    } catch (e) {
-        return howToCatch (e);
-    }
-}
-
 // --- r's zip only takes two.
 export const zipAll = (...xss) => {
     const ret = []
@@ -456,8 +507,6 @@ export const joinOk = curry ((j, xs) => xs
 
 // --------- new.
 
-// @todo: consider flip version, although the name is good how it is.
-// --- fit really well into final part of laat.
 export const nieuw = x => new x
 export const nieuw1 = curry ((x, val) => new x (val))
 export const nieuw2 = curry ((x, val1, val2) => new x (val1, val2))
@@ -466,6 +515,9 @@ export const nieuwN = curry ((x, vs) => new x (...vs))
 
 // --------- regex.
 // @deps: dot1
+
+// --- leaving out the 'flip' versions: assuming you generally want to pipe the target to the match
+// functions.
 
 const removeSpaces = dot2 ('replace') (/\s+/g) ('')
 
@@ -499,6 +551,13 @@ export const xMatchStr = curry ((reStr, target) => target
 export const xMatchStrFlags = curry ((reStr, flags, target) => target
     | xMatch (new RegExp (reStr, flags)))
 
+// --- @todo
+// xReplace
+// xReplace should tell how many it replaced.
+// perhaps when global it should return an object.
+// xReplaceStr
+// xReplaceStrFlags
+
 export const ifReplace = curry ((yes, no, re, repl, target) => {
     let success = 0
     const out = target.replace (re, () => {
@@ -518,47 +577,35 @@ export const ifXReplaceStrFlags = curry ((yes, no, reStr, flags, repl, target) =
     ifReplace (yes, no, xRegExpStr (reStr, flags), repl, target))
 
 
-const shallowClone = obj => ({...obj})
 
-// list dependencies if a func uses other ones (for unit testing)
+
+
+
+const shallowClone = obj => ({...obj})
 
 export const mergeFish = (mixinsPre, proto, mixinsPost) => {
     const reduceMixin = reduce ((a, b) => b | mergeTo (a), {})
     const pre = mixinsPre | reduceMixin
     const post = mixinsPost | reduceMixin
 
-    // new merge fun?
-//     pre | eachObj ((v, k) => ifNot__ (
-//         hasIn (k, proto),
-//         () => proto[k] = v,
-//     ))
-
+    pre | mergeToWithMut ((tgtVal, srcVal) => tgtVal) (proto)
     post | mergeToMut (proto)
     return proto
 }
 
 export const factory = (proto, mixinsPre = [], mixinsPost = []) => laat (
     [
-        mergeFish (mixinsPre, proto, mixinsPost)
+        mergeFish (mixinsPre, proto, mixinsPost),
     ],
 
     (protoExtended) => ({
         proto: protoExtended,
         create: instanceExtension => protoExtended
             | Object.create
-            | mergeToInMut (instanceExtension),
+            | mergeFromInMut (instanceExtension),
     })
 )
 
-
-export const exception = (...args) => new Error (
-    args | join (' ')
-)
-export const raise = (e) => { throw e }
-export const die = (...args) => exception (...args) | raise
-export const decorateException = curry ((prefix, e) =>
-    e | assocMut ('message', joinOk (' ') ([prefix, e.message]))
-)
 
 /*
  * could make the flattening proto stuff configurable
@@ -578,8 +625,6 @@ export const decorateException = curry ((prefix, e) =>
  *
  *
  *
- * xReplace should tell how many it replaced.
- * perhaps when global it should return an object.
  *
 // tests for truthINEss
 export const cond = curry ((blocks, target) => {
@@ -595,88 +640,6 @@ export const cond = curry ((blocks, target) => {
 
 
 
-
-
-battery of conds:
-
-const transform = (inFile) => {
-    const c = slurp (inFile)
-    const re1 = /^ \s* (<math (?:.|\s)+ <\/math>) \s+ true \s* $/
-    const re2 = /^ \s* (<math [^>]* \/>) \s* true \s* $/
-    let math
-    const m1 = c | xMatch (re1)
-    if (m1) {
-        math = m1[1]
-    } else {
-        const m2 = c | xMatch (re2)
-        if (m2) math = m2[1]
-    }
-    return math | ifElseOk (
-        math => 'mml=' + math,
-        () => warn ('no match', inFile, c, re1, re2),
-    )
-}
-
-
-xMatch family also needs a from and to version.
-
-
-export const xMatchStr = curry ((str, target) =>
-    target | xMatch (new RegExp (str)))
-
-export const ifElseOk = curry ((good, bad, x) =>
-    ok (x) ? good (x) : bad ())
-
-
-const ifElseTrue = curry ((good, bad, x) => {
-    console.log ('x', x)
-    return x === true ? good (x) : bad (x)
-})
-
-export const ifElseReplaceOk = curry ((good, bad, wat, met, target) => {
-    let success
-    const out = target.replace (wat, () => {
-        success = true
-        return met
-    })
-    return success | ifElseTrue (() => good (out), () => bad (target))
-})
-
-const str = 'ALLENS'
-const re1 = ' x '
-const re2 = ' l '
-
-// --- target should be optional, will need other form.
-// --- last one always? undef if none?
-// tests for truthINEss
-export const cond = curry ((blocks, target) => {
-    let result
-    for (const [test, exec] of blocks) {
-        if (!ok (test)) return exec (target)
-
-        const result = test (target)
-        if (result) return exec (result)
-    }
-})
-
-const out = str | cond ([
-    [
-        xMatchStr (re1),
-        () => 'woot',
-    ],
-    [
-        xMatchStr (re2),
-        () => 'wut',
-    ],
-    [
-        str => str === 'ALLEN',
-        () => 'capital',
-    ],
-    [
-        void 8,
-        target => 'passthrough = ' + target,
-    ],
-])
 
 
 

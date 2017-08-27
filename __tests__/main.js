@@ -1,7 +1,7 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, main, ok, exception, raise, die, decorateException, zipAll, bind, bindLate, bindTry, cascade, flipC, sprintf1, sprintfN, given, laat, givenStar, laatStar, nieuw, nieuw1, nieuw2, nieuw3, nieuwN, xRegExp, xRegExpStr, xMatch, xMatchStr, xMatchStrFlags, ifReplace, ifXReplace, ifXReplaceStr, ifXReplaceStrFlags, slice$ = [].slice;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, main, ok, zipAll, bind, bindLate, bindTry, cascade, flipC, sprintf1, sprintfN, given, laat, givenStar, laatStar, nieuw, nieuw1, nieuw2, nieuw3, nieuwN, xRegExp, xRegExpStr, xMatch, xMatchStr, xMatchStrFlags, ifReplace, ifXReplace, ifXReplaceStr, ifXReplaceStrFlags, slice$ = [].slice;
 ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
 ref$ = require('./common'), arrayLs = ref$.arrayLs, test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
-ref$ = main = require('../lib/index'), ok = ref$.ok, exception = ref$.exception, raise = ref$.raise, die = ref$.die, decorateException = ref$.decorateException, zipAll = ref$.zipAll, bind = ref$.bind, bindLate = ref$.bindLate, bindTry = ref$.bindTry, cascade = ref$.cascade, flipC = ref$.flipC, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar, nieuw = ref$.nieuw, nieuw1 = ref$.nieuw1, nieuw2 = ref$.nieuw2, nieuw3 = ref$.nieuw3, nieuwN = ref$.nieuwN, xRegExp = ref$.xRegExp, xRegExpStr = ref$.xRegExpStr, xMatch = ref$.xMatch, xMatchStr = ref$.xMatchStr, xMatchStrFlags = ref$.xMatchStrFlags, ifReplace = ref$.ifReplace, ifXReplace = ref$.ifXReplace, ifXReplaceStr = ref$.ifXReplaceStr, ifXReplaceStrFlags = ref$.ifXReplaceStrFlags;
+ref$ = main = require('../lib/index'), ok = ref$.ok, zipAll = ref$.zipAll, bind = ref$.bind, bindLate = ref$.bindLate, bindTry = ref$.bindTry, cascade = ref$.cascade, flipC = ref$.flipC, sprintf1 = ref$.sprintf1, sprintfN = ref$.sprintfN, given = ref$.given, laat = ref$.laat, givenStar = ref$.givenStar, laatStar = ref$.laatStar, nieuw = ref$.nieuw, nieuw1 = ref$.nieuw1, nieuw2 = ref$.nieuw2, nieuw3 = ref$.nieuw3, nieuwN = ref$.nieuwN, xRegExp = ref$.xRegExp, xRegExpStr = ref$.xRegExpStr, xMatch = ref$.xMatch, xMatchStr = ref$.xMatchStr, xMatchStrFlags = ref$.xMatchStrFlags, ifReplace = ref$.ifReplace, ifXReplace = ref$.ifXReplace, ifXReplaceStr = ref$.ifXReplaceStr, ifXReplaceStrFlags = ref$.ifXReplaceStrFlags;
 describe('cascade', function(){
   return test(1, function(){
     var odd, this$ = this;
@@ -380,36 +380,6 @@ describe('zip-all', function(){
   return test("two args equivalent to ramda's zip", function(){
     return expectToEqual(zip(['un', 'yek', 'egy'], ['yek', 'do', 'seh']))(
     zipAll(['un', 'yek', 'egy'], ['yek', 'do', 'seh']));
-  });
-});
-describe('exceptions', function(){
-  test('exception', function(){
-    return expectToEqual(new Error('a b c'))(
-    exception('a', 'b', 'c'));
-  });
-  test('raise', function(){
-    return expect(function(){
-      return raise(
-      new Error('bad news'));
-    }).toThrow('bad news');
-  });
-  test('die', function(){
-    return expect(function(){
-      return die('really', 'bad', 'news');
-    }).toThrow('really bad news');
-  });
-  test('decorate exception', function(){
-    return expectToEqual(new Error('bad news: file not found'))(
-    decorateException('bad news:')(
-    new Error('file not found')));
-  });
-  return test('all', function(){
-    return expect(function(){
-      return raise(
-      decorateException('bad news:')(
-      exception(
-      'file not found')));
-    }).toThrow('bad news: file not found');
   });
 });
 describe('new', function(){

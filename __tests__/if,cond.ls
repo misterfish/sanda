@@ -27,6 +27,8 @@
     if-length-one, when-length-one, if-length-one__,
     if-empty, when-empty, if-empty__,
 
+    cond,
+
 } = require '../lib/index'
 
 # --- @todo test anaphoric
@@ -842,3 +844,110 @@ describe 'ifEmpty__' ->
             num-arms: 1
 
     do-tests describe-spec, tests
+
+describe 'cond' ->
+    test 1 ->
+        'lions' |> cond [
+            [
+                (str) -> str === 'lions'
+                -> 'feet'
+            ]
+            [
+                (str) -> str === 'tigers'
+                -> 'heads'
+            ]
+            [
+                void
+                (target) -> 'no match on ' + target
+            ]
+        ]
+        |> expect-to-equal 'feet'
+    test 2 ->
+        'tigers' |> cond [
+            [
+                (str) -> str === 'lions'
+                -> 'feet'
+            ]
+            [
+                (str) -> str === 'tigers'
+                -> 'heads'
+            ]
+            [
+                void
+                (target) -> 'no match on ' + target
+            ]
+        ]
+        |> expect-to-equal 'heads'
+    test 'lazy, in order' ->
+        mock = jest.fn()
+        'lions' |> cond [
+            [
+                (str) -> str === 'lions'
+                -> 'feet'
+            ]
+            [
+                (str) -> str === 'tigers'
+                mock
+            ]
+            [
+                void
+                (target) -> 'no match on ' + target
+            ]
+        ]
+        mock.mock.calls.length
+        |> expect-to-equal 0
+    test 3 ->
+        'beetles' |> cond [
+            [
+                (str) -> str === 'lions'
+                -> 'feet'
+            ]
+            [
+                (str) -> str === 'tigers'
+                -> 'heads'
+            ]
+            [
+                void
+                (target) -> 'no match on ' + target
+            ]
+        ]
+        |> expect-to-equal 'no match on beetles'
+
+describe 'cond strict' ->
+    xtest 1 ->
+        cond-strict [
+            [
+                1 + 1 == 3
+                -> 'hands'
+            ]
+            [
+                1 + 1 == 2
+                -> 'nails'
+            ]
+            [
+                void
+                -> 'no match'
+            ]
+        ]
+
+describe 'cond non-strict' ->
+    xtest 1 ->
+        cond-non-strict [
+            [
+                -> 1 + 1 == 3
+                -> 'hands'
+            ]
+            [
+                -> 1 + 1 == 2
+                -> 'nails'
+            ]
+            [
+                void
+                -> 'no match'
+            ]
+        ]
+
+
+
+
+

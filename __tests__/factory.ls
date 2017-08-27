@@ -26,17 +26,62 @@ describe 'factory ' ->
         walk: -> 'walk'
         confess: -> 'I am ' + @color
 
-    { proto, create, } = factory animal-proto
+    describe 1 ->
+        { proto, create, } = factory animal-proto
 
-    red-animal = create color: 'red'
-    blue-animal = create color: 'blue'
+        test 'main' ->
+            red-animal = create color: 'red'
+            blue-animal = create color: 'blue'
 
-    test 1 ->
-        red-animal.confess()
-        |> expect-to-equal 'I am red'
+            red-animal.confess()
+            |> expect-to-equal 'I am red'
 
-        blue-animal.confess()
-        |> expect-to-equal 'I am blue'
-    test 'proto chain multi-level' ->
-        red-animal.ooze()
-        |> expect-to-equal 'ooze'
+            blue-animal.confess()
+            |> expect-to-equal 'I am blue'
+
+        test 'proto' ->
+            typeof! proto.ooze
+            |> expect-to-equal 'Function'
+            typeof! proto.walk
+            |> expect-to-equal 'Function'
+            typeof! proto.confess
+            |> expect-to-equal 'Function'
+        test 'instance spec not altered' ->
+            instance-spec = color: 'red'
+            red-animal = create instance-spec
+            instance-spec
+            |> expect-to-equal color: 'red'
+        test 'proto chain multi-level' ->
+            red-animal = create color: 'red'
+            red-animal.ooze()
+            |> expect-to-equal 'ooze'
+
+    describe 'mixins pre' ->
+        hopper =
+            hop: -> 'hopper hop'
+        topper =
+            hop: -> 'topper hop'
+            top: -> 'topper top'
+        walker =
+            pop: -> 'walker pop'
+            # --- shouldn't make it to the object.
+            walk: -> 'walker walk'
+
+        { proto, create, } = factory animal-proto, [hopper, topper, walker]
+        red-animal = create color: 'red'
+
+        test 'mixins pre' ->
+            red-animal.confess()
+            |> expect-to-equal 'I am red'
+            red-animal.hop()
+            |> expect-to-equal 'topper hop'
+            red-animal.top()
+            |> expect-to-equal 'topper top'
+            red-animal.pop()
+            |> expect-to-equal 'walker pop'
+        test "mixins pre doesn't clobber" ->
+            red-animal.walk()
+            |> expect-to-equal 'walk'
+
+
+    # shouldn't alter mixins

@@ -17,7 +17,6 @@
 {
     ok,
 
-    exception, raise, die, decorate-exception,
     zip-all,
 
     bind, bind-late, bind-try,
@@ -297,28 +296,6 @@ describe 'zip-all' ->
         |> expect-to-equal zip do
             <[ un yek egy ]>
             <[ yek do seh ]>
-
-# --- move XXX
-
-describe 'exceptions' ->
-    test 'exception' ->
-        exception 'a' 'b' 'c'
-        |> expect-to-equal new Error ('a b c')
-    test 'raise' ->
-        (expect -> new Error 'bad news' |> raise).to-throw 'bad news'
-    test 'die' ->
-        (expect -> die 'really' 'bad' 'news').to-throw 'really bad news'
-    test 'decorate exception' ->
-        new Error 'file not found'
-        |> decorate-exception 'bad news:'
-        |> expect-to-equal new Error 'bad news: file not found'
-    test 'all' ->
-        (expect ->
-            'file not found'
-            |> exception
-            |> decorate-exception 'bad news:'
-            |> raise
-        ).to-throw 'bad news: file not found'
 
 describe 'new' ->
     class C

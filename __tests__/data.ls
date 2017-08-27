@@ -23,6 +23,7 @@
     concat-to, concat-to-mut, concat-from, concat-from-mut,
 
     merge-to, merge-from, merge-to-mut, merge-from-mut,
+    merge-to-with-mut, merge-from-with-mut,
     merge-to-in, merge-from-in, merge-to-in-mut, merge-from-in-mut,
     merge-all-in,
     inject-to-mut, inject-from-mut,
@@ -570,6 +571,140 @@ describe 'data transforms' ->
         test 'alias inject-from-mut' ->
             inject-from-mut
             |> expect-to-equal merge-from-mut
+
+    describe 'mergeToWithMut' ->
+        var tgt, src
+        noop = ->
+        choose-left = (a, b) -> a
+        choose-right = (a, b) -> b
+        describe 'main' ->
+            test 'when no collisions, acts like mergeToMut' ->
+                tgt = Object.create hidden1: 42
+                    ..a = 1
+                    ..b = 2
+                src = Object.create hidden2: 42
+                    ..c = 3
+                    ..d = 4
+                src
+                |> merge-to-with-mut noop, tgt
+                |> expect-to-equal merge-to-mut tgt, src
+
+        describe 'collide with own of target' ->
+            var tgt, src
+            before-each ->
+                tgt := Object.create hidden: 42
+                    ..a = 'target a'
+                    ..b = 'target b'
+                # --- src prototype is discarded anyway.
+                src :=
+                    b: 'source b'
+                    c: 'source c'
+            test 'choose target' ->
+                src |> merge-to-with-mut choose-left, tgt
+                tgt |> expect-to-equal do
+                    a: 'target a'
+                    b: 'target b'
+                    c: 'source c'
+            test 'choose source' ->
+                src |> merge-to-with-mut choose-right, tgt
+                tgt |> expect-to-equal do
+                    a: 'target a'
+                    b: 'source b'
+                    c: 'source c'
+
+        describe 'collide with in of target' ->
+            var tgt, src
+            before-each ->
+                tgt := Object.create hidden: 'target hidden'
+                    ..a = 'target a'
+                    ..b = 'target b'
+                # --- src prototype is discarded anyway.
+                src :=
+                    b: 'source b'
+                    c: 'source c'
+                    hidden: 'source hidden'
+            test 'choose target, hidden val floats' ->
+                src |> merge-to-with-mut choose-left, tgt
+                tgt |> expect-to-equal do
+                    a: 'target a'
+                    b: 'target b'
+                    c: 'source c'
+                    hidden: 'target hidden'
+                tgt.hidden |> expect-to-equal 'target hidden'
+            test 'choose source, hidden val floats' ->
+                src |> merge-to-with-mut choose-right, tgt
+                tgt |> expect-to-equal do
+                    a: 'target a'
+                    b: 'source b'
+                    c: 'source c'
+                    hidden: 'source hidden'
+
+    describe 'mergeFromWithMut' ->
+        var tgt, src
+        noop = ->
+        choose-left = (a, b) -> a
+        choose-right = (a, b) -> b
+        describe 'main' ->
+            test 'when no collisions, acts like mergeFromMut' ->
+                tgt = Object.create hidden1: 42
+                    ..a = 1
+                    ..b = 2
+                src = Object.create hidden2: 42
+                    ..c = 3
+                    ..d = 4
+                tgt
+                |> merge-from-with-mut noop, src
+                |> expect-to-equal merge-from-mut src, tgt
+
+        describe 'collide with own of target' ->
+            var tgt, src
+            before-each ->
+                tgt := Object.create hidden: 42
+                    ..a = 'target a'
+                    ..b = 'target b'
+                # --- src prototype is discarded anyway.
+                src :=
+                    b: 'source b'
+                    c: 'source c'
+            test 'choose target' ->
+                tgt |> merge-from-with-mut choose-left, src
+                tgt |> expect-to-equal do
+                    a: 'target a'
+                    b: 'target b'
+                    c: 'source c'
+            test 'choose source' ->
+                tgt |> merge-from-with-mut choose-right, src
+                tgt |> expect-to-equal do
+                    a: 'target a'
+                    b: 'source b'
+                    c: 'source c'
+
+        describe 'collide with in of target' ->
+            var tgt, src
+            before-each ->
+                tgt := Object.create hidden: 'target hidden'
+                    ..a = 'target a'
+                    ..b = 'target b'
+                # --- src prototype is discarded anyway.
+                src :=
+                    b: 'source b'
+                    c: 'source c'
+                    hidden: 'source hidden'
+            test 'choose target, hidden val floats' ->
+                tgt |> merge-from-with-mut choose-left, src
+                tgt |> expect-to-equal do
+                    a: 'target a'
+                    b: 'target b'
+                    c: 'source c'
+                    hidden: 'target hidden'
+                tgt.hidden |> expect-to-equal 'target hidden'
+            test 'choose source, hidden val floats' ->
+                tgt |> merge-from-with-mut choose-right, src
+                tgt |> expect-to-equal do
+                    a: 'target a'
+                    b: 'source b'
+                    c: 'source c'
+                    hidden: 'source hidden'
 
     describe 'mergeToIn' ->
         fn = merge-to-in

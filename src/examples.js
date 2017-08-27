@@ -3,6 +3,8 @@ process.exit (1)
 //  @dep ifFunction
 //  @dep bind
 
+// --- 'nieuw' ones fit really well into final part of laat, by the way.
+
 if (obj.speak) obj.speak()
 
 whenOk__ (
@@ -190,4 +192,7 @@ const flagsYes = (...args) => args
     | map (x => [x, true])
     | fromPairs
 
+// might need a form for cond with no target (see tests)
+
 */
+

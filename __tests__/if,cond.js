@@ -1,7 +1,7 @@
-var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, ifCond, whenCond, ifCond__, ifOk, whenOk, ifOk__, ifTrue, whenTrue, ifTrue__, ifFalse, whenFalse, ifFalse__, ifYes, whenYes, ifYes__, ifNo, whenNo, ifNo__, ifFunction, whenFunction, ifFunction__, ifLengthOne, whenLengthOne, ifLengthOne__, ifEmpty, whenEmpty, ifEmpty__, doTests, doTestDoubleArm, doTestSingleArm;
+var ref$, assoc, assocPath, head, tail, reduceRight, chain, identity, reduce, map, filter, join, split, rProp, rPath, rDefaultTo, curry, each, complement, isNil, rRepeat, rTimes, reverse, tap, flip, zip, arrayLs, test, xtest, expectToEqual, expectToBe, ifCond, whenCond, ifCond__, ifOk, whenOk, ifOk__, ifTrue, whenTrue, ifTrue__, ifFalse, whenFalse, ifFalse__, ifYes, whenYes, ifYes__, ifNo, whenNo, ifNo__, ifFunction, whenFunction, ifFunction__, ifLengthOne, whenLengthOne, ifLengthOne__, ifEmpty, whenEmpty, ifEmpty__, cond, doTests, doTestDoubleArm, doTestSingleArm;
 ref$ = require('ramda'), assoc = ref$.assoc, assocPath = ref$.assocPath, head = ref$.head, tail = ref$.tail, reduceRight = ref$.reduceRight, chain = ref$.chain, identity = ref$.identity, reduce = ref$.reduce, map = ref$.map, filter = ref$.filter, join = ref$.join, split = ref$.split, rProp = ref$.prop, rPath = ref$.path, rDefaultTo = ref$.defaultTo, curry = ref$.curry, each = ref$.forEach, complement = ref$.complement, isNil = ref$.isNil, rRepeat = ref$.repeat, rTimes = ref$.times, reverse = ref$.reverse, tap = ref$.tap, flip = ref$.flip, zip = ref$.zip;
 ref$ = require('./common'), arrayLs = ref$.arrayLs, test = ref$.test, xtest = ref$.xtest, expectToEqual = ref$.expectToEqual, expectToBe = ref$.expectToBe;
-ref$ = require('../lib/index'), ifCond = ref$.ifCond, whenCond = ref$.whenCond, ifCond__ = ref$.ifCond__, ifOk = ref$.ifOk, whenOk = ref$.whenOk, ifOk__ = ref$.ifOk__, ifTrue = ref$.ifTrue, whenTrue = ref$.whenTrue, ifTrue__ = ref$.ifTrue__, ifFalse = ref$.ifFalse, whenFalse = ref$.whenFalse, ifFalse__ = ref$.ifFalse__, ifYes = ref$.ifYes, whenYes = ref$.whenYes, ifYes__ = ref$.ifYes__, ifNo = ref$.ifNo, whenNo = ref$.whenNo, ifNo__ = ref$.ifNo__, ifFunction = ref$.ifFunction, whenFunction = ref$.whenFunction, ifFunction__ = ref$.ifFunction__, ifLengthOne = ref$.ifLengthOne, whenLengthOne = ref$.whenLengthOne, ifLengthOne__ = ref$.ifLengthOne__, ifEmpty = ref$.ifEmpty, whenEmpty = ref$.whenEmpty, ifEmpty__ = ref$.ifEmpty__;
+ref$ = require('../lib/index'), ifCond = ref$.ifCond, whenCond = ref$.whenCond, ifCond__ = ref$.ifCond__, ifOk = ref$.ifOk, whenOk = ref$.whenOk, ifOk__ = ref$.ifOk__, ifTrue = ref$.ifTrue, whenTrue = ref$.whenTrue, ifTrue__ = ref$.ifTrue__, ifFalse = ref$.ifFalse, whenFalse = ref$.whenFalse, ifFalse__ = ref$.ifFalse__, ifYes = ref$.ifYes, whenYes = ref$.whenYes, ifYes__ = ref$.ifYes__, ifNo = ref$.ifNo, whenNo = ref$.whenNo, ifNo__ = ref$.ifNo__, ifFunction = ref$.ifFunction, whenFunction = ref$.whenFunction, ifFunction__ = ref$.ifFunction__, ifLengthOne = ref$.ifLengthOne, whenLengthOne = ref$.whenLengthOne, ifLengthOne__ = ref$.ifLengthOne__, ifEmpty = ref$.ifEmpty, whenEmpty = ref$.whenEmpty, ifEmpty__ = ref$.ifEmpty__, cond = ref$.cond;
 doTests = curry$(function(describeSpec, tests){
   return each(function(testSpec){
     var numArms, ref$, ref1$, theTest;
@@ -958,6 +958,143 @@ describe('ifEmpty__', function(){
   });
   return doTests(describeSpec, tests);
 });
+describe('cond', function(){
+  test(1, function(){
+    return expectToEqual('feet')(
+    cond([
+      [
+        function(str){
+          return deepEq$(str, 'lions', '===');
+        }, function(){
+          return 'feet';
+        }
+      ], [
+        function(str){
+          return deepEq$(str, 'tigers', '===');
+        }, function(){
+          return 'heads';
+        }
+      ], [
+        void 8, function(target){
+          return 'no match on ' + target;
+        }
+      ]
+    ])(
+    'lions'));
+  });
+  test(2, function(){
+    return expectToEqual('heads')(
+    cond([
+      [
+        function(str){
+          return deepEq$(str, 'lions', '===');
+        }, function(){
+          return 'feet';
+        }
+      ], [
+        function(str){
+          return deepEq$(str, 'tigers', '===');
+        }, function(){
+          return 'heads';
+        }
+      ], [
+        void 8, function(target){
+          return 'no match on ' + target;
+        }
+      ]
+    ])(
+    'tigers'));
+  });
+  test('lazy, in order', function(){
+    var mock;
+    mock = jest.fn();
+    cond([
+      [
+        function(str){
+          return deepEq$(str, 'lions', '===');
+        }, function(){
+          return 'feet';
+        }
+      ], [
+        function(str){
+          return deepEq$(str, 'tigers', '===');
+        }, mock
+      ], [
+        void 8, function(target){
+          return 'no match on ' + target;
+        }
+      ]
+    ])(
+    'lions');
+    return expectToEqual(0)(
+    mock.mock.calls.length);
+  });
+  return test(3, function(){
+    return expectToEqual('no match on beetles')(
+    cond([
+      [
+        function(str){
+          return deepEq$(str, 'lions', '===');
+        }, function(){
+          return 'feet';
+        }
+      ], [
+        function(str){
+          return deepEq$(str, 'tigers', '===');
+        }, function(){
+          return 'heads';
+        }
+      ], [
+        void 8, function(target){
+          return 'no match on ' + target;
+        }
+      ]
+    ])(
+    'beetles'));
+  });
+});
+describe('cond strict', function(){
+  return xtest(1, function(){
+    return condStrict([
+      [
+        1 + 1 === 3, function(){
+          return 'hands';
+        }
+      ], [
+        1 + 1 === 2, function(){
+          return 'nails';
+        }
+      ], [
+        void 8, function(){
+          return 'no match';
+        }
+      ]
+    ]);
+  });
+});
+describe('cond non-strict', function(){
+  return xtest(1, function(){
+    return condNonStrict([
+      [
+        function(){
+          return 1 + 1 === 3;
+        }, function(){
+          return 'hands';
+        }
+      ], [
+        function(){
+          return 1 + 1 === 2;
+        }, function(){
+          return 'nails';
+        }
+      ], [
+        void 8, function(){
+          return 'no match';
+        }
+      ]
+    ]);
+  });
+});
 function curry$(f, bound){
   var context,
   _curry = function(args) {
@@ -970,4 +1107,88 @@ function curry$(f, bound){
     } : f;
   };
   return _curry();
+}
+function deepEq$(x, y, type){
+  var toString = {}.toString, hasOwnProperty = {}.hasOwnProperty,
+      has = function (obj, key) { return hasOwnProperty.call(obj, key); };
+  var first = true;
+  return eq(x, y, []);
+  function eq(a, b, stack) {
+    var className, length, size, result, alength, blength, r, key, ref, sizeB;
+    if (a == null || b == null) { return a === b; }
+    if (a.__placeholder__ || b.__placeholder__) { return true; }
+    if (a === b) { return a !== 0 || 1 / a == 1 / b; }
+    className = toString.call(a);
+    if (toString.call(b) != className) { return false; }
+    switch (className) {
+      case '[object String]': return a == String(b);
+      case '[object Number]':
+        return a != +a ? b != +b : (a == 0 ? 1 / a == 1 / b : a == +b);
+      case '[object Date]':
+      case '[object Boolean]':
+        return +a == +b;
+      case '[object RegExp]':
+        return a.source == b.source &&
+               a.global == b.global &&
+               a.multiline == b.multiline &&
+               a.ignoreCase == b.ignoreCase;
+    }
+    if (typeof a != 'object' || typeof b != 'object') { return false; }
+    length = stack.length;
+    while (length--) { if (stack[length] == a) { return true; } }
+    stack.push(a);
+    size = 0;
+    result = true;
+    if (className == '[object Array]') {
+      alength = a.length;
+      blength = b.length;
+      if (first) {
+        switch (type) {
+        case '===': result = alength === blength; break;
+        case '<==': result = alength <= blength; break;
+        case '<<=': result = alength < blength; break;
+        }
+        size = alength;
+        first = false;
+      } else {
+        result = alength === blength;
+        size = alength;
+      }
+      if (result) {
+        while (size--) {
+          if (!(result = size in a == size in b && eq(a[size], b[size], stack))){ break; }
+        }
+      }
+    } else {
+      if ('constructor' in a != 'constructor' in b || a.constructor != b.constructor) {
+        return false;
+      }
+      for (key in a) {
+        if (has(a, key)) {
+          size++;
+          if (!(result = has(b, key) && eq(a[key], b[key], stack))) { break; }
+        }
+      }
+      if (result) {
+        sizeB = 0;
+        for (key in b) {
+          if (has(b, key)) { ++sizeB; }
+        }
+        if (first) {
+          if (type === '<<=') {
+            result = size < sizeB;
+          } else if (type === '<==') {
+            result = size <= sizeB
+          } else {
+            result = size === sizeB;
+          }
+        } else {
+          first = false;
+          result = size === sizeB;
+        }
+      }
+    }
+    stack.pop();
+    return result;
+  }
 }

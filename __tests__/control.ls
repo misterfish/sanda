@@ -16,6 +16,7 @@
 
 {
     try-catch, try-catch__,
+    exception, raise, die, decorate-exception,
 } = require '../lib/index'
 
 describe 'try/catch__' ->
@@ -49,4 +50,24 @@ describe 'try/catch' ->
         passes
         |> try-catch how-to-pass, how-to-fail
         |> expect-to-equal [99 99 99]
+
+describe 'exceptions' ->
+    test 'exception' ->
+        exception 'a' 'b' 'c'
+        |> expect-to-equal new Error ('a b c')
+    test 'raise' ->
+        (expect -> new Error 'bad news' |> raise).to-throw 'bad news'
+    test 'die' ->
+        (expect -> die 'really' 'bad' 'news').to-throw 'really bad news'
+    test 'decorate exception' ->
+        new Error 'file not found'
+        |> decorate-exception 'bad news:'
+        |> expect-to-equal new Error 'bad news: file not found'
+    test 'all' ->
+        (expect ->
+            'file not found'
+            |> exception
+            |> decorate-exception 'bad news:'
+            |> raise
+        ).to-throw 'bad news: file not found'
 
