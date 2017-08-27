@@ -33,6 +33,7 @@ describe 'factory ' ->
             confess: -> 'I am ' + @color
 
     test-proto-unaltered = ->
+        return
         animal-proto.walk() |> expect-to-equal 'walk'
         (typeof! animal-proto.confess) |> expect-to-equal 'Function'
         animal-proto.ooze() |> expect-to-equal 'ooze'
@@ -94,7 +95,7 @@ describe 'factory ' ->
             # --- shouldn't make it to the object.
             walk: -> 'walker walk'
 
-        test 'mixins pre, right order' ->
+        test 'instance spec, and mixins pre, right order' ->
             red-animal.confess()
             |> expect-to-equal 'I am red'
             red-animal.hop()
@@ -104,12 +105,10 @@ describe 'factory ' ->
             red-animal.pop()
             |> expect-to-equal 'walker pop'
         test "mixins pre doesn't clobber" ->
-            console.log 'HERE'
             red-animal.walk()
             |> expect-to-equal 'walk'
 
     describe 'mixins post' ->
-        return
         var proto, create, red-animal
         before-each ->
             init()
@@ -118,8 +117,6 @@ describe 'factory ' ->
             create := fact.create
             red-animal := create color: 'red'
         after-each -> test-proto-unaltered()
-
-        console.log 'THERE'
 
         hopper =
             hop: -> 'hopper hop'
@@ -131,7 +128,7 @@ describe 'factory ' ->
             # --- shouldn't make it to the object.
             walk: -> 'walker walk'
 
-        test 'mixins post, right order' ->
+        test 'instance spec, and mixins post, right order' ->
             red-animal.confess()
             |> expect-to-equal 'I am red'
             red-animal.hop()
@@ -147,3 +144,49 @@ describe 'factory ' ->
             (num-keys hopper) |> expect-to-equal 1
             (num-keys topper) |> expect-to-equal 2
             (num-keys walker) |> expect-to-equal 2
+
+    describe 'instance extension' ->
+        var proto, create, red-animal
+        before-each ->
+            init()
+            fact = factory animal-proto, [hopper, topper, walker], [hopper, topper, walker]
+            proto := fact.proto
+            create := fact.create
+
+        hopper =
+            hop: -> 'hopper hop'
+        topper =
+            hop: -> 'topper hop'
+            top: -> 'topper top'
+        walker =
+            pop: -> 'walker pop'
+            # --- shouldn't make it to the object.
+            walk: -> 'walker walk'
+
+        test 'instance spec' ->
+            red-animal = create color: 'red'
+            red-animal.confess()
+            |> expect-to-equal 'I am red'
+
+        test 'instance spec, multiple' ->
+            red-animal = create do
+                * color: 'red'
+                * color: 'blue'
+            red-animal.confess()
+            |> expect-to-equal 'I am blue'
+
+        test 'instance spec, multiple, prototypes discarded' ->
+            spec1 = Object.create hidden: 42
+                ..color = 'red'
+                ..in = 'pines'
+            spec2 = Object.create hidden: 43
+                ..color = 'blue'
+                ..out = 'leaves'
+
+            red-animal = create spec1, spec2
+
+            red-animal.confess()
+            |> expect-to-equal 'I am blue'
+            red-animal
+            |> expect-to-equal do
+                in: 'pines' out: 'leaves' color: 'blue'

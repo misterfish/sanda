@@ -29,7 +29,7 @@ import {
     repeat as rRepeat,
     concat as rConcat,
     append as rAppend,
-    merge as rMerge,
+    merge as rMerge, mergeAll as rMergeAll,
     zip,
 } from 'ramda'
 
@@ -607,7 +607,7 @@ const arg0 = (...args) => args [0]
 const arg1 = (...args) => args [1]
 
 const mergeMixins = (mixinsPre, proto, mixinsPost) => {
-    const reduceMixins = reduce ((a, b) => b | mergeTo (a), {})
+    const reduceMixins = reduce ((a, b) => b | mergeTo (a)) ({})
     const pre = mixinsPre | reduceMixins
     const post = mixinsPost | reduceMixins
     const chooseTarget = arg0
@@ -623,7 +623,8 @@ const mergeMixins = (mixinsPre, proto, mixinsPost) => {
 // --- you can avoid this by passing Object.create (proto) instead of proto.
 // --- probably if you are working with mixins you don't mind if the proto is altered, just saying.
 
-// --- allow array for instanceExtension, for last-minute mixins. XXX
+// --- multiple instanceExtensions can be given: will be merged right-to-left using R.mergeAll,
+// meaning prototypes will be discarded.
 
 export const factory = (proto, mixinsPre = [], mixinsPost = []) => laat (
     [
@@ -632,9 +633,9 @@ export const factory = (proto, mixinsPre = [], mixinsPost = []) => laat (
 
     (protoExtended) => ({
         proto: protoExtended,
-        create: instanceExtension => protoExtended
+        create: (...instanceExtension) => protoExtended
             | Object.create
-            | mergeFromInMut (instanceExtension),
+            | mergeFromInMut (instanceExtension | rMergeAll),
     })
 )
 

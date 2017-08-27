@@ -21,6 +21,7 @@ describe('factory ', function(){
     }, ref$);
   };
   testProtoUnaltered = function(){
+    return;
     expectToEqual('walk')(
     animalProto.walk());
     expectToEqual('Function')(
@@ -120,7 +121,7 @@ describe('factory ', function(){
         return 'walker walk';
       }
     };
-    test('mixins pre, right order', function(){
+    test('instance spec, and mixins pre, right order', function(){
       expectToEqual('I am red')(
       redAnimal.confess());
       expectToEqual('topper hop')(
@@ -131,14 +132,12 @@ describe('factory ', function(){
       redAnimal.pop());
     });
     return test("mixins pre doesn't clobber", function(){
-      console.log('HERE');
       return expectToEqual('walk')(
       redAnimal.walk());
     });
   });
-  return describe('mixins post', function(){
+  describe('mixins post', function(){
     var proto, create, redAnimal, hopper, topper, walker;
-    return;
     beforeEach(function(){
       var fact;
       init();
@@ -152,7 +151,6 @@ describe('factory ', function(){
     afterEach(function(){
       return testProtoUnaltered();
     });
-    console.log('THERE');
     hopper = {
       hop: function(){
         return 'hopper hop';
@@ -174,7 +172,7 @@ describe('factory ', function(){
         return 'walker walk';
       }
     };
-    test('mixins post, right order', function(){
+    test('instance spec, and mixins post, right order', function(){
       expectToEqual('I am red')(
       redAnimal.confess());
       expectToEqual('topper hop')(
@@ -195,6 +193,77 @@ describe('factory ', function(){
       numKeys(topper));
       return expectToEqual(2)(
       numKeys(walker));
+    });
+  });
+  return describe('instance extension', function(){
+    var proto, create, redAnimal, hopper, topper, walker;
+    beforeEach(function(){
+      var fact;
+      init();
+      fact = factory(animalProto, [hopper, topper, walker], [hopper, topper, walker]);
+      proto = fact.proto;
+      return create = fact.create;
+    });
+    hopper = {
+      hop: function(){
+        return 'hopper hop';
+      }
+    };
+    topper = {
+      hop: function(){
+        return 'topper hop';
+      },
+      top: function(){
+        return 'topper top';
+      }
+    };
+    walker = {
+      pop: function(){
+        return 'walker pop';
+      },
+      walk: function(){
+        return 'walker walk';
+      }
+    };
+    test('instance spec', function(){
+      var redAnimal;
+      redAnimal = create({
+        color: 'red'
+      });
+      return expectToEqual('I am red')(
+      redAnimal.confess());
+    });
+    test('instance spec, multiple', function(){
+      var redAnimal;
+      redAnimal = create({
+        color: 'red'
+      }, {
+        color: 'blue'
+      });
+      return expectToEqual('I am blue')(
+      redAnimal.confess());
+    });
+    return test('instance spec, multiple, prototypes discarded', function(){
+      var x$, spec1, y$, spec2, redAnimal;
+      x$ = spec1 = Object.create({
+        hidden: 42
+      });
+      x$.color = 'red';
+      x$['in'] = 'pines';
+      y$ = spec2 = Object.create({
+        hidden: 43
+      });
+      y$.color = 'blue';
+      y$.out = 'leaves';
+      redAnimal = create(spec1, spec2);
+      expectToEqual('I am blue')(
+      redAnimal.confess());
+      return expectToEqual({
+        'in': 'pines',
+        out: 'leaves',
+        color: 'blue'
+      })(
+      redAnimal);
     });
   });
 });
