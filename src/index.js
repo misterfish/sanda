@@ -24,7 +24,7 @@ defineBinaryOperator ('>>', (a, b) => (...args) => b (a (...args)))
 import {
     isEmpty, tap, has, hasIn, flip, fromPairs, toPairs, toPairsIn, assoc, assocPath, head,
     last, tail, reduceRight, chain, identity, reduce, map, filter, reject, join,
-    split, prop as rProp, path as rPath, defaultTo as rDefaultTo, curry,
+    split, prop as rProp, path as rPath, defaultTo as rDefaultTo, curry, curryN,
     splitEvery,
     forEach as each, forEachObjIndexed as eachObj, complement, times as rTimes,
     range as rRange, isNil, addIndex, take, equals, mapAccum,
@@ -466,17 +466,20 @@ export const apply2 = curry ((f, val1, val2) => f (val1, val2))
 export const apply3 = curry ((f, val1, val2, val3) => f (val1, val2, val3))
 export const applyN = curry ((f, vs) => f.apply (null, vs))
 
-// --- flip first and second args: also works for functions curried with the a => b => ... notation.
-// outer curry not needed??
-// and how can the inner curry work with rest params?
-export const flipC = curry ((f) => curry (
+// --- flip first and second args, even for functions with more than 2 args
+// --- also works for functions curried with the a => b => ... notation (which would otherwise make
+// it impossible to use f.length).
+// actually it is a mystery why this function works! (curry with rest params ... )
+export const flipC = f => curryN (
+    2,
     (a, b, ...rest) => laat (
         [f (b) (a)],
-        interimResult => rest.length === 0
-            ? interimResult
-            : rest | reduce((a, b) => a (b), interimResult)
+        interimResult => rest | ifEmpty (
+            () => interimResult,
+            reduce ((a, b) => a (b), interimResult)
+        )
     )
-))
+)
 
 // ------ sprintf
 

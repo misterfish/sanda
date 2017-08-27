@@ -116,5 +116,3 @@ describe 'factory ' ->
             (num-keys hopper) |> expect-to-equal 1
             (num-keys topper) |> expect-to-equal 2
             (num-keys walker) |> expect-to-equal 2
-
-    # shouldn't alter mixins

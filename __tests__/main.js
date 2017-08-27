@@ -140,16 +140,22 @@ describe('flipC', function(){
       test(1, function(){
         return expect(divideAndAddThreeArgsFlipped(10, 5, 1)).toEqual(1.5);
       });
-      return test('result is curried', function(){
+      test('result is curried', function(){
         return expect(divideAndAddThreeArgsFlipped(10)(5)(1)).toEqual(1.5);
+      });
+      return test('result is curried part deux', function(){
+        return expect(divideAndAddThreeArgsFlipped(10, 5)(1)).toEqual(1.5);
       });
     });
     return describe('2 + > 1 args', function(){
       test(1, function(){
         return expect(divideAndAddFourArgsFlipped(10, 5, 1, 2)).toEqual(3.5);
       });
-      return test('result is curried', function(){
+      test('result is curried', function(){
         return expect(divideAndAddFourArgsFlipped(10)(5)(1)(2)).toEqual(3.5);
+      });
+      return test('result is curried part deux', function(){
+        return expect(divideAndAddFourArgsFlipped(10, 5, 1)(2)).toEqual(3.5);
       });
     });
   });
@@ -184,16 +190,22 @@ describe('flipC', function(){
       test(1, function(){
         return expect(divideAndAddThreeArgsFlipped(10, 5, 1)).toEqual(1.5);
       });
-      return test('result is curried', function(){
+      test('result is curried', function(){
         return expect(divideAndAddThreeArgsFlipped(10)(5)(1)).toEqual(1.5);
+      });
+      return test('result is curried part deux', function(){
+        return expect(divideAndAddThreeArgsFlipped(10, 5)(1)).toEqual(1.5);
       });
     });
     return describe('2 + > 1 args', function(){
       test(1, function(){
         return expect(divideAndAddFourArgsFlipped(10, 5, 1, 2)).toEqual(3.5);
       });
-      return test('result is curried', function(){
+      test('result is curried', function(){
         return expect(divideAndAddFourArgsFlipped(10)(5)(1)(2)).toEqual(3.5);
+      });
+      return test('result is curried part deux', function(){
+        return expect(divideAndAddFourArgsFlipped(10, 5, 1)(2)).toEqual(3.5);
       });
     });
   });
@@ -228,16 +240,22 @@ describe('flipC', function(){
       test(1, function(){
         return expect(divideAndAddThreeArgsFlipped(10, 5, 1)).toEqual(1.5);
       });
-      return test('result is curried', function(){
+      test('result is curried', function(){
         return expect(divideAndAddThreeArgsFlipped(10)(5)(1)).toEqual(1.5);
+      });
+      return test('result is curried part deux', function(){
+        return expect(divideAndAddThreeArgsFlipped(10, 5)(1)).toEqual(1.5);
       });
     });
     return describe('2 + > 1 args', function(){
       test(1, function(){
         return expect(divideAndAddFourArgsFlipped(10, 5, 1, 2)).toEqual(3.5);
       });
-      return test('result is curried', function(){
+      test('result is curried', function(){
         return expect(divideAndAddFourArgsFlipped(10)(5)(1)(2)).toEqual(3.5);
+      });
+      return test('result is curried part deux', function(){
+        return expect(divideAndAddFourArgsFlipped(10, 5, 1)(2)).toEqual(3.5);
       });
     });
   });

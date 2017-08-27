@@ -113,11 +113,15 @@ describe 'flipC' ->
                 (expect divide-and-add-three-args-flipped 10 5 1).to-equal 1.5
             test 'result is curried' ->
                 (expect ((divide-and-add-three-args-flipped 10) 5) 1).to-equal 1.5
+            test 'result is curried part deux' ->
+                (expect (divide-and-add-three-args-flipped 10 5) 1).to-equal 1.5
         describe '2 + > 1 args' ->
             test 1 ->
                 (expect divide-and-add-four-args-flipped 10 5 1 2).to-equal 3.5
             test 'result is curried' ->
                 (expect (((divide-and-add-four-args-flipped 10) 5) 1) 2).to-equal 3.5
+            test 'result is curried part deux' ->
+                (expect (divide-and-add-four-args-flipped 10 5 1) 2).to-equal 3.5
     describe 'target created with LS curry function' ->
         divide = (a, b) --> a / b
         divide-and-add-three-args = (a, b, c) --> a / b + c
@@ -142,11 +146,15 @@ describe 'flipC' ->
                 (expect divide-and-add-three-args-flipped 10 5 1).to-equal 1.5
             test 'result is curried' ->
                 (expect ((divide-and-add-three-args-flipped 10) 5) 1).to-equal 1.5
+            test 'result is curried part deux' ->
+                (expect (divide-and-add-three-args-flipped 10 5) 1).to-equal 1.5
         describe '2 + > 1 args' ->
             test 1 ->
                 (expect divide-and-add-four-args-flipped 10 5 1 2).to-equal 3.5
             test 'result is curried' ->
                 (expect (((divide-and-add-four-args-flipped 10) 5) 1) 2).to-equal 3.5
+            test 'result is curried part deux' ->
+                (expect (divide-and-add-four-args-flipped 10 5 1) 2).to-equal 3.5
     describe 'target created with ramda curry function' ->
         divide = curry (a, b) -> a / b
         divide-and-add-three-args = curry (a, b, c) -> a / b + c
@@ -171,11 +179,15 @@ describe 'flipC' ->
                 (expect divide-and-add-three-args-flipped 10 5 1).to-equal 1.5
             test 'result is curried' ->
                 (expect ((divide-and-add-three-args-flipped 10) 5) 1).to-equal 1.5
+            test 'result is curried part deux' ->
+                (expect (divide-and-add-three-args-flipped 10 5) 1).to-equal 1.5
         describe '2 + > 1 args' ->
             test 1 ->
                 (expect divide-and-add-four-args-flipped 10 5 1 2).to-equal 3.5
             test 'result is curried' ->
                 (expect (((divide-and-add-four-args-flipped 10) 5) 1) 2).to-equal 3.5
+            test 'result is curried part deux' ->
+                (expect (divide-and-add-four-args-flipped 10 5 1) 2).to-equal 3.5
 
 describe 'laat' ->
     test 'alias given' ->
