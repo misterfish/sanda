@@ -287,8 +287,6 @@ export const mergeToMut = curry ((tgt, src) => {
 
 export const mergeFromMut = flip (mergeToMut)
 
-// @todo test
-// not intended to be piped, thus no To or From necessary.
 // --- discards non-own on src.
 // --- does not discard non-own on tgt, b/c mut.
 // --- uses collision function if key exists in the target, anywhere in target's prototype chain.
@@ -580,22 +578,24 @@ export const ifXReplaceStrFlags = curry ((yes, no, reStr, flags, repl, target) =
 
 
 
+const arg0 = (...args) => args [0]
+const arg1 = (...args) => args [1]
 
-const shallowClone = obj => ({...obj})
+const mergeMixins = (mixinsPre, proto, mixinsPost) => {
+    const reduceMixins = reduce ((a, b) => b | mergeTo (a), {})
+    const pre = mixinsPre | reduceMixins
+    const post = mixinsPost | reduceMixins
+    const chooseTarget = arg0
 
-export const mergeFish = (mixinsPre, proto, mixinsPost) => {
-    const reduceMixin = reduce ((a, b) => b | mergeTo (a), {})
-    const pre = mixinsPre | reduceMixin
-    const post = mixinsPost | reduceMixin
-
-    pre | mergeToWithMut ((tgtVal, srcVal) => tgtVal) (proto)
+    pre | mergeToWithMut (chooseTarget) (proto)
     post | mergeToMut (proto)
+
     return proto
 }
 
 export const factory = (proto, mixinsPre = [], mixinsPost = []) => laat (
     [
-        mergeFish (mixinsPre, proto, mixinsPost),
+        mergeMixins (mixinsPre, proto, mixinsPost),
     ],
 
     (protoExtended) => ({
