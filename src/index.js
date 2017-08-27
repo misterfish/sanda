@@ -466,17 +466,19 @@ export const apply2 = curry ((f, val1, val2) => f (val1, val2))
 export const apply3 = curry ((f, val1, val2, val3) => f (val1, val2, val3))
 export const applyN = curry ((f, vs) => f.apply (null, vs))
 
-// --- flip first and second args, even for functions with more than 2 args
-// --- also works for functions curried with the a => b => ... notation (which would otherwise make
-// it impossible to use f.length).
-// actually it is a mystery why this function works! (curry with rest params ... )
+// --- flip first and second args of a curried function, even for functions with more than 2 args.
+// --- also works for functions curried with the a => b => ... notation (unlike R.flip).
+// --- does not work with non-curried functions.
+
 export const flipC = f => curryN (
     2,
     (a, b, ...rest) => laat (
+        // --- if f had arity 2, f (b) (a) is the answer; otherwise it's a curried interim result,
+        // since f itself was curried.
         [f (b) (a)],
         interimResult => rest | ifEmpty (
             () => interimResult,
-            reduce ((a, b) => a (b), interimResult)
+            reduce ((a, b) => a (b)) (interimResult),
         )
     )
 )

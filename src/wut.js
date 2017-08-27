@@ -23,30 +23,9 @@ import fishLib, {
 
 import { flipC, } from './index'
 
-const argsFour = a => b => c => d => a / b + c + d
+const add = a => b => a / b
+const padd = (a, b) => a / b
 
-argsFour (1) (2) (3) (4)
-| log // => 7.5
 
-const flippedFour = flipC (argsFour)
+; (add | flip ) (5,10) | log
 
-flippedFour (1) (2) (3) (4)
-| log // => 9
-
-flippedFour (1, 2, 3) (4)
-| log // => 9
-
-flippedFour (1, 2, 3, 4)
-| log // => 9
-
-const sum = 0 | reduce ((a, b) => a + b)
-const thing = curryN(4, (a, b, ...rest) => a + b + (rest | sum))
-
-thing (1, 2, 3, 4)
-| log
-
-thing (1, 2, 3) (4) | log
-
-thing (1, 2) | log
-
-thing (1) | log
