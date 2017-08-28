@@ -406,15 +406,12 @@ export const laat = given
 // symmetry with laat.
 
 export const givenStar = (xs, f) => {
-    const xsMapper = prevVals => ifFunction (
-        passN (prevVals),
-        identity,
-    )
+    const executeStep = prevVals => passN (prevVals)
 
     const ys = xs
         // --- acc contains running output array, up to the previous item.
-        | mapAccum ((acc, v) => xsMapper (acc) (v)
-            | (mapped => [[...acc, mapped], mapped])
+        | mapAccum ((acc, v) => executeStep (acc) (v)
+            | (stepVal => [[...acc, stepVal], stepVal])
         ) ([])
         | rProp (1)
 
@@ -566,14 +563,6 @@ export const xReplaceStrFlags = curry ((reStr, flags, repl, target) =>
     target.replace (xRegExpStr (reStr, flags), repl)
 )
 
-// --- @todo
-//
-// xReplace should tell how many it replaced? but ifReplace gets ths count, good enough?
-//
-// perhaps when global it should return an object.
-// xReplaceStr
-// xReplaceStrFlags
-
 export const ifReplace = curry ((yes, no, re, repl, target) => {
     let success = 0
     const out = target.replace (re, () => {
@@ -584,13 +573,16 @@ export const ifReplace = curry ((yes, no, re, repl, target) => {
 })
 
 export const ifXReplace = curry ((yes, no, re, repl, target) =>
-    ifReplace (yes, no, re | xRegExp, repl, target))
+    ifReplace (yes, no, re | xRegExp, repl, target)
+)
 
 export const ifXReplaceStr = curry ((yes, no, reStr, repl, target) =>
-    ifReplace (yes, no, xRegExpStr (reStr), repl, target))
+    ifReplace (yes, no, xRegExpStr (reStr), repl, target)
+)
 
 export const ifXReplaceStrFlags = curry ((yes, no, reStr, flags, repl, target) =>
-    ifReplace (yes, no, xRegExpStr (reStr, flags), repl, target))
+    ifReplace (yes, no, xRegExpStr (reStr, flags), repl, target)
+)
 
 // --- returns a copy with prototype vals discarded.
 export const discardPrototype = (o) => ({ ...o })

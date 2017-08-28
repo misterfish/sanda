@@ -236,3 +236,11 @@ ifBind__ (
 // point-free of x => x.apply (null, xs)
 // is not called apply, but passX.
 
+// --- @todo
+//
+// xReplace should tell how many it replaced?
+// but ifReplace gets ths count, good enough?
+
+
+but shouldn't mixins be functional.
+mixin takes instance as input and modifies it.
