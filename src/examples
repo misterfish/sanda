@@ -244,3 +244,13 @@ ifBind__ (
 
 but shouldn't mixins be functional.
 mixin takes instance as input and modifies it.
+
+
+lenses should compose with >>.
+
+see gcanti.
+'new street name' | address.set (...) where address is a lens.
+
+check RA.
+functors, pointy functors
+check Reader from monet, examples given in RA.
