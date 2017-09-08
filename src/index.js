@@ -88,12 +88,25 @@ export const tapDotNMut = tapDotN
 
 // ------ deps: noop, isFunction, ok
 
+// ------ useless, same as ifYes.
 // --- strict evaluation of cond.
 // --- not anaphoric unless param is baked into yes or no.
 // --- doesn't seem useful to pass anything into the yes and no functions.
-export const ifCond = curry ((yes, no, cond) => cond ? yes () : no ())
-export const whenCond = curry ((yes, cond) => cond | ifCond (yes) (noop))
-export const ifCond__ = (cond, yes, no = noop) => cond | ifCond (yes) (no)
+// --- for anaphoric, see cond.
+// export const ifCond = curry ((yes, no, cond) => cond ? yes () : no ())
+// export const whenCond = curry ((yes, cond) => cond | ifCond (yes) (noop))
+// export const ifCond__ = (cond, yes, no = noop) => cond | ifCond (yes) (no)
+
+// @todo need something like
+// when (isTTY, stdin => ...)
+// stdin | whenPredicate (isTTY, stdin => ...)
+//
+// doesn't work
+// stdin.setRawMode | whenFunction (pass1 (bool))
+// stdin.bindTry ('setRawMode') | whenFunction (pass1 (bool))
+// --- this is horrible.
+// bool => tap (stdin => 'setRawMode' | bindTry (stdin) | whenFunction (pass1 (bool))),
+// @todo whenBind? whenCan?
 
 //@todo export const ifNotOk = curry ((f, x) => ok (x) ? void 8 : f (x))
 
@@ -101,9 +114,10 @@ export const ifOk = curry ((yes, no, x) => ok (x) ? yes (x) : no (x))
 export const whenOk = curry ((yes, x) => x | ifOk (yes) (noop))
 export const ifOk__ = (x, yes, no = noop) => x | ifOk (yes) (no)
 
-const ifNotOk = curry ((yes, no, x) => isNil (x) ? yes (x) : no (x))
-const whenNotOk = curry ((yes, x) => x | ifNotOk (yes) (noop))
-const ifNotOk__ = (x, yes, no = noop) => x | ifNotOk (yes) (no)
+// @todo
+export const ifNotOk = curry ((yes, no, x) => isNil (x) ? yes (x) : no (x))
+export const whenNotOk = curry ((yes, x) => x | ifNotOk (yes) (noop))
+export const ifNotOk__ = (x, yes, no = noop) => x | ifNotOk (yes) (no)
 
 export const ifTrue = curry ((yes, no, x) => x === true ? yes (x) : no (x))
 export const whenTrue = curry ((yes, x) => x | ifTrue (yes) (noop))
@@ -141,7 +155,8 @@ const ifBind = curry ((yes, no, [o, k]) => laat (
     [k | bindTry (o)],
     ifOk (yes, no),
 ))
-const whenBind = curry ((yes, spec) => spec | ifBind (yes) (noop))
+// @todo test
+export const whenBind = curry ((yes, spec) => spec | ifBind (yes) (noop))
 const ifBind__ = (spec, yes, no = noop) => spec | ifBind (yes) (no)
 
 // --- last one always? undef if none?
@@ -152,18 +167,23 @@ export const cond = curry ((blocks, target) => {
         if (!ok (test)) return exec (target)
 
         const result = test (target)
-        if (result) return exec (result)
+		// @todo test.
+        // this order for symmetry with null case.
+        if (result) return exec (target, result)
     }
 })
 
 // ------ exceptions.
 
+// @todo was buggy, changed
 export const tryCatch = curry ((good, bad, f) => {
+    let successVal
     try {
-        return good (f ())
+        successVal = f ()
     } catch (e) {
         return bad (e)
     }
+    return good (successVal)
 })
 
 export const tryCatch__ = (whatToTry, howToCatch = noop) => {
@@ -186,19 +206,30 @@ export const decorateException = curry ((prefix, e) =>
 
 
 // @todo
-const ifArray = curry ((yes, no, x) => isArray (x) ? yes (x) : no (x))
-const ifZero = curry ((yes, no, x) => x === 0 ? yes (x) : no (x))
-const whenZero = curry ((yes, x) => x | ifZero (yes) (noop))
-const ifZero__ = (x, yes, no = noop) => x | ifZero (yes) (no)
-const ifOne = curry ((yes, no, x) => x === 1 ? yes (x) : no (x))
-const whenOne = curry ((yes, x) => x | ifOne (yes) (noop))
-const ifOne__ = (x, yes, no = noop) => x | ifOne (yes) (no)
+export const ifArray = curry ((yes, no, x) => isArray (x) ? yes (x) : no (x))
+
+export const ifZero = curry ((yes, no, x) => x === 0 ? yes (x) : no (x))
+export const whenZero = curry ((yes, x) => x | ifZero (yes) (noop))
+export const ifZero__ = (x, yes, no = noop) => x | ifZero (yes) (no)
+export const ifOne = curry ((yes, no, x) => x === 1 ? yes (x) : no (x))
+export const whenOne = curry ((yes, x) => x | ifOne (yes) (noop))
+export const ifOne__ = (x, yes, no = noop) => x | ifOne (yes) (no)
 
 export const ifEmpty = curry ((yes, no, xs) => xs.length === 0 ? yes (xs) : no (xs))
 export const whenEmpty = curry ((yes, xs) => xs | ifEmpty (yes) (noop))
 export const ifEmpty__ = (xs, yes, no = noop) => xs | ifEmpty (yes) (no)
 
-// --@todo: cond battery from wiris script.
+// --- tests for exact truth. better truthy? @todo
+export const ifPredicate = curry ((f, yes, no, x) => f (x) === true ? yes (x) : no (x))
+export const whenPredicate = curry ((f, yes, x) => x | ifPredicate (yes) (noop))
+export const ifPredicate__ = (f, x, yes, no = noop) => x | ifPredicate (yes) (no)
+
+
+// @todo
+// alias ifEmpty -> isLengthOne
+//
+// @todo
+// isLeft, isRight, isSome, isNone,
 
 // ------ cascade
 
@@ -271,8 +302,10 @@ export const prependToMut = curry ((tgt, src) => {
 // [] -> [] -> []
 // [] -> a -> [] => error
 // String -> String -> String
+// @todo: alias precatFrom
 export const concatTo = rConcat
 
+// @todo: alias precatTo
 export const concatFrom = flip (rConcat)
 
 // [] -> [] -> [], mut
@@ -396,6 +429,10 @@ export const applyScalar = curry ((fs, xs) => xs
 )
 
 export const passScalar = flip (applyScalar)
+
+// @todo
+export const scalarApply = applyScalar
+export const scalarPass = passScalar
 
 // --------- given/laat
 
@@ -644,3 +681,19 @@ const isFunction = isType ('Function')
 // --- map indexed: not sure about exporting these.
 const mapIndexed = addIndex (map)
 const mapAccumIndexed = addIndex (mapAccum)
+
+
+
+// @todo
+export const laatDat = curry ((fs, f, x) => laat (
+    fs | map (pass1 (x)),
+    (...args) => f | passN ([x, ...args]),
+))
+
+export const laatStarDat = curry ((fs, f, x) => laatStar (
+    fs | map (
+        f => (...args) => f | passN ([x, ...args]),
+    ),
+    (...args) => f | passN ([x, ...args]),
+))
+

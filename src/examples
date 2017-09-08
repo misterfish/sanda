@@ -1,5 +1,4 @@
-process.exit (1)
-
+process.exit (1) 
 //  @dep ifFunction
 //  @dep bind
 
@@ -254,3 +253,80 @@ see gcanti.
 check RA.
 functors, pointy functors
 check Reader from monet, examples given in RA.
+
+
+return lens.set(f(lens.get(s)), s)
+// not really better.
+s | lens.set (f (s | ('get' | bind (lens)))))
+// if we can guarantee that this is never used?
+s | lens.set (f (s | (lens.get))))
+
+
+
+
+flatten2 from test.
+from redux workshop.
+
+
+const shouldTrigger = ({ threshold, synapses }) => {
+    const sum = synapses.reduce(
+        (amplitude, { weight, value }) => amplitude + (weight * value), 0);
+    return sum >= threshold;
+}
+
+
+const takeTwo = ({ threshold, synapses }) => laat (
+    [
+        synapses | reduce (
+            ((amplitude, { weight, value }) => amplitude + (weight * value))
+            (0)
+        )
+    ],
+    sum => sum | gte (threshold),
+)
+
+
+
+// const composeLeft = (...fs) => compose (... (fs | reverse))
+const composeLeft = (...fs) => fs | reverse | applyN (compose)
+
+
+
+const join = curry ((joinStr, xs) => xs.reduce (
+    (acc, x) => acc | ifNotOk (
+        () => x,
+        acc => acc + joinStr + x,
+    ),
+    null,
+))
+
+
+
+
+elementAt n = last . take (n + 1)
+
+
+
+
+would be good to sugar this:
+
+const lockerState = x => x | cond ([
+    [equals ('taken'), () => LockerState.Taken],
+    [equals ('free'), () => LockerState.Free],
+    [equals ('broken'), () => LockerState.Broken],
+])
+
+const lockerState = cond ([
+    'taken' | condEquals (() => LockerState.Taken),
+    'free' | condEquals (() => LockerState.Free),
+    'broken' | condEquals (() => LockerState.Broken),
+])
+
+But it also opens the door to some pretty powerful idioms.
+
+if (isEven (x)) doThen (x); else doElse (x)
+
+x | ifEven (doThen, doElse)
+
+
+instead of 'b is not a function' i want the name of the function.

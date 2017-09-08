@@ -1,4 +1,9 @@
 {
+    "name": "sanda",
+    "version": "0.31",
+
+    "main": "lib",
+
   "dependencies": {
     "babel-cli": "^6.24.1",
     "babel-plugin-operator-overload": "^2.0.0",
