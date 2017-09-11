@@ -761,3 +761,8 @@ export const gte = flip (rGte)
 export const lt = flip (rLt)
 export const lte = flip (rLte)
 
+// --- different from R.equals, which considers two different objects equal if their contents are
+//     the same.
+// --- different from R.identical, which has some different semantics involving e.g. 0 and -0.
+// --- literally just wraps ===.
+export const eq = curry ((x, y) => x === y)

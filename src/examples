@@ -414,10 +414,26 @@ docs
 
 
 prepositions.
+ companion methods with In for dealing with proto chain.
+mutable state.
 piping.
 expressiveness.
+non-destructive ('tap') method chaining.
+mapPairs for %foo = @foo.
+'vector operations' for functions.
+slightly more functional alternatives to defaultTo, times.
+alternative to template strings.
 doe, laat.
+apply, pass, call.
 anaphoric structures.
+guard conditions.
+xRegExp, xMatch etc.
+let expressions, also recursive.
+prototypes, mixins, factory.
+section
+ factory
+ monads
+ daggy adt / monoid
 
 frustrations with case statement, e.g. livescript.
  more expressive matching: separate predicate from value.
@@ -439,3 +455,19 @@ composing with the >> / << operators is curried by default.
 // ]))
 
 though of course, we have cata.
+
+
+
+
+
+
+
+vector operations.
+ cross product: [a, b, c] x [f1, f2, f3] = [
+     f1 (a) + f2 (a) + f3 (a),
+     f1 (b) + ...
+     ...
+ ]
+ and the combining operation '+' can be set.
+
+ derivation of listdat.
