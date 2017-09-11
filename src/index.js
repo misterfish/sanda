@@ -17,7 +17,8 @@
 // functions with To and From endings have no aliases.
 
 defineBinaryOperator ('|', (a, b) => b (a))
-defineBinaryOperator ('>>', (a, b) => (...args) => b (a (...args)))
+defineBinaryOperator ('>>', curry ((a, b) => compose (b, a)))
+defineBinaryOperator ('<<', curry ((a, b) => compose (a, b)))
 
 import {
     isEmpty, tap, has, hasIn, flip, fromPairs, toPairs, toPairsIn, assoc, assocPath, head,
@@ -26,11 +27,10 @@ import {
     splitEvery,
     forEach as each, forEachObjIndexed as eachObj, complement, times as rTimes,
     range as rRange, isNil, addIndex, take, equals, mapAccum,
-    repeat as rRepeat,
-    concat as rConcat,
-    append as rAppend,
+    repeat as rRepeat, concat as rConcat, append as rAppend, compose,
     merge as rMerge, mergeAll as rMergeAll,
     zip,
+    gt as rGt, gte as rGte, lt as rLt, lte as rLte,
 } from 'ramda'
 
 import fishLib, {
@@ -43,9 +43,14 @@ import {
     bitwiseLeft, bitwiseRight, bitwiseRightZeroFill,
 } from './operator'
 
+import {
+    doe,
+} from './monad'
+
 export {
     bitwiseAnd, bitwiseOr, bitwiseXor, bitwiseNot,
     bitwiseLeft, bitwiseRight, bitwiseRightZeroFill,
+    doe,
 }
 
 export const ok = x => !isNil (x)
@@ -161,9 +166,26 @@ const ifBind__ = (spec, yes, no = noop) => spec | ifBind (yes) (no)
 
 // --- last one always? undef if none?
 // tests for truthINEss, so it acts like if().
+// export const cond = curry ((blocks, target) => {
+//     let result
+//     for (const [test, exec] of blocks) {
+//         if (!ok (test)) return exec (target)
+//
+//         const result = test (target)
+// 		// @todo test.
+//         // this order for symmetry with null case.
+//         if (result) return exec (target, result)
+//     }
+// })
+
+// need version with no target xx
 export const cond = curry ((blocks, target) => {
     let result
-    for (const [test, exec] of blocks) {
+    for (const [a, b] of blocks) {
+        const [test, exec] = b | ifOk (
+            () => [a, b],
+            () => [null, a],
+        )
         if (!ok (test)) return exec (target)
 
         const result = test (target)
@@ -172,6 +194,7 @@ export const cond = curry ((blocks, target) => {
         if (result) return exec (target, result)
     }
 })
+
 
 // ------ exceptions.
 
@@ -528,6 +551,7 @@ export const zipAll = (...xss) => {
 
 // --------- list.
 
+// multiple versions with preps ??
 export const repeat = flip (rRepeat)
 export const times = flip (rTimes)
 
@@ -696,4 +720,44 @@ export const laatStarDat = curry ((fs, f, x) => laatStar (
     ),
     (...args) => f | passN ([x, ...args]),
 ))
+
+const listDat = curry ((fs, n) => fs | map (
+    pass1 (n),
+))
+
+// --- or:
+const listDat2 = (n => map (pass1 (n)) | flipC)
+const listDat3 = flipC (n => map (pass1 (n)))
+// --- >> is higher.
+const listDat4 = pass1 >> map | curry | flipC
+const listDat6 = pass1 >> map | flipC
+
+const listDat5 = flipC (n => n | pass1 | map)
+
+const _$ = {}
+
+export const condElse = appendTo ([void 8])
+
+export const condEquals = curry ((exec, testString) => [
+//     testString | ifEquals (_$) (noop) (equals),
+    testString | equals,
+    exec,
+])
+
+export const condPredicate = curry ((exec, pred) => [
+    pred,
+    exec,
+])
+
+export const guard = condPredicate
+export const otherwise = condElse
+
+export const ifEquals = curry ((test, yes, no, x) => x === test ? yes (x) : no (x))
+export const whenEquals = curry ((test, yes, x) => x | ifEquals (test) (yes) (noop))
+export const ifEquals__ = (x, test, yes, no = noop) => x | ifEquals (test) (yes) (no)
+
+export const gt = flip (rGt)
+export const gte = flip (rGte)
+export const lt = flip (rLt)
+export const lte = flip (rLte)
 

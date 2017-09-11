@@ -322,6 +322,8 @@ const lockerState = cond ([
     'broken' | condEquals (() => LockerState.Broken),
 ])
 
+daggyX#cata takes care of this though.
+
 But it also opens the door to some pretty powerful idioms.
 
 if (isEven (x)) doThen (x); else doElse (x)
@@ -330,3 +332,110 @@ x | ifEven (doThen, doElse)
 
 
 instead of 'b is not a function' i want the name of the function.
+
+increased expressive power
+
+
+
+jlongster.com
+
+
+
+yes it's 'hideous' with the parentheses touching:
+replace(/a/)('e')(str)
+
+but with some spaces between them you might actually start to find it kind of pretty.
+
+replace (/a/) ('e') (str)
+str | replace (/a/) ('e')
+str | ('e' | replace (/a/))
+str | replace (/a/, 'e')
+
+
+maybe laatStar and family could do away with the array.
+
+laatDat is a mess, buggy.
+args are functions, so it should resemble laatStar, but without recursive stuff, unless it's
+laatDatStar.
+
+0 | laatDat (
+    [
+        ifZero (_ => 10, _ => 20),
+        minus (1),
+    ],
+    (_, a, b) => {
+        console.log ('a', a)
+        console.log ('b', b)
+    },
+)
+
+
+found this:
+
+laat (
+    [
+        n | ifZero (...),
+        n | minus (1),
+    ],
+    (a, b) => [a, b],
+)
+
+the last part is just an array of the args, so actually you're just assembling an array.
+
+n | listDat (
+    ifZero (...),
+    minus (1),
+)
+
+    const f = n => map (pass1 (n))
+    const f = n => n | pass1 | map
+    // --- xxx, can't flip it after this.
+    const f = pass1 >> map
+
+const listDat3 = (() => {
+    const _ = n => n | pass1 | ramda.map
+    const __ = pass1 >> ramda.map
+    const ___ = curry (pass1 >> ramda.map)
+//     return __
+    return ___ | flipC
+//     return curry ((a, b) => ___ (b, a))
+}) ()
+
+
+after composing, have to curry again.
+
+
+
+
+docs
+ length as a reduce function.
+     const length = 0 | reduce (inc)
+
+
+
+prepositions.
+piping.
+expressiveness.
+doe, laat.
+anaphoric structures.
+
+frustrations with case statement, e.g. livescript.
+ more expressive matching: separate predicate from value.
+
+
+several examples of reductions, derivations.
+
+sorry but to we switched ramda's gt(e) and lt(e).
+
+composing with the >> / << operators is curried by default.
+
+
+
+
+// const mappend = curry ((rhs, lhs) => lhs | cond ([
+//     LT | identical | guard (_ => LT),
+//     GT | identical | guard (_ => GT),
+//     EQ | identical | guard (_ => rhs),
+// ]))
+
+though of course, we have cata.
