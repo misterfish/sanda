@@ -639,3 +639,30 @@ const either = Left >> (x => _ => x) >> ifOk (Right)
 // const either = msg => msg | Left | (x => _ => x) | ifOk (Right)
 // const either = Left >> (x => _ => x) >> ifOk (Right)
 const either = Left >> blush >> ifOk (Right)
+
+
+
+
+
+
+const isOdd = x => x | cond ([
+    0 | eq | guard (F),
+    1 | eq | guard (T),
+    (dec >> isEven) | otherwise,
+])
+
+const isEven = x => x | cond ([
+    0 | eq | guard (T),
+    1 | eq | guard (F),
+    (dec >> isOdd) | otherwise,
+])
+
+
+; ramda.range (10, 20)
+| map (x => [x, x]
+    | applyScalar ([identity, isEven])
+    | applyScalar ([identity, ifTrue (_ => 'even' | cyan, _ => 'odd' | yellow)])
+    | sprintfN ('%s is %s')
+)
+| join ('\n')
+| log

@@ -31,11 +31,6 @@ import {
     gt as rGt, gte as rGte, lt as rLt, lte as rLte,
 } from 'ramda'
 
-import fishLib, {
-    log, info, warn, error, green, yellow, magenta, brightRed, cyan, brightBlue,
-    sprintf, forceColors,
-} from 'fish-lib'
-
 import {
     bitwiseAnd, bitwiseOr, bitwiseXor, bitwiseNot,
     bitwiseLeft, bitwiseRight, bitwiseRightZeroFill,

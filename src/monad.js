@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 defineBinaryOperator ('|', (a, b) => b (a))
 defineBinaryOperator ('>>', (a, b) => (...args) => b (a (...args)))
 
@@ -14,11 +12,6 @@ import {
     concat as rConcat,
     zip,
 } from 'ramda'
-
-import fishLib, {
-    log, info, warn, error, green, yellow, magenta, brightRed, cyan, brightBlue,
-    sprintf, forceColors,
-} from 'fish-lib'
 
 import { assocMut, ifLengthOne, } from './index'
 
