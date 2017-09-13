@@ -75,6 +75,10 @@ export const dot2Mut = dot2
 export const dot3Mut = dot3
 export const dotNMut = dotN
 
+// @todo
+export const dot4 = curry ((prop, val1, val2, val3, val4, o) => o[prop] (val1, val2, val3, val4))
+export const dot4Mut = dot3
+
 export const tapMut = tap
 export const tapDotMut = tapDot
 export const tapDot1Mut = tapDot1
