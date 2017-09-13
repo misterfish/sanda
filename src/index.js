@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 // ramda map works on objs: keys same, values altered.
 // could make an object mapper which lets you return pairs.
 //
