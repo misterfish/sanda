@@ -1,3 +1,131 @@
+If you absolutely hate Lisps, Haskell, or, well, JavaScript, then this
+probably isn't for you.
+
+So we're going the CoffeeScript way ...
+
+Well no. This is all Just JavaScript, with the exception of 3 overloaded
+binary operators. It began as an attempt to import into JavaScript several
+LiveScript idioms which I had begun not to be able to live without.
+Then the similarities to Lisps & Haskell were too obvious to miss.
+
+| is simply syntactical sugar. a | b is b (a). that's it. so what's the big
+deal? it's like flow from lodash or ramda. it provides an intuitive way to
+write quickly & correctly. i never liked the flow syntax, with the value at
+the bottom:
+
+flow (
+    filter (isOdd),
+    map (double),
+    sum,
+) ([1, 2, 3]) // => 8
+
+; [1, 2, 3]
+| filter (isOdd)
+| map (double)
+| sum // => 8
+
+I do use a space before the parentheses. It might look strange at first but
+you might find it more elegant and even beautiful.
+
+reducer for a piece of userdata
+
+const userdata = { name: 'mikhail', bored: true }
+const toggleBored = userdata => ({
+    ... userdata,
+    bored: !userdata.bored,
+})
+
+'userdata' is repeated a lot of times. We can do better with a function
+called update:
+
+const update = curry ((prop, f, obj) => obj | assoc (
+    prop,
+    obj [prop] | f,
+))
+
+const toggleBored = userdata => assoc (
+    'bored',
+    cur => !cur,
+)
+
+cur, not cur. let's go further. the second argument is a function, so:
+
+const toggle = x => !x
+const toggleBored = userdata => userdata | assoc (
+    'bored',
+    toggle,
+)
+
+now remember a property of curried functions:
+add (x, y, z)
+add (x, y) (z)
+add (x) (y, z)
+add (x) (y) (z)
+
+const toggleBored = userdata => userdata | update ('bored') (toggle)
+
+Remember that x => x | at the beginning of the body can be abstracted away:
+
+const toggleBored = update ('bored') (toggle)
+
+Now more:
+
+const entertain = update ('bored') (
+    cur => false,
+)
+
+const entertain = update ('bored') (
+    () => false,
+)
+
+const entertain = update ('bored') (F)
+const bore = update ('bored') (T)
+
+The first part is a function.
+
+const _updateBored = update ('bored')
+const toggleBored = _updateBored (toggle)
+const entertain = _updateBored (F)
+const bore = _updateBored (T)
+
+We can go an extra step, though how far you wish to take this is of course a
+matter of choice:
+
+const _updateBored  = 'bored' | update
+const toggleBored   = toggle | _updateBored
+const entertain     = F | _updateBored
+const bore          = T | _updateBored
+
+
+When you have a value 
+
+const someData = getData();
+
+if (someData) {
+    useValue(someData);
+}
+
+Of course, we need to discriminate between falsey values (empty string, 0
+etc) and someData being undefined or null. (For this example we assume
+someData has been declared, hence, no need for a 'typeof' check).
+
+if (someData !== undefined && someData !== null)
+
+A JavaScript hacker might write the following (to the consternation of her )
+
+In a few cases methods of the same name are defined as in Ramda. Of course
+you are free to import or not import them from whichever library works for
+you.
+
+
+reverse map. the mapping function is invokeWith (...)
+
+
+For point-freeing: need a function which takes a value and a number and invokes a
+function with that values as the arg, repeated n times.
+
+For me this provides a missing piece
+
 process.exit (1) 
 //  @dep ifFunction
 //  @dep bind
@@ -428,8 +556,10 @@ apply, pass, call.
 anaphoric structures.
 guard conditions.
 xRegExp, xMatch etc.
+expression-based.
 let expressions, also recursive.
 prototypes, mixins, factory.
+dexterity
 section
  factory
  monads
@@ -471,3 +601,41 @@ vector operations.
  and the combining operation '+' can be set.
 
  derivation of listdat.
+
+
+ need doe sequential (birds).
+
+
+
+
+ LS -> JS
+
+x = if something? then do-something that * 2 else 'nothing'
+const x = ifOk (something, that => that * 2, () => 'nothing')
+const x = ifOk (something, double, _ => 'nothing')
+const x = ifOk (something, double, 'nothing' | f)
+
+x = something ? 'nothing'
+const x = something | defaultTo ('nothing' | f)
+
+
+people notice that ramda needs prop / path symmetry.
+so easy to make a case for in versions, and to and from.
+
+
+our spread:
+ampersand (reverse, toUpperCase) ('Stan') // ['natS', 'STAN']
+asterisk (reverse, toUpperCase) (['Stan', 'Lee']) // ['natS', 'LEE']
+
+const blush
+const either = Left >> (x => _ => x) >> ifOk (Right)
+
+// -- either :: String → Either
+// const either = msg => ifOk (Right, _ => msg | Left)
+// const either = msg => ifOk (Right, msg | Left | blush)
+// const either = msg => ifOk (Right) (_ => msg | Left)
+// const either = msg => (_ => msg | Left) | ifOk (Right)
+// const either = msg => msg | Left | (x => _ => x) | ifOk (Right)
+// const either = msg => msg | Left | (x => _ => x) | ifOk (Right)
+// const either = Left >> (x => _ => x) >> ifOk (Right)
+const either = Left >> blush >> ifOk (Right)

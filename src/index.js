@@ -244,8 +244,8 @@ export const ifEmpty__ = (xs, yes, no = noop) => xs | ifEmpty (yes) (no)
 
 // --- tests for exact truth. better truthy? @todo
 export const ifPredicate = curry ((f, yes, no, x) => f (x) === true ? yes (x) : no (x))
-export const whenPredicate = curry ((f, yes, x) => x | ifPredicate (yes) (noop))
-export const ifPredicate__ = (f, x, yes, no = noop) => x | ifPredicate (yes) (no)
+export const whenPredicate = curry ((f, yes, x) => x | ifPredicate (f) (yes) (noop))
+export const ifPredicate__ = (f, x, yes, no = noop) => x | ifPredicate (f) (yes) (no)
 
 
 // @todo
@@ -766,3 +766,6 @@ export const lte = flip (rLte)
 // --- different from R.identical, which has some different semantics involving e.g. 0 and -0.
 // --- literally just wraps ===.
 export const eq = curry ((x, y) => x === y)
+export const ne = curry ((x, y) => x !== y)
+
+const ignore = n => f => (...args) => args | splitAt (n) | prop (1) | applyN (f)
