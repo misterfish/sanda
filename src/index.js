@@ -77,6 +77,8 @@ export const dotNMut = dotN
 
 // @todo
 export const dot4 = curry ((prop, val1, val2, val3, val4, o) => o[prop] (val1, val2, val3, val4))
+export const dot5 = curry ((prop, val1, val2, val3, val4, val5, o) => o[prop] (val1, val2, val3, val4, val5))
+export const dot6 = curry ((prop, val1, val2, val3, val4, val5, val6, o) => o[prop] (val1, val2, val3, val4, val5, val6))
 export const dot4Mut = dot3
 
 export const tapMut = tap
@@ -472,6 +474,7 @@ export const givenStar = (xs, f) => {
         ) ([])
         | rProp (1)
 
+    // xxx ifOk
     return f | ifYes (
         passN (ys),
         () => last (ys),

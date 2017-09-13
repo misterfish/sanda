@@ -666,3 +666,9 @@ const isEven = x => x | cond ([
 )
 | join ('\n')
 | log
+
+
+
+need assoc variants.
+e.g. ref => this.canvas = ref
+something like assocMutAs(?) ('canvas', this)
