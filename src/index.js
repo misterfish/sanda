@@ -31,6 +31,8 @@ import {
     gt as rGt, gte as rGte, lt as rLt, lte as rLte,
 } from 'ramda'
 
+import sprintf from 'sprintf'
+
 import {
     bitwiseAnd, bitwiseOr, bitwiseXor, bitwiseNot,
     bitwiseLeft, bitwiseRight, bitwiseRightZeroFill,

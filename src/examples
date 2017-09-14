@@ -672,3 +672,8 @@ const isEven = x => x | cond ([
 need assoc variants.
 e.g. ref => this.canvas = ref
 something like assocMutAs(?) ('canvas', this)
+
+
+don't need dot more than about 3 because we have dotN.
+tapDot needs an alias, is a a horrible namem.
+visit?
