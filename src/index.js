@@ -767,7 +767,10 @@ export const lte = flip (rLte)
 //     the same.
 // --- different from R.identical, which has some different semantics involving e.g. 0 and -0.
 // --- literally just wraps ===.
+// rationale: must be able to confidently refactor working code which uses ===
 export const eq = curry ((x, y) => x === y)
 export const ne = curry ((x, y) => x !== y)
+
+export const blush = x => _ => x
 
 const ignore = n => f => (...args) => args | splitAt (n) | prop (1) | applyN (f)
