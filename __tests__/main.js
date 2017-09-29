@@ -275,15 +275,13 @@ describe('laatStar', function(){
     return expect(givenStar).toBe(laatStar);
   });
   test('superset of laat', function(){
-    return laatStar([
-      function(){
-        return 10;
-      }, function(){
-        return 12;
-      }, function(){
-        return 19;
-      }
-    ], function(ten, twelve, nineteen){
+    return laatStar(function(){
+      return 10;
+    }, function(){
+      return 12;
+    }, function(){
+      return 19;
+    }, function(ten, twelve, nineteen){
       return expect(ten + twelve + nineteen).toEqual(41);
     });
   });

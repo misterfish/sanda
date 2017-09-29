@@ -19,6 +19,7 @@ defineBinaryOperator ('>>', curry ((a, b) => compose (b, a)))
 defineBinaryOperator ('<<', curry ((a, b) => compose (a, b)))
 
 import {
+    splitAt,
     isEmpty, tap, has, hasIn, flip, fromPairs, toPairs, toPairsIn, assoc, assocPath, head,
     last, tail, reduceRight, chain, identity, reduce, map, filter, reject, join,
     split, prop as rProp, path as rPath, defaultTo as rDefaultTo, curry, curryN,
@@ -149,21 +150,23 @@ export const ifLengthOne = curry ((yes, no, xs) => xs.length === 1 ? yes (xs) : 
 export const whenLengthOne = curry ((yes, xs) => xs | ifLengthOne (yes) (noop))
 export const ifLengthOne__ = (xs, yes, no = noop) => xs | ifLengthOne (yes) (no)
 
-const ifHas = curry ((yes, no, [o, k]) => o | has (k) ? yes (o, k, o[k]) : no (o, k))
-const whenHas = curry ((yes, spec) => spec | ifHas (yes) (noop))
-const ifHas__ = (spec, yes, no = noop) => spec | ifHas (yes) (no)
+// @todo test
+export const ifHas = curry ((yes, no, [o, k]) => o | has (k) ? yes (o[k], o, k) : no (o, k))
+export const whenHas = curry ((yes, spec) => spec | ifHas (yes) (noop))
+export const ifHas__ = (spec, yes, no = noop) => spec | ifHas (yes) (no)
 
-const ifHasIn = curry ((yes, no, [o, k]) => o | hasIn (k) ? yes (o, k, o[k]) : no (o, k))
-const whenHasIn = curry ((yes, spec) => spec | ifHasIn (yes) (noop))
-const ifHasIn__ = (spec, yes, no = noop) => spec | ifHasIn (yes) (no)
+// @todo test
+export const ifHasIn = curry ((yes, no, [o, k]) => o | hasIn (k) ? yes (o[k], o, k) : no (o, k))
+export const whenHasIn = curry ((yes, spec) => spec | ifHasIn (yes) (noop))
+export const ifHasIn__ = (spec, yes, no = noop) => spec | ifHasIn (yes) (no)
 
-const ifBind = curry ((yes, no, [o, k]) => laat (
+// @todo test
+export const ifBind = curry ((yes, no, [o, k]) => laat (
     [k | bindTry (o)],
     ifOk (yes, no),
 ))
-// @todo test
 export const whenBind = curry ((yes, spec) => spec | ifBind (yes) (noop))
-const ifBind__ = (spec, yes, no = noop) => spec | ifBind (yes) (no)
+export const ifBind__ = (spec, yes, no = noop) => spec | ifBind (yes) (no)
 
 // --- last one always? undef if none?
 // tests for truthINEss, so it acts like if().
@@ -228,6 +231,7 @@ export const decorateException = curry ((prefix, e) =>
 )
 
 
+// @ might be good if __ versions don't call the curried versions, because it messes up TCO.
 
 // @todo
 export const ifArray = curry ((yes, no, x) => isArray (x) ? yes (x) : no (x))
@@ -351,7 +355,7 @@ export const mergeFrom = flip (rMerge)
 // --- does not discard non-own on tgt, b/c mut.
 export const mergeToMut = curry ((tgt, src) => {
     const ret = tgt
-    for (let i in src) [src, i] | whenHas ((o, k, v) => ret[k] = v)
+    for (let i in src) [src, i] | whenHas ((v, o, k) => ret[k] = v)
     return ret
 })
 
@@ -368,9 +372,9 @@ export const mergeFromMut = flip (mergeToMut)
 export const mergeToWithMut = curry ((collision, tgt, src) => {
     const ret = tgt
     for (let i in src)
-        [src, i] | whenHas ((o, k, v) => {
+        [src, i] | whenHas ((v, o, k) => {
             [ret, i] | ifHasIn (
-                (o, k, v) => ret[i] = collision (ret[i], src[i]),
+                (v, o, k) => ret[i] = collision (ret[i], src[i]),
                 (o, k) => ret[i] = src[i],
             )
         })
@@ -466,7 +470,7 @@ export const laat = given
 // note that f is optional: the last function in xs serves the same purpose, but it can be used for
 // symmetry with laat.
 
-export const givenStar = (xs, f) => {
+export const givenStar = (...xs) => {
     const executeStep = prevVals => passN (prevVals)
 
     const ys = xs
@@ -476,11 +480,7 @@ export const givenStar = (xs, f) => {
         ) ([])
         | rProp (1)
 
-    // xxx ifOk
-    return f | ifYes (
-        passN (ys),
-        () => last (ys),
-    )
+    return ys | last
 }
 
 export const laatStar = givenStar
@@ -710,18 +710,19 @@ const mapAccumIndexed = addIndex (mapAccum)
 
 
 
-// @todo
+// @test
 export const laatDat = curry ((fs, f, x) => laat (
     fs | map (pass1 (x)),
     (...args) => f | passN ([x, ...args]),
 ))
 
-export const laatStarDat = curry ((fs, f, x) => laatStar (
+// @test
+export const laatStarDat = curry ((fs, x) =>
     fs | map (
         f => (...args) => f | passN ([x, ...args]),
-    ),
-    (...args) => f | passN ([x, ...args]),
-))
+    )
+    | applyN (laatStar),
+)
 
 const listDat = curry ((fs, n) => fs | map (
     pass1 (n),
@@ -774,3 +775,5 @@ export const ne = curry ((x, y) => x !== y)
 export const blush = x => _ => x
 
 const ignore = n => f => (...args) => args | splitAt (n) | prop (1) | applyN (f)
+const headTail = f => splitAt (1) >> f
+

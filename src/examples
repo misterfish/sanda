@@ -690,3 +690,11 @@ isEven = not . isOdd
 
 transformation of | to >> is like $ to . in haskell.
 
+
+laatStar nicer without array.
+laatStarDat needs to be curried, so yes array
+
+maybe laat(Star)Dat1, laat(Star)Dat2, laat(Star)Dat3, laat(Star)DatN
+
+
+i think i prefer 'list' to 'array'

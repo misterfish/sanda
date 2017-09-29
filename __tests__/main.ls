@@ -202,8 +202,7 @@ describe 'laatStar' ->
         (expect given-star).to-be laat-star
     test 'superset of laat' ->
         laat-star do
-            [ -> 10, -> 12,  -> 19 ]
-            (ten, twelve, nineteen) ->
+            -> 10, -> 12, -> 19, (ten, twelve, nineteen) ->
                 (expect ten + twelve + nineteen).to-equal 41
     return
     test 'recursive references' ->
