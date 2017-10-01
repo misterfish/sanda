@@ -557,6 +557,20 @@ export const zipAll = (...xss) => {
 export const repeat = flip (rRepeat)
 export const times = flip (rTimes)
 
+// @todo
+// export const rangeBy = curry ((from, to, by, f) => {
+//     for (let i = from; i <= to; i += by) f (i)
+// })
+// export const range = curry ((from, to, f) => rangeBy (from, to, 1, f))
+
+// excl, so it's like ramda.
+// they already provide range.
+export const rangeBy = curry ((from, to, by) => {
+    const coll = []
+    for (let i = from; i < to; i += by) coll.push (i)
+    return coll
+})
+
 export const compact = filter (Boolean)
 export const compactOk = reject (isNil)
 
